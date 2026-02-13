@@ -95,6 +95,7 @@ __pycache__/
 .coverage.*
 htmlcov/
 *.egg-info/
+.venv/
 
 # =========================
 # AI / LLM cache (if any)
