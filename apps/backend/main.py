@@ -17,10 +17,12 @@ print("FIREBASE_CREDENTIALS_PATH:", os.getenv("FIREBASE_CREDENTIALS_PATH"))
 # Initialize Firebase
 initialize_firebase()
 
+Origin = os.getenv("FRONTEND_URL", "http://localhost:5173")
+
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # your React frontend URL
+    allow_origins=[Origin],  # your React frontend URL
     allow_credentials=True,
     allow_methods=["*"],  # allow GET, POST, PUT, DELETE etc.
     allow_headers=["*"],  # allow all headers
