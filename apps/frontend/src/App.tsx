@@ -1,12 +1,13 @@
-import Home from './pages/Home.tsx'
 import Navbar from './components/Navbar.tsx'
+import Category from './pages/Category.tsx'
 function App() {
 
   return (
     <>
     
       <Navbar />
-      <Home />
+      <Category />
+      
 
     </>
   )
