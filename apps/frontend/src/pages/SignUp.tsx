@@ -66,4 +66,4 @@ onChange={(e) => setPassword(e.target.value)}
 );
 }
 
-export default Signu
+export default Signup;
