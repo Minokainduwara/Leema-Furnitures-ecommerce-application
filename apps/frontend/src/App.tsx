@@ -1,14 +1,10 @@
-import Navbar from './components/Navbar.tsx'
-import Category from './pages/Category.tsx'
+
+import UserDashboard from './pages/UserDashboard.tsx'
 function App() {
 
   return (
     <>
-    
-      <Navbar />
-      <Category />
-      
-
+   <UserDashboard/>
     </>
   )
 }
