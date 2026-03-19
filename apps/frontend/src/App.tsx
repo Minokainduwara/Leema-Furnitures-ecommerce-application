@@ -1,31 +1,25 @@
-import { Route, Routes } from "react-router";
-import Home from './pages/Home.tsx'
-import Dashboard from "./pages/Dashboard.tsx";
-import Login from "./pages/Login.tsx";
-import Signup from "./pages/SignUp.tsx";
+import { Routes, Route } from "react-router-dom";
+
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import Signup from "./pages/SignUp";
+import AdminDashboard from "./pages/AdminDashboard";
+
+import MyDetails from "./components/Admin-Components/MyDetails";
 
 function App() {
-
   return (
-    <div>
-        <Routes>
-          <Route path="/HomePage" element={<Home/>} />
-        </Routes>
+    <Routes>
+      <Route path="/homepage" element={<Home />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
 
-        <Routes>
-          <Route path="/Dashboard" element={<Dashboard/>} />
-        </Routes>
-
-        <Routes>
-          <Route path="/Login" element={<Login/>} />
-        </Routes>
-
-        <Routes>
-          <Route path="/Signup" element={<Signup/>} />
-        </Routes>
-
-    </div>
-  )
+      {/* Dashboard Layout */}
+      <Route path="/admindashboard" element={<AdminDashboard />}>
+        <Route index element={<MyDetails />} />
+      </Route>
+    </Routes>
+  );
 }
 
-export default App
+export default App;
