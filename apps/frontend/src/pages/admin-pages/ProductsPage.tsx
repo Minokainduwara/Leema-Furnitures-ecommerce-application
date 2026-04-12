@@ -69,14 +69,14 @@ const ProductForm: React.FC<ProductFormProps> = ({ form, setForm }) => (
         label="Price ($)"
         type="number"
         value={form.price}
-        onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
+        onChange={(e) => setForm((f) => ({ ...f, price: Number(e.target.value) }))}
         placeholder="0.00"
       />
       <Input
         label="Stock"
         type="number"
         value={form.stock}
-        onChange={(e) => setForm((f) => ({ ...f, stock: e.target.value }))}
+        onChange={(e) => setForm((f) => ({ ...f, stock: Number(e.target.value) }))}
         placeholder="0"
       />
     </div>
@@ -199,7 +199,7 @@ const ViewProductModal: React.FC<ViewProductModalProps> = ({ open, onClose, prod
 const EMPTY_FORM: ProductFormData = {
   name: "", category: "Sofa", price: "", stock: "",
   status: "Active", description: "", image: "🛋️",
-};
+} as unknown as ProductFormData;
 
 const ProductsPage: React.FC = () => {
   const { products, addProduct, updateProduct, deleteProduct } = useProducts();
@@ -216,7 +216,7 @@ const ProductsPage: React.FC = () => {
   );
 
   const handleOpenAdd  = (): void => { setForm(EMPTY_FORM); open("add"); };
-  const handleOpenEdit = (p: Product): void => { setForm({ ...p, price: String(p.price), stock: String(p.stock) }); open("edit", p); };
+  const handleOpenEdit = (p: Product): void => { setForm({ ...p }); open("edit", p); };
   const handleOpenView = (p: Product): void => open("view", p);
   const handleOpenDel  = (p: Product): void => open("delete", p);
 
