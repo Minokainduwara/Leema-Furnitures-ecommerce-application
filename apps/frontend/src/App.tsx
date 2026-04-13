@@ -1,25 +1,21 @@
-import { Routes, Route } from "react-router-dom";
+import React, { useEffect } from "react";
+import { AuthProvider } from "./hooks/Authcontext";
+import AppRoutes from "./router/index";
 
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Signup from "./pages/SignUp";
-import AdminDashboard from "./pages/AdminDashboard";
+const App: React.FC = () => {
+  useEffect(() => {
+    const link = document.createElement("link");
+    link.href = "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&display=swap";
+    link.rel  = "stylesheet";
+    document.head.appendChild(link);
+    return () => { document.head.removeChild(link); };
+  }, []);
 
-import MyDetails from "./components/Admin-Components/MyDetails";
-
-function App() {
   return (
-    <Routes>
-      <Route path="/homepage" element={<Home />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
-
-      {/* Dashboard Layout */}
-      <Route path="/admindashboard" element={<AdminDashboard />}>
-        <Route index element={<MyDetails />} />
-      </Route>
-    </Routes>
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
   );
-}
+};
 
 export default App;
