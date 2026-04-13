@@ -1,116 +1,67 @@
 import React, { lazy, Suspense } from "react";
-import { createBrowserRouter, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
-import RequireAuth  from "../guards/RequireAuth";
-import GuestOnly    from "../guards/GuestOnly";
-import AdminLayout  from "../pages/admin-pages/AdminLayout";
-import LoginPage    from "../pages/LoginPage";
-import NotFoundPage from "../pages/NotFoundPage";
+import RequireAuth   from "../guards/RequireAuth";
+import GuestOnly     from "../guards/GuestOnly";
+import AdminLayout   from "../pages/admin-pages/AdminLayout";
+import LoginPage     from "../pages/LoginPage";
+import NotFoundPage  from "../pages/NotFoundPage";
 import ForbiddenPage from "../pages/ForbiddenPage";
 
-// ─── Lazy-loaded page chunks ──────────────────────────────────────────────────
-// Each page is split into its own JS chunk — only loaded when navigated to.
+// ─── Lazy page chunks ─────────────────────────────────────────────────────────
 
-const DashboardPage  = lazy(() => import("../pages/admin-pages/DashboardPage"));
-const ProductsPage   = lazy(() => import("../pages/admin-pages/ProductsPage"));
-const UsersPage      = lazy(() => import("../pages/admin-pages/UsersPage"));
-const ServicesPage   = lazy(() => import("../pages/admin-pages/ServicesPage"));
-const AnalyticsPage  = lazy(() => import("../pages/admin-pages/AnalyticsPage"));
-const ProfilePage    = lazy(() => import("../pages/admin-pages/ProfilePage"));
+const DashboardPage = lazy(() => import("../pages/admin-pages/DashboardPage"));
+const ProductsPage  = lazy(() => import("../pages/admin-pages/ProductsPage"));
+const UsersPage     = lazy(() => import("../pages/admin-pages/UsersPage"));
+const ServicesPage  = lazy(() => import("../pages/admin-pages/ServicesPage"));
+const AnalyticsPage = lazy(() => import("../pages/admin-pages/AnalyticsPage"));
+const ProfilePage   = lazy(() => import("../pages/admin-pages/ProfilePage"));
 
-// ─── Page loader spinner ──────────────────────────────────────────────────────
+// ─── Spinner ──────────────────────────────────────────────────────────────────
 
 const PageLoader: React.FC = () => (
-  <div className="flex-1 flex items-center justify-center h-full">
+  <div className="flex items-center justify-center min-h-screen">
     <div className="w-7 h-7 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
   </div>
 );
 
-const withSuspense = (element: React.ReactNode) => (
-  <Suspense fallback={<PageLoader />}>{element}</Suspense>
+const S = (el: React.ReactNode) => (
+  <Suspense fallback={<PageLoader />}>{el}</Suspense>
 );
 
-// ─── Router definition ────────────────────────────────────────────────────────
+// ─── Routes ───────────────────────────────────────────────────────────────────
+// BrowserRouter is provided in main.tsx — no router created here.
 
-const router = createBrowserRouter([
-  // ── Root redirect ──────────────────────────────────────────────────────────
-  {
-    path: "/",
-    element: <Navigate to="/dashboard" replace />,
-  },
+const AppRoutes: React.FC = () => (
+  <Routes>
+    {/* Root → dashboard */}
+    <Route index element={<Navigate to="/dashboard" replace />} />
 
-  // ── Guest-only routes (login) ──────────────────────────────────────────────
-  {
-    element: <GuestOnly />,
-    children: [
-      {
-        path: "login",
-        element: <LoginPage />,
-      },
-    ],
-  },
+    {/* Guest only — redirect logged-in users away */}
+    <Route element={<GuestOnly />}>
+      <Route path="login" element={<LoginPage />} />
+    </Route>
 
-  // ── Protected admin routes ─────────────────────────────────────────────────
-  {
-    element: <RequireAuth />,           // any logged-in user
-    children: [
-      {
-        element: <AdminLayout />,       // shared sidebar + topbar shell
-        children: [
-          // Dashboard — all roles
-          {
-            path: "dashboard",
-            element: withSuspense(<DashboardPage />),
-          },
-          // Products — all roles
-          {
-            path: "products",
-            element: withSuspense(<ProductsPage />),
-          },
-          // Users — superadmin + admin only
-          {
-            element: <RequireAuth allowedRoles={["superadmin", "admin"]} />,
-            children: [
-              {
-                path: "users",
-                element: withSuspense(<UsersPage />),
-              },
-            ],
-          },
-          // Services — all roles
-          {
-            path: "services",
-            element: withSuspense(<ServicesPage />),
-          },
-          // Analytics — superadmin + admin only
-          {
-            element: <RequireAuth allowedRoles={["superadmin", "admin"]} />,
-            children: [
-              {
-                path: "analytics",
-                element: withSuspense(<AnalyticsPage />),
-              },
-            ],
-          },
-          // Profile — all roles
-          {
-            path: "profile",
-            element: withSuspense(<ProfilePage />),
-          },
-        ],
-      },
-    ],
-  },
+    {/* Protected — any authenticated user */}
+    <Route element={<RequireAuth />}>
+      <Route element={<AdminLayout />}>
+        <Route path="dashboard" element={S(<DashboardPage />)} />
+        <Route path="products"  element={S(<ProductsPage />)} />
+        <Route path="services"  element={S(<ServicesPage />)} />
+        <Route path="profile"   element={S(<ProfilePage />)} />
 
-  // ── Error pages ────────────────────────────────────────────────────────────
-  {
-    path: "403",
-    element: <ForbiddenPage />,
-  },
-  {
-    path: "*",
-    element: <NotFoundPage />,
-  },
-]);
+        {/* Superadmin + admin only */}
+        <Route element={<RequireAuth allowedRoles={["superadmin", "admin"]} />}>
+          <Route path="users"     element={S(<UsersPage />)} />
+          <Route path="analytics" element={S(<AnalyticsPage />)} />
+        </Route>
+      </Route>
+    </Route>
 
-export default router;
+    {/* Error pages */}
+    <Route path="403" element={<ForbiddenPage />} />
+    <Route path="*"   element={<NotFoundPage />} />
+  </Routes>
+);
+
+export default AppRoutes;
