@@ -29,7 +29,7 @@ export function useProducts(): UseProductsReturn {
         stock:  Number(data.stock),
         rating: 4.5,
         sales:  0,
-      },
+      } as unknown as Product,
     ]);
   };
 
@@ -37,7 +37,7 @@ export function useProducts(): UseProductsReturn {
     setProducts((prev) =>
       prev.map((p) =>
         p.id === id
-          ? { ...p, ...data, price: Number(data.price), stock: Number(data.stock) }
+          ? ({ ...p, ...data, price: Number(data.price), stock: Number(data.stock) } as unknown as Product)
           : p
       )
     );

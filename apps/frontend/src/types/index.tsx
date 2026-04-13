@@ -31,8 +31,8 @@ export interface Product {
 }
 
 export type ProductFormData = Omit<Product, "id" | "rating" | "sales"> & {
-  price: string;  // string while editing, coerced on save
-  stock: string;
+  price: number;  // string while editing, coerced on save
+  stock: number;
 };
 
 // ─── User ─────────────────────────────────────────────────────────────────────
@@ -66,7 +66,7 @@ export interface Service {
 }
 
 export type ServiceFormData = Omit<Service, "id" | "subscribers"> & {
-  price: string;
+  price: number;
 };
 
 // ─── Order ────────────────────────────────────────────────────────────────────
@@ -161,4 +161,33 @@ export interface Report {
   title:  string;
   desc:   string;
   period: string;
+}
+
+// ─── Auth ─────────────────────────────────────────────────────────────────────
+
+export interface AuthUser {
+  id:     string;
+  name:   string;
+  email:  string;
+  role:   "superadmin" | "admin" | "manager";
+  avatar: string;
+}
+
+export interface AuthState {
+  user:      AuthUser | null;
+  isLoading: boolean;
+}
+
+export interface AuthContextValue extends AuthState {
+  login:  (email: string, password: string) => Promise<void>;
+  logout: () => void;
+}
+
+// ─── Route meta ───────────────────────────────────────────────────────────────
+
+export interface RouteMeta {
+  path:        string;
+  label:       string;
+  icon:        React.ComponentType<{ size?: number; className?: string }>;
+  requiredRole?: AuthUser["role"][];
 }
