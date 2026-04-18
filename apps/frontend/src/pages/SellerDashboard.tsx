@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
-// Temporary icon components
+
 const SalesIcon = () => (
   <svg
     className="w-6 h-6 text-blue-500"
@@ -57,7 +57,7 @@ const ProductIcon = () => (
   </svg>
 );
 
-// TypeScript types
+
 type Order = {
   id: string;
   customer: string;
@@ -82,7 +82,7 @@ function SellerDashboard() {
   const [sidebaropen, setsidebar] = useState<boolean>(false);
   const [darkmode, setdarkmode] = useState<boolean>(false);
 
-  // Orders
+  
   const recentOrders: Order[] = [
     {
       id: "ORD123",
@@ -108,7 +108,7 @@ function SellerDashboard() {
     (order) => order.status === "Pending",
   );
 
-  // Sidebar items
+  
   const sideBarItems: SidebarItem[] = [
     { name: "Dashboard", icon: "/images/dashboard.png", path: "/dashboard" },
     { name: "Products", icon: "/images/products.png", path: "/products" },
@@ -202,9 +202,9 @@ function SellerDashboard() {
           </button>
         </div>
       </aside>
-      {/* Main Content */}
+      
       <main className="bg-white flex-1 dark:bg-gray-900 min-h-screen ">
-        {/* Header */}
+        
         <header className="flex items-center justify-between bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-6 py-4 shadow-sm sticky top-0 z-10">
           <button onClick={() => setsidebar(true)} className="lg:hidden">
             <img
@@ -218,7 +218,7 @@ function SellerDashboard() {
           </span>
           <div className="flex items-center gap-3">
             <img
-              src="/images/profile.jpg"
+             src="/images/profile.png"
               alt="Profile"
               className="h-10 w-10 rounded-full border border-gray-300 dark:border-gray-700 object-cover"
             />

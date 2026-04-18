@@ -1,10 +1,8 @@
 import React, { useState, useRef, ChangeEvent, FormEvent } from "react";
 import { Link } from "react-router-dom";
-
-// Example categories
+import { useNavigate } from "react-router-dom";
 const categories = ["Furniture", "Electronics", "Clothing", "Books", "Toys"];
 
-// Example icons (Heroicons style)
 const EditIcon = () => (
   <svg
     className="w-5 h-5 text-blue-500"
@@ -29,11 +27,14 @@ const DeleteIcon = () => (
     strokeWidth="2"
     viewBox="0 0 24 24"
   >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M6 18L18 6M6 6l12 12"
+    />
   </svg>
 );
 
-// Types
 type Product = {
   id: number;
   name: string;
@@ -49,6 +50,7 @@ type DeleteState = { show: boolean; id: number | null };
 function SellerProductManagement() {
   const [sidebaropen, setsidebar] = useState<boolean>(false);
   const [darkmode, setdarkmode] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   const [products, setProducts] = useState<Product[]>([
     {
@@ -104,14 +106,21 @@ function SellerProductManagement() {
   });
   const [editingId, setEditingId] = useState<number | null>(null);
   const [showForm, setShowForm] = useState<boolean>(false);
-  const [showDelete, setShowDelete] = useState<DeleteState>({ show: false, id: null });
+  const [showDelete, setShowDelete] = useState<DeleteState>({
+    show: false,
+    id: null,
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const sideBarItems = [
     { name: "Dashboard", icon: "/images/dashboard.png", path: "/dashboard" },
     { name: "Products", icon: "/images/products.png", path: "/products" },
     { name: "Orders", icon: "/images/orders.png", path: "/orders" },
-    { name: "Customer Details", icon: "/images/Details.png", path: "/customers" },
+    {
+      name: "Customer Details",
+      icon: "/images/Details.png",
+      path: "/customers",
+    },
     { name: "Promotions", icon: "/images/promotion.png", path: "/promotions" },
     { name: "Messages", icon: "/images/msg.png", path: "/messages" },
     { name: "Profile", icon: "/images/profile.png", path: "/profile" },
@@ -120,11 +129,11 @@ function SellerProductManagement() {
   const filteredProducts = products.filter(
     (p) =>
       p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.code.toLowerCase().includes(search.toLowerCase())
+      p.code.toLowerCase().includes(search.toLowerCase()),
   );
 
   const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -145,7 +154,7 @@ function SellerProductManagement() {
     e.preventDefault();
     if (editingId !== null) {
       setProducts((prev) =>
-        prev.map((p) => (p.id === editingId ? { ...form, id: editingId } : p))
+        prev.map((p) => (p.id === editingId ? { ...form, id: editingId } : p)),
       );
     } else {
       setProducts((prev) => [...prev, { ...form, id: Date.now() }]);
@@ -176,8 +185,9 @@ function SellerProductManagement() {
   };
 
   return (
-    <div className={`bg-gray-100 min-h-screen font-sans ${darkmode ? "dark" : ""} flex`}>
-      {/* Sidebar */}
+    <div
+      className={`bg-gray-100 min-h-screen font-sans ${darkmode ? "dark" : ""} flex`}
+    >
       <aside
         className={`bg-white w-64 h-screen dark:bg-gray-900 fixed shadow-lg border-r border-gray-200 dark:border-gray-800 z-20 ${
           sidebaropen ? "translate-x-0" : "-translate-x-64"
@@ -188,7 +198,10 @@ function SellerProductManagement() {
           <span className="text-xl font-bold text-gray-800 dark:text-gray-100">
             Seller Dashboard
           </span>
-          <button className="ml-auto lg:hidden" onClick={() => setsidebar(false)}>
+          <button
+            className="ml-auto lg:hidden"
+            onClick={() => setsidebar(false)}
+          >
             <img src="/images/close.png" alt="close" className="h-8 w-8 p-1" />
           </button>
         </div>
@@ -224,9 +237,7 @@ function SellerProductManagement() {
         </div>
       </aside>
 
-      {/* Main Content */}
       <main className="bg-white flex-1 dark:bg-gray-900 min-h-screen p-6">
-        {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
           <h2 className="text-2xl font-bold text-gray-800 mb-4 md:mb-0 dark:text-gray-100">
             Product Management
@@ -241,27 +252,13 @@ function SellerProductManagement() {
             />
             <button
               className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-2 rounded-lg shadow transition"
-              onClick={() => {
-                setShowForm(true);
-                setForm({
-                  id: 0,
-                  name: "",
-                  code: "",
-                  description: "",
-                  price: "",
-                  category: categories[0],
-                  images: [],
-                });
-                setEditingId(null);
-                if (fileInputRef.current) fileInputRef.current.value = "";
-              }}
+              onClick={() => navigate("/products/add")}
             >
               Add Product
             </button>
           </div>
         </div>
 
-        {/* Product Table */}
         <div className="bg-white rounded-xl shadow-lg p-4 overflow-x-auto">
           <table className="min-w-full text-sm">
             <thead>
@@ -289,7 +286,9 @@ function SellerProductManagement() {
                     <td className="px-3 py-2">{p.name}</td>
                     <td className="px-3 py-2">{p.code}</td>
                     <td className="px-3 py-2">{p.category}</td>
-                    <td className="px-3 py-2 text-green-600 font-semibold">Rs{p.price}</td>
+                    <td className="px-3 py-2 text-green-600 font-semibold">
+                      Rs{p.price}
+                    </td>
                     <td className="px-3 py-2">
                       <div className="flex gap-1">
                         {p.images &&
@@ -306,7 +305,7 @@ function SellerProductManagement() {
                     <td className="px-3 py-2 flex gap-1">
                       <button
                         className="bg-blue-100 hover:bg-blue-200 rounded p-1 transition"
-                        onClick={() => handleEdit(p)}
+                        onClick={() => navigate(`/products/edit/${p.id}`)}
                         title="Edit"
                       >
                         <EditIcon />
@@ -326,7 +325,6 @@ function SellerProductManagement() {
           </table>
         </div>
 
-        {/* Add/Edit Product Modal */}
         {showForm && (
           <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
             <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md relative">
@@ -415,11 +413,12 @@ function SellerProductManagement() {
           </div>
         )}
 
-        {/* Delete Confirmation Modal */}
         {showDelete.show && (
           <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
             <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-sm">
-              <h3 className="text-lg font-bold mb-4 text-red-600">Confirm Delete</h3>
+              <h3 className="text-lg font-bold mb-4 text-red-600">
+                Confirm Delete
+              </h3>
               <p className="mb-6 text-gray-700">
                 Are you sure you want to delete this product?
               </p>
