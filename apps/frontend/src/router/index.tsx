@@ -1,8 +1,9 @@
 import React, { lazy, Suspense } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import ForbiddenPage from "../pages/ForbiddenPage";
-
+import AdminLayout from "../pages/admin-pages/AdminLayout";
 import ProtectedRoute from "../components/ProtectedRoute";
+
 // ─── Lazy page chunks ─────────────────────────────────────────────────────────
 
 const DashboardPage = lazy(() => import("../pages/admin-pages/DashboardPage"));
@@ -13,7 +14,6 @@ const AnalyticsPage = lazy(() => import("../pages/admin-pages/AnalyticsPage"));
 const ProfilePage   = lazy(() => import("../pages/admin-pages/ProfilePage"));
 const LoginPage     = lazy(() => import("../pages/LoginPage"));
 const Home          = lazy(() => import("../pages/Home"));
-
 
 // ─── Spinner ──────────────────────────────────────────────────────────────────
 
@@ -28,69 +28,33 @@ const S = (el: React.ReactNode) => (
 );
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
-// BrowserRouter is provided in main.tsx — no router created here.
 
 const AppRoutes: React.FC = () => (
   <Routes>
-    {/* Root → dashboard */}
-    <Route index element={<Navigate to="/dashboard" replace />} />
-
-    {/* Public */}
+    {/* Public Routes */}
     <Route path="/login" element={S(<LoginPage />)} />
     <Route path="/" element={S(<Home />)} />
 
-    {/* Admin area - wrap with ProtectedRoute */}
+    {/* Admin Routes with Layout */}
     <Route
-      path="/dashboard"
+      path="/admin"
       element={
         <ProtectedRoute requireAdmin>
-          {S(<DashboardPage />)}
+          <AdminLayout />
         </ProtectedRoute>
       }
-    />
-    <Route
-      path="/products"
-      element={
-        <ProtectedRoute requireAdmin>
-          {S(<ProductsPage />)}
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/users"
-      element={
-        <ProtectedRoute requireAdmin>
-          {S(<UsersPage />)}
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/services"
-      element={
-        <ProtectedRoute requireAdmin>
-          {S(<ServicesPage />)}
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/analytics"
-      element={
-        <ProtectedRoute requireAdmin>
-          {S(<AnalyticsPage />)}
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/profile"
-      element={
-        <ProtectedRoute>
-          {S(<ProfilePage />)}
-        </ProtectedRoute>
-      }
-    />
+    >
+      <Route path="dashboard" element={S(<DashboardPage />)} />
+      <Route path="products" element={S(<ProductsPage />)} />
+      <Route path="users" element={S(<UsersPage />)} />
+      <Route path="services" element={S(<ServicesPage />)} />
+      <Route path="analytics" element={S(<AnalyticsPage />)} />
+      <Route path="profile" element={S(<ProfilePage />)} />
+    </Route>
 
+    {/* Error Routes */}
     <Route path="/forbidden" element={<ForbiddenPage />} />
-    <Route path="*" element={<div className="p-8">404 - Not Found</div>} />
+    <Route path="*" element={<div className="p-8 text-center">404 - Page Not Found</div>} />
   </Routes>
 );
 
