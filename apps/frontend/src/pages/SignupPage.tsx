@@ -1,18 +1,26 @@
 import React, { useState } from "react";
-import { Mail, Lock, Eye, EyeOff, LogIn } from "lucide-react";
+import { Mail, Lock, User, Eye, EyeOff, UserPlus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
-interface LoginForm {
+interface SignupForm {
+  name: string;
   email: string;
   password: string;
+  confirmPassword: string;
 }
 
-const LoginPage: React.FC = () => {
+const SignupPage: React.FC = () => {
   const navigate = useNavigate();
-  const { login, isLoading, error: authError } = useAuth();
-  const [form, setForm] = useState<LoginForm>({ email: "", password: "" });
+  const { signup, isLoading, error: authError } = useAuth();
+  const [form, setForm] = useState<SignupForm>({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -25,16 +33,26 @@ const LoginPage: React.FC = () => {
     e.preventDefault();
     setError("");
 
-    if (!form.email || !form.password) {
+    if (!form.name || !form.email || !form.password || !form.confirmPassword) {
       setError("Please fill in all fields");
       return;
     }
 
+    if (form.password !== form.confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    if (form.password.length < 6) {
+      setError("Password must be at least 6 characters");
+      return;
+    }
+
     try {
-      await login(form.email, form.password);
+      await signup(form.email, form.password, form.name);
       navigate("/admin/dashboard");
     } catch (err) {
-      setError(authError || "Login failed. Please try again.");
+      setError(authError || "Signup failed. Please try again.");
     }
   };
 
@@ -44,15 +62,36 @@ const LoginPage: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl mb-4">
-            <LogIn size={32} className="text-white" />
+            <UserPlus size={32} className="text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-stone-900 mb-2">Welcome Back</h1>
-          <p className="text-stone-500">Sign in to your Leema admin account</p>
+          <h1 className="text-3xl font-bold text-stone-900 mb-2">Create Account</h1>
+          <p className="text-stone-500">Join Leema admin dashboard</p>
         </div>
 
         {/* Card */}
         <div className="bg-white rounded-2xl shadow-lg border border-stone-100 p-8">
           <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Name Input */}
+            <div>
+              <label className="block text-sm font-medium text-stone-700 mb-2">
+                Full Name
+              </label>
+              <div className="relative">
+                <User
+                  size={18}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"
+                />
+                <input
+                  type="text"
+                  name="name"
+                  value={form.name}
+                  onChange={handleChange}
+                  placeholder="John Doe"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                />
+              </div>
+            </div>
+
             {/* Email Input */}
             <div>
               <label className="block text-sm font-medium text-stone-700 mb-2">
@@ -102,6 +141,34 @@ const LoginPage: React.FC = () => {
               </div>
             </div>
 
+            {/* Confirm Password Input */}
+            <div>
+              <label className="block text-sm font-medium text-stone-700 mb-2">
+                Confirm Password
+              </label>
+              <div className="relative">
+                <Lock
+                  size={18}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"
+                />
+                <input
+                  type={showConfirm ? "text" : "password"}
+                  name="confirmPassword"
+                  value={form.confirmPassword}
+                  onChange={handleChange}
+                  placeholder="••••••••"
+                  className="w-full pl-10 pr-10 py-2.5 rounded-lg border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm(!showConfirm)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
+                >
+                  {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+
             {/* Error Message */}
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-3">
@@ -109,18 +176,13 @@ const LoginPage: React.FC = () => {
               </div>
             )}
 
-            {/* Remember & Forgot */}
-            <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center gap-2 text-stone-600 cursor-pointer hover:text-stone-900">
-                <input type="checkbox" className="rounded border-stone-300" />
-                Remember me
-              </label>
-              <a href="#" className="text-amber-600 hover:text-amber-700 font-medium">
-                Forgot password?
-              </a>
-            </div>
+            {/* Terms */}
+            <label className="flex items-start gap-2 text-sm text-stone-600">
+              <input type="checkbox" className="rounded border-stone-300 mt-1" />
+              I agree to the Terms of Service and Privacy Policy
+            </label>
 
-            {/* Login Button */}
+            {/* Signup Button */}
             <button
               type="submit"
               disabled={isLoading}
@@ -129,22 +191,22 @@ const LoginPage: React.FC = () => {
               {isLoading ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Signing in...
+                  Creating account...
                 </>
               ) : (
                 <>
-                  <LogIn size={18} />
-                  Sign In
+                  <UserPlus size={18} />
+                  Create Account
                 </>
               )}
             </button>
           </form>
 
-          {/* Signup Link */}
+          {/* Login Link */}
           <p className="text-center text-sm text-stone-600 mt-6">
-            Don't have an account?{" "}
-            <a href="/signup" className="text-amber-600 hover:text-amber-700 font-semibold">
-              Sign up
+            Already have an account?{" "}
+            <a href="/login" className="text-amber-600 hover:text-amber-700 font-semibold">
+              Sign in
             </a>
           </p>
         </div>
@@ -158,4 +220,4 @@ const LoginPage: React.FC = () => {
   );
 };
 
-export default LoginPage;
+export default SignupPage;
