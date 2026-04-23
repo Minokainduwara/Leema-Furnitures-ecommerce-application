@@ -1,0 +1,104 @@
+# =========================
+# Node / Bun
+# =========================
+node_modules/
+dist/
+bun.lockb
+*.log
+*.tsbuildinfo
+
+# =========================
+# Python
+# =========================
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.db
+*.egg-info/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# =========================
+# Environment / Config
+# =========================
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+*.env
+
+# =========================
+# Firebase
+# =========================
+.firebase/
+.firebaserc
+*.json
+firebase-debug.log
+firebase-debug.*.log
+!package.json
+
+# =========================
+# Docker
+# =========================
+docker-compose.override.yml
+*.log
+*.tmp
+*.swp
+
+# =========================
+# OS
+# =========================
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+Desktop.ini
+
+# =========================
+# IDE / Editors
+# =========================
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# =========================
+# React / Frontend
+# =========================
+build/
+.cache/
+out/
+.storybook/
+coverage/
+*.snap
+.eslintcache
+.history/
+*.log
+
+# =========================
+# FastAPI / Backend
+# =========================
+__pycache__/
+*.py[cod]
+*.pyd
+*.pyo
+*.pylint.d
+*.mypy_cache/
+.mypy_cache/
+.dmypy.json
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+*.egg-info/
+
+# =========================
+# AI / LLM cache (if any)
+# =========================
+*.db
+*.vectorstore
+*.embeddings
