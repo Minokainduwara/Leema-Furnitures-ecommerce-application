@@ -230,21 +230,25 @@ export function useUsers(): UseUsersReturn {
 // ─── useModal ──────────────────────────────────────────────────────────────
 
 interface UseModalReturn {
-  modal:      ModalType | null;
-  openModal:  (type: ModalType) => void;
+  modal: ModalType | null;
+  data: any;
+  openModal: (type: ModalType, payload?: any) => void;
   closeModal: () => void;
 }
 
 export function useModal(): UseModalReturn {
   const [modal, setModal] = useState<ModalType | null>(null);
+  const [data, setData] = useState<any>(null);
 
-  const openModal = (type: ModalType): void => {
+  const openModal = (type: ModalType, payload?: any): void => {
     setModal(type);
+    setData(payload ?? null);
   };
 
   const closeModal = (): void => {
     setModal(null);
+    setData(null);
   };
 
-  return { modal, openModal, closeModal };
+  return { modal, data, openModal, closeModal };
 }
