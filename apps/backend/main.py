@@ -1,34 +1,29 @@
-from dotenv import load_dotenv
-import os
-from fastapi import FastAPI  # type: ignore
-from fastapi.middleware.cors import CORSMiddleware # type: ignore
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from database import Base, engine
+from models.user import User
+from routes import cart, order
 
+Base.metadata.create_all(bind=engine)
 
-# Load your .env.local file first
-load_dotenv(dotenv_path=".env.local")
-
-from firebase_config import initialize_firebase  # import after loading env
+from routes import user, auth, admin
 
 app = FastAPI()
 
-# Optional: check that the env variable is loaded correctly
-print("FIREBASE_CREDENTIALS_PATH:", os.getenv("FIREBASE_CREDENTIALS_PATH"))
-
-# Initialize Firebase
-initialize_firebase()
-
-Origin = os.getenv("FRONTEND_URL", "http://localhost:5173")
-
-# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[Origin],  # your React frontend URL
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],  # allow GET, POST, PUT, DELETE etc.
-    allow_headers=["*"],  # allow all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-
 @app.get("/")
-def root():
-    return {"status": "Firebase initialized"}
+def home():
+    return {"message": "Backend running"}
+
+app.include_router(user.router)
+app.include_router(auth.router)
+app.include_router(admin.router)
+app.include_router(cart.router)
+app.include_router(order.router)
