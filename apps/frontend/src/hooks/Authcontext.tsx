@@ -1,68 +1,122 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
-import type { AuthContextValue, AuthUser, AuthState } from "../types";
+import { createContext, useState, useEffect, type ReactNode } from "react";
+import api from "../api/client";
 
-// ─── Mock credentials ─────────────────────────────────────────────────────────
+export interface AuthUser {
+  id: number;
+  email: string;
+  name: string;
+  role: string;
+}
 
-const MOCK_USERS: Record<string, AuthUser & { password: string }> = {
-  "admin@leema.lk": {
-    id:       "u1",
-    name:     "Leema Admin",
-    email:    "admin@leema.lk",
-    role:     "superadmin",
-    avatar:   "LA",
-    password: "admin123",
-  },
-  "manager@leema.lk": {
-    id:       "u2",
-    name:     "Store Manager",
-    email:    "manager@leema.lk",
-    role:     "manager",
-    avatar:   "SM",
-    password: "manager123",
-  },
-};
+export interface AuthContextType {
+  user: AuthUser | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+  signup: (email: string, password: string, name: string) => Promise<void>;
+  error: string | null;
+}
 
-// ─── Context ──────────────────────────────────────────────────────────────────
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const AuthContext = createContext<AuthContextValue | null>(null);
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [state, setState] = useState<AuthState>({
-    user:      null,
-    isLoading: false,
-  });
+  // Check if user is already logged in on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (token) {
+          const userData = await api.get("auth/me").json<AuthUser>();
+          setUser(userData);
+        }
+      } catch (err) {
+        localStorage.removeItem("token");
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const login = useCallback(async (email: string, password: string): Promise<void> => {
-    setState((s) => ({ ...s, isLoading: true }));
+    checkAuth();
+  }, []);
 
-    // simulate network delay
-    await new Promise((r) => setTimeout(r, 800));
+  const login = async (email: string, password: string): Promise<void> => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const response = await api
+        .post("auth/login", {
+          json: { email, password },
+        })
+        .json<{ token: string; user: AuthUser }>();
 
-    const found = MOCK_USERS[email.toLowerCase()];
-    if (!found || found.password !== password) {
-      setState((s) => ({ ...s, isLoading: false }));
-      throw new Error("Invalid email or password.");
+      localStorage.setItem("token", response.token);
+      setUser(response.user);
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : "Login failed";
+      setError(errorMsg);
+      throw err;
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    const { password: _pw, ...user } = found;
-    setState({ user, isLoading: false });
-  }, []);
+  const signup = async (
+    email: string,
+    password: string,
+    name: string
+  ): Promise<void> => {
+    try {
+      setIsLoading(true);
+      setError(null);
 
-  const logout = useCallback((): void => {
-    setState({ user: null, isLoading: false });
-  }, []);
+      const response = await api
+        .post("auth/signup", {
+          json: { email, password, name },
+        })
+        .json<{ token: string; user: AuthUser }>();
+
+      localStorage.setItem("token", response.token);
+      setUser(response.user);
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : "Signup failed";
+      setError(errorMsg);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const logout = async (): Promise<void> => {
+    try {
+      setIsLoading(true);
+      await api.post("auth/logout");
+    } catch (err) {
+      console.error("Logout error:", err);
+    } finally {
+      localStorage.removeItem("token");
+      setUser(null);
+      setIsLoading(false);
+    }
+  };
+
+  const value: AuthContextType = {
+    user,
+    isLoading,
+    isAuthenticated: !!user,
+    login,
+    logout,
+    signup,
+    error,
+  };
 
   return (
-    <AuthContext.Provider value={{ ...state, login, logout }}>
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
   );
-};
-
-// ─── Hook ─────────────────────────────────────────────────────────────────────
-
-export function useAuth(): AuthContextValue {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used inside <AuthProvider>");
-  return ctx;
 }
