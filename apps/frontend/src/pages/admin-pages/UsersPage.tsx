@@ -1,191 +1,300 @@
-import React, { useState } from "react";
-import { Plus, Edit2, Trash2, Save, Users, Activity, Star } from "lucide-react";
-import {
-  Badge, Btn, Input, Select, Modal, ConfirmDelete,
-  PageHeader, SearchBar, Avatar,
-} from "../../components/ui/admin-ui/index";
-import { useUsers, useModal } from "../../hooks/Usestore";
-import type { User, UserFormData, UserRole, UserStatus } from "../../types";
+import { useState } from "react";
+import { Plus, Edit2, Trash2, Save } from "lucide-react";
+import type { User, UserFormData } from "../../types";
+import { useUsers } from "../../hooks/Usestore";
+import { useModal } from "../../hooks/Usestore";
+import { Input, Select, Textarea } from "../../components/ui/admin-ui";
+import { Button } from "../../components/ui/button";
+import Modal from "../../components/ui/Modals";
+import ConfirmDelete from "../../components/ui/ConfirmDelete";
 
-// ─── Variant maps ─────────────────────────────────────────────────────────────
+const USER_ROLES = [
+  { value: "Customer", label: "Customer" },
+  { value: "Seller", label: "Seller" },
+  { value: "Admin", label: "Admin" },
+  { value: "Manager", label: "Manager" },
+];
 
-const ROLE_V:   Record<UserRole,   "default" | "purple" | "info">     = { Customer: "default", VIP: "purple", Admin: "info" };
-const STATUS_V: Record<UserStatus, "success" | "danger">              = { Active: "success", Inactive: "danger" };
+const USER_STATUS = [
+  { value: "Active", label: "Active" },
+  { value: "Inactive", label: "Inactive" },
+];
 
-// ─── User Form ────────────────────────────────────────────────────────────────
+// ─── User Form Component ──────────────────────────────────────────────────────
 
 interface UserFormProps {
-  form:    UserFormData;
-  setForm: React.Dispatch<React.SetStateAction<UserFormData>>;
+  form: UserFormData;
+  setForm: (form: UserFormData) => void;
 }
 
-const UserForm: React.FC<UserFormProps> = ({ form, setForm }) => (
-  <div className="space-y-4">
-    <div className="grid grid-cols-2 gap-3">
+const UserForm: React.FC<UserFormProps> = ({ form, setForm }) => {
+  return (
+    <div className="space-y-4">
       <Input
         label="Full Name"
         value={form.name}
-        onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-        placeholder="Full name"
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+          setForm({ ...form, name: e.target.value })
+        }
+        placeholder="e.g. John Doe"
       />
+
       <Input
         label="Email"
         type="email"
         value={form.email}
-        onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-        placeholder="email@example.com"
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+          setForm({ ...form, email: e.target.value })
+        }
+        placeholder="e.g. john@example.com"
       />
-    </div>
-    <div className="grid grid-cols-2 gap-3">
+
       <Input
         label="Phone"
-        value={form.phone}
-        onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-        placeholder="+94 77 000 0000"
+        type="tel"
+        value={form.phone || ""}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+          setForm({ ...form, phone: e.target.value })
+        }
+        placeholder="e.g. +1234567890"
       />
-      <Select
-        label="Role"
-        value={form.role}
-        onChange={(e) => setForm((f) => ({ ...f, role: e.target.value as UserRole }))}
-        options={(["Customer", "VIP", "Admin"] as UserRole[]).map((r) => ({ value: r, label: r }))}
-      />
+
+      <div className="grid grid-cols-2 gap-3">
+        <Select
+          label="Role"
+          value={form.role}
+          onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+            setForm({ ...form, role: e.target.value as any })
+          }
+          options={USER_ROLES}
+        />
+        <Select
+          label="Status"
+          value={form.status}
+          onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+            setForm({ ...form, status: e.target.value as any })
+          }
+          options={USER_STATUS}
+        />
+      </div>
     </div>
-    <Select
-      label="Status"
-      value={form.status}
-      onChange={(e) => setForm((f) => ({ ...f, status: e.target.value as UserStatus }))}
-      options={(["Active", "Inactive"] as UserStatus[]).map((s) => ({ value: s, label: s }))}
-    />
-  </div>
-);
+  );
+};
 
-// ─── User Table Row ───────────────────────────────────────────────────────────
+// ─── User Card Component ──────────────────────────────────────────────────────
 
-interface UserRowProps {
-  user:     User;
-  onEdit:   (u: User) => void;
+interface UserCardProps {
+  user: User;
+  onEdit: (u: User) => void;
   onDelete: (u: User) => void;
 }
 
-const UserRow: React.FC<UserRowProps> = ({ user, onEdit, onDelete }) => (
-  <tr className="border-b border-stone-50 hover:bg-amber-50/30 transition-colors">
-    <td className="px-4 py-3">
-      <div className="flex items-center gap-3">
-        <Avatar initials={user.avatar} size="md" />
-        <div>
-          <div className="font-medium text-stone-800">{user.name}</div>
-          <div className="text-xs text-stone-400">Joined {user.joined}</div>
+const UserCard: React.FC<UserCardProps> = ({ user, onEdit, onDelete }) => (
+  <div className="bg-white rounded-2xl p-5 shadow-sm border border-stone-100 hover:shadow-md transition-all">
+    <div className="flex items-center gap-3 mb-4">
+      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white font-bold">
+        {user.name.charAt(0).toUpperCase()}
+      </div>
+      <div>
+        <div className="font-semibold text-stone-800">{user.name}</div>
+        <div className="text-xs text-stone-600">{user.email}</div>
+      </div>
+    </div>
+
+    <div className="space-y-2 mb-4 text-sm">
+      <div className="flex justify-between">
+        <span className="text-stone-600">Role:</span>
+        <span className="font-medium text-stone-900">{user.role}</span>
+      </div>
+      <div className="flex justify-between">
+        <span className="text-stone-600">Status:</span>
+        <span
+          className={`font-medium ${
+            user.status === "Active" ? "text-green-600" : "text-red-600"
+          }`}
+        >
+          {user.status}
+        </span>
+      </div>
+      {user.orders !== undefined && (
+        <div className="flex justify-between">
+          <span className="text-stone-600">Orders:</span>
+          <span className="font-medium text-stone-900">{user.orders}</span>
         </div>
-      </div>
-    </td>
-    <td className="px-4 py-3">
-      <div className="text-stone-600">{user.email}</div>
-      <div className="text-xs text-stone-400">{user.phone}</div>
-    </td>
-    <td className="px-4 py-3"><Badge variant={ROLE_V[user.role]}>{user.role}</Badge></td>
-    <td className="px-4 py-3 text-stone-600">{user.orders}</td>
-    <td className="px-4 py-3 font-semibold text-stone-800">${user.spent.toLocaleString()}</td>
-    <td className="px-4 py-3"><Badge variant={STATUS_V[user.status]}>{user.status}</Badge></td>
-    <td className="px-4 py-3">
-      <div className="flex gap-1.5">
-        <button onClick={() => onEdit(user)}   className="p-1.5 rounded-lg hover:bg-amber-50 text-stone-400 hover:text-amber-600"><Edit2  size={14} /></button>
-        <button onClick={() => onDelete(user)} className="p-1.5 rounded-lg hover:bg-red-50   text-stone-400 hover:text-red-500">  <Trash2 size={14} /></button>
-      </div>
-    </td>
-  </tr>
+      )}
+    </div>
+
+    <div className="flex gap-2 pt-3 border-t border-stone-100">
+      <button
+        type="button"
+        onClick={() => onEdit(user)}
+        className="flex-1 p-2 hover:bg-stone-100 rounded-lg text-stone-600 transition-colors flex items-center justify-center gap-2"
+      >
+        <Edit2 size={16} />
+        Edit
+      </button>
+      <button
+        type="button"
+        onClick={() => onDelete(user)}
+        className="flex-1 p-2 hover:bg-red-100 rounded-lg text-red-600 transition-colors flex items-center justify-center gap-2"
+      >
+        <Trash2 size={16} />
+        Delete
+      </button>
+    </div>
+  </div>
 );
 
 // ─── Users Page ───────────────────────────────────────────────────────────────
 
-const EMPTY_FORM: UserFormData = {
-  name: "", email: "", phone: "", role: "Customer", status: "Active",
-};
-
 const UsersPage: React.FC = () => {
-  const { users, addUser, updateUser, deleteUser } = useUsers();
-  const { modal, selected, open, close }           = useModal<User>();
-  const [search, setSearch]                        = useState<string>("");
-  const [form,   setForm]                          = useState<UserFormData>(EMPTY_FORM);
+  const { users, addUser, updateUser, deleteUser, loading } = useUsers();
+  const { modal, data, openModal, closeModal } = useModal();
 
-  const filtered = users.filter(
-    (u) =>
-      u.name.toLowerCase().includes(search.toLowerCase()) ||
-      u.email.toLowerCase().includes(search.toLowerCase())
-  );
+  const [form, setForm] = useState<UserFormData>({
+    name: "",
+    email: "",
+    phone: "",
+    role: "Customer",
+    status: "Active",
+  });
 
-  const handleOpenAdd  = (): void => { setForm(EMPTY_FORM); open("add"); };
-  const handleOpenEdit = (u: User): void => { setForm({ name: u.name, email: u.email, phone: u.phone, role: u.role, status: u.status }); open("edit", u); };
-  const handleOpenDel  = (u: User): void => open("delete", u);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-  const handleSave = (): void => {
-    if (modal === "add") addUser(form);
-    else if (selected) updateUser(selected.id, form);
-    close();
+  // Reset form
+  const resetForm = () => {
+    setForm({
+      name: "",
+      email: "",
+      phone: "",
+      role: "Customer",
+      status: "Active",
+    });
   };
-  const handleDelete = (): void => {
-    if (selected) deleteUser(selected.id);
-    close();
+
+  // Handle save
+  const handleSave = async () => {
+    if (!form.name.trim() || !form.email.trim()) {
+      alert("Please fill in required fields");
+      return;
+    }
+
+    try {
+      if (modal === "add") {
+        await addUser(form);
+      } else if (modal === "edit" && data && "id" in data) {
+        await updateUser((data as User).id, form);
+      }
+      closeModal();
+      resetForm();
+    } catch (error) {
+      alert("Error saving user");
+    }
   };
 
-  const summaryItems = [
-    { label: "Total Users",  value: users.length,                                    Icon: Users,    color: "text-stone-700" },
-    { label: "Active Users", value: users.filter((u) => u.status === "Active").length, Icon: Activity, color: "text-emerald-600" },
-    { label: "VIP Members",  value: users.filter((u) => u.role === "VIP").length,    Icon: Star,     color: "text-amber-500" },
-  ];
+  // Handle delete
+  const handleDelete = async () => {
+    if (!selectedUser) return;
+    try {
+      await deleteUser(selectedUser.id);
+      closeModal();
+      setSelectedUser(null);
+    } catch (error) {
+      alert("Error deleting user");
+    }
+  };
+
+  // Handle edit
+  const handleEdit = (user: User) => {
+    setSelectedUser(user);
+    setForm({
+      name: user.name,
+      email: user.email,
+      phone: user.phone || "",
+      role: user.role,
+      status: user.status,
+    });
+    openModal("edit", user);
+  };
+
+  // Handle delete click
+  const handleDeleteClick = (user: User) => {
+    setSelectedUser(user);
+    openModal("delete", user);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p className="text-stone-600">Loading users...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-5">
-      <PageHeader
-        title="Users"
-        subtitle={`${users.length} registered users`}
-        action={<Btn onClick={handleOpenAdd}><Plus size={16} />Add User</Btn>}
-      />
-
-      <div className="grid grid-cols-3 gap-4">
-        {summaryItems.map((s) => (
-          <div key={s.label} className="bg-white rounded-2xl p-4 shadow-sm border border-stone-100 flex items-center gap-3">
-            <s.Icon size={20} className={s.color} />
-            <div>
-              <div className="text-xl font-bold text-stone-800">{s.value}</div>
-              <div className="text-xs text-stone-500">{s.label}</div>
-            </div>
-          </div>
-        ))}
+    <div>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-stone-900">Users</h1>
+          <p className="text-sm text-stone-600 mt-1">Manage your users and permissions</p>
+        </div>
+        <Button
+          onClick={() => {
+            resetForm();
+            openModal("add");
+          }}
+        >
+          <Plus size={16} />
+          Add User
+        </Button>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-stone-100 overflow-hidden">
-        <div className="p-4 border-b border-stone-100">
-          <SearchBar value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search users…" className="max-w-xs" />
+      {/* Users Grid */}
+      {users.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-stone-600">No users yet. Invite your first user!</p>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-stone-50 border-b border-stone-100">
-              <tr>
-                {["User","Contact","Role","Orders","Total Spent","Status","Actions"].map((h) => (
-                  <th key={h} className="text-left text-xs font-semibold text-stone-400 px-4 py-3">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((u) => (
-                <UserRow key={u.id} user={u} onEdit={handleOpenEdit} onDelete={handleOpenDel} />
-              ))}
-            </tbody>
-          </table>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {users.map((user) => (
+            <UserCard
+              key={user.id}
+              user={user}
+              onEdit={handleEdit}
+              onDelete={handleDeleteClick}
+            />
+          ))}
         </div>
-      </div>
+      )}
 
-      <Modal open={modal === "add" || modal === "edit"} onClose={close} title={modal === "add" ? "Add New User" : "Edit User"}>
+      {/* Add/Edit Modal */}
+      <Modal
+        open={modal === "add" || modal === "edit"}
+        onClose={closeModal}
+        title={modal === "add" ? "Add User" : "Edit User"}
+      >
         <UserForm form={form} setForm={setForm} />
         <div className="flex justify-end gap-2 mt-6">
-          <Btn variant="secondary" onClick={close}>Cancel</Btn>
-          <Btn onClick={handleSave}><Save size={15} />{modal === "add" ? "Add User" : "Save Changes"}</Btn>
+          <Button onClick={closeModal}>Cancel</Button>
+          <Button onClick={handleSave}>
+            <Save size={15} />
+            {modal === "add" ? "Add User" : "Save Changes"}
+          </Button>
         </div>
       </Modal>
 
-      <ConfirmDelete open={modal === "delete"} onClose={close} onConfirm={handleDelete} title="Remove User">
-        <Avatar initials={selected?.avatar ?? ""} size="lg" className="mx-auto mb-2" />
-        <p className="text-stone-600">Remove <strong>{selected?.name}</strong> from the platform?</p>
+      {/* Delete Confirmation Modal */}
+      <ConfirmDelete
+        open={modal === "delete"}
+        onClose={closeModal}
+        onConfirm={handleDelete}
+        title="Remove User"
+      >
+        <div className="text-5xl mb-2">👤</div>
+        <p className="text-stone-600">
+          Remove <strong>{selectedUser?.name}</strong>?
+        </p>
       </ConfirmDelete>
     </div>
   );

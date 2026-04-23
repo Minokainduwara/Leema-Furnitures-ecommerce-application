@@ -1,148 +1,157 @@
 import React, { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../hooks/Authcontext";
-import { AlertCircle, Eye, EyeOff, LogIn } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, LogIn } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
 
-interface LocationState {
-  from?: { pathname: string };
+interface LoginForm {
+  email: string;
+  password: string;
 }
 
 const LoginPage: React.FC = () => {
-  const { login, isLoading } = useAuth();
-  const navigate              = useNavigate();
-  const location              = useLocation();
-  const from                  = (location.state as LocationState)?.from?.pathname ?? "/dashboard";
+  const navigate = useNavigate();
+  const { login, isLoading, error: authError } = useAuth();
+  const [form, setForm] = useState<LoginForm>({ email: "", password: "" });
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
 
-  const [email,    setEmail]    = useState("admin@leema.lk");
-  const [password, setPassword] = useState("admin123");
-  const [showPw,   setShowPw]   = useState(false);
-  const [error,    setError]    = useState("");
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+    setError("");
+  };
 
-  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (!form.email || !form.password) {
+      setError("Please fill in all fields");
+      return;
+    }
+
     try {
-      await login(email, password);
-      navigate(from, { replace: true });
+      await login(form.email, form.password);
+      navigate("/admin/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed.");
+      setError(authError || "Login failed. Please try again.");
     }
   };
 
   return (
-    <div className="min-h-screen bg-stone-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
-
-        {/* Logo */}
-        <div className="flex items-center gap-3 mb-8 justify-center">
-          <div className="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-amber-200">
-            L
+    <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-amber-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl mb-4">
+            <LogIn size={32} className="text-white" />
           </div>
-          <div>
-            <div className="font-bold text-stone-800 tracking-wide" style={{ fontFamily: "'Playfair Display', serif" }}>
-              LEEMA
-            </div>
-            <div className="text-stone-400 text-[10px] tracking-widest uppercase">Furniture Admin</div>
-          </div>
+          <h1 className="text-3xl font-bold text-stone-900 mb-2">Welcome Back</h1>
+          <p className="text-stone-500">Sign in to your Leema admin account</p>
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-stone-100 p-8">
-          <h1 className="text-xl font-bold text-stone-800 mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
-            Welcome back
-          </h1>
-          <p className="text-sm text-stone-400 mb-6">Sign in to your admin account</p>
-
-          {error && (
-            <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl mb-4">
-              <AlertCircle size={15} className="flex-shrink-0" />
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email */}
+        <div className="bg-white rounded-2xl shadow-lg border border-stone-100 p-8">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Email Input */}
             <div>
-              <label className="block text-sm font-medium text-stone-600 mb-1.5">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoComplete="email"
-                placeholder="admin@leema.lk"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 text-sm
-                  focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all
-                  placeholder:text-stone-400"
-              />
-            </div>
-
-            {/* Password */}
-            <div>
-              <label className="block text-sm font-medium text-stone-600 mb-1.5">Password</label>
+              <label className="block text-sm font-medium text-stone-700 mb-2">
+                Email Address
+              </label>
               <div className="relative">
+                <Mail
+                  size={18}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"
+                />
                 <input
-                  type={showPw ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  autoComplete="current-password"
+                  type="email"
+                  name="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  placeholder="admin@leema.com"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                />
+              </div>
+            </div>
+
+            {/* Password Input */}
+            <div>
+              <label className="block text-sm font-medium text-stone-700 mb-2">
+                Password
+              </label>
+              <div className="relative">
+                <Lock
+                  size={18}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"
+                />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={form.password}
+                  onChange={handleChange}
                   placeholder="••••••••"
-                  className="w-full px-3.5 py-2.5 pr-10 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 text-sm
-                    focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all
-                    placeholder:text-stone-400"
+                  className="w-full pl-10 pr-10 py-2.5 rounded-lg border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPw((v) => !v)}
+                  onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
                 >
-                  {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
 
-            {/* Submit */}
+            {/* Error Message */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                <p className="text-sm text-red-600">{error}</p>
+              </div>
+            )}
+
+            {/* Remember & Forgot */}
+            <div className="flex items-center justify-between text-sm">
+              <label className="flex items-center gap-2 text-stone-600 cursor-pointer hover:text-stone-900">
+                <input type="checkbox" className="rounded border-stone-300" />
+                Remember me
+              </label>
+              <a href="#" className="text-amber-600 hover:text-amber-700 font-medium">
+                Forgot password?
+              </a>
+            </div>
+
+            {/* Login Button */}
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600
-                disabled:opacity-60 disabled:cursor-not-allowed text-white font-medium py-2.5 rounded-xl
-                transition-all shadow-sm shadow-amber-200 text-sm mt-2"
+              className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 disabled:from-stone-400 disabled:to-stone-500 text-white font-semibold py-2.5 rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
             >
               {isLoading ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Signing in...
+                </>
               ) : (
-                <><LogIn size={15} /> Sign in</>
+                <>
+                  <LogIn size={18} />
+                  Sign In
+                </>
               )}
             </button>
           </form>
 
-          {/* Demo hint */}
-          <div className="mt-6 pt-5 border-t border-stone-100">
-            <p className="text-xs text-stone-400 font-medium mb-2">Demo credentials</p>
-            <div className="space-y-1.5">
-              {[
-                { label: "Super Admin", email: "admin@leema.lk",   pw: "admin123" },
-                { label: "Manager",    email: "manager@leema.lk",  pw: "manager123" },
-              ].map((c) => (
-                <button
-                  key={c.email}
-                  type="button"
-                  onClick={() => { setEmail(c.email); setPassword(c.pw); setError(""); }}
-                  className="w-full text-left px-3 py-2 rounded-lg hover:bg-stone-50 border border-stone-100
-                    transition-colors group"
-                >
-                  <span className="text-xs font-medium text-stone-700">{c.label}</span>
-                  <span className="text-xs text-stone-400 ml-2">{c.email}</span>
-                </button>
-              ))}
-            </div>
-          </div>
+          {/* Signup Link */}
+          <p className="text-center text-sm text-stone-600 mt-6">
+            Don't have an account?{" "}
+            <a href="/signup" className="text-amber-600 hover:text-amber-700 font-semibold">
+              Sign up
+            </a>
+          </p>
         </div>
 
-        <p className="text-center text-xs text-stone-400 mt-6">
-          © {new Date().getFullYear()} Leema Furniture. All rights reserved.
+        {/* Footer */}
+        <p className="text-center text-sm text-stone-500 mt-6">
+          Leema Furnitures © 2026
         </p>
       </div>
     </div>

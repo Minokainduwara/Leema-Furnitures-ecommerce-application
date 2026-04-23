@@ -1,24 +1,29 @@
+import React from "react";
 import { Navigate } from "react-router-dom";
-import { useAuth } from "../hooks/useAuth";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
+  requireAdmin?: boolean;
 }
 
-export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading } = useAuth();
+const isAuthenticated = (): boolean => {
+  return Boolean(localStorage.getItem("authToken"));
+};
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p>Loading...</p>
-      </div>
-    );
+const isAdminUser = (): boolean => {
+  return localStorage.getItem("userRole") === "admin";
+};
+
+function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
+  if (!isAuthenticated()) {
+    return <Navigate to="/login" replace />;
   }
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+  if (requireAdmin && !isAdminUser()) {
+    return <Navigate to="/forbidden" replace />;
   }
 
   return <>{children}</>;
 }
+
+export default ProtectedRoute;
