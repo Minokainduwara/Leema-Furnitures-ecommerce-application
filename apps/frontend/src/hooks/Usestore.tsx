@@ -1,153 +1,247 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type {
   Product, ProductFormData,
   User, UserFormData,
   Service, ServiceFormData,
-  ModalType, UseModalReturn,
+  ModalType,
 } from "../types";
-import { INITIAL_PRODUCTS, INITIAL_USERS, INITIAL_SERVICES } from "../data/Mockdata";
+import api from "../api/client";
 
 // ─── useProducts ──────────────────────────────────────────────────────────────
 
 interface UseProductsReturn {
   products:      Product[];
-  addProduct:    (data: ProductFormData) => void;
-  updateProduct: (id: number, data: ProductFormData) => void;
-  deleteProduct: (id: number) => void;
+  addProduct:    (data: ProductFormData) => Promise<void>;
+  updateProduct: (id: number, data: ProductFormData) => Promise<void>;
+  deleteProduct: (id: number) => Promise<void>;
+  loading:       boolean;
+  error:         string | null;
 }
 
 export function useProducts(): UseProductsReturn {
-  const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const addProduct = (data: ProductFormData): void => {
-    setProducts((prev) => [
-      ...prev,
-      {
+  // Fetch products on mount
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const data = await api.get("products").json<Product[]>();
+      setProducts(data);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to fetch products");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const addProduct = async (data: ProductFormData): Promise<void> => {
+    try {
+      const payload = {
         ...data,
-        id:     Date.now(),
-        price:  Number(data.price),
-        stock:  Number(data.stock),
-        rating: 4.5,
-        sales:  0,
-      } as unknown as Product,
-    ]);
+        price: Number(data.price),
+        stock: Number(data.stock),
+      };
+      const newProduct = await api.post("products", { json: payload }).json<Product>();
+      setProducts((prev) => [...prev, newProduct]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to add product");
+      throw err;
+    }
   };
 
-  const updateProduct = (id: number, data: ProductFormData): void => {
-    setProducts((prev) =>
-      prev.map((p) =>
-        p.id === id
-          ? ({ ...p, ...data, price: Number(data.price), stock: Number(data.stock) } as unknown as Product)
-          : p
-      )
-    );
-  };
-
-  const deleteProduct = (id: number): void => {
-    setProducts((prev) => prev.filter((p) => p.id !== id));
-  };
-
-  return { products, addProduct, updateProduct, deleteProduct };
-}
-
-// ─── useUsers ─────────────────────────────────────────────────────────────────
-
-interface UseUsersReturn {
-  users:      User[];
-  addUser:    (data: UserFormData) => void;
-  updateUser: (id: number, data: UserFormData) => void;
-  deleteUser: (id: number) => void;
-}
-
-export function useUsers(): UseUsersReturn {
-  const [users, setUsers] = useState<User[]>(INITIAL_USERS);
-
-  const addUser = (data: UserFormData): void => {
-    setUsers((prev) => [
-      ...prev,
-      {
+  const updateProduct = async (id: number, data: ProductFormData): Promise<void> => {
+    try {
+      const payload = {
         ...data,
-        id:     Date.now(),
-        orders: 0,
-        spent:  0,
-        joined: new Date().toLocaleDateString("en-US", { month: "short", year: "numeric" }),
-        avatar: data.name
-          .split(" ")
-          .map((w) => w[0])
-          .join("")
-          .slice(0, 2)
-          .toUpperCase(),
-      },
-    ]);
+        price: Number(data.price),
+        stock: Number(data.stock),
+      };
+      const updated = await api.put(`products/${id}`, { json: payload }).json<Product>();
+      setProducts((prev) => prev.map((p) => (p.id === id ? updated : p)));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update product");
+      throw err;
+    }
   };
 
-  const updateUser = (id: number, data: UserFormData): void => {
-    setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, ...data } : u)));
+  const deleteProduct = async (id: number): Promise<void> => {
+    try {
+      await api.delete(`products/${id}`);
+      setProducts((prev) => prev.filter((p) => p.id !== id));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete product");
+      throw err;
+    }
   };
 
-  const deleteUser = (id: number): void => {
-    setUsers((prev) => prev.filter((u) => u.id !== id));
-  };
-
-  return { users, addUser, updateUser, deleteUser };
+  return { products, addProduct, updateProduct, deleteProduct, loading, error };
 }
 
 // ─── useServices ──────────────────────────────────────────────────────────────
 
 interface UseServicesReturn {
-  services:       Service[];
-  addService:     (data: ServiceFormData) => void;
-  updateService:  (id: number, data: ServiceFormData) => void;
-  deleteService:  (id: number) => void;
-  toggleService:  (id: number) => void;
+  services:      Service[];
+  addService:    (data: ServiceFormData) => Promise<void>;
+  updateService: (id: number, data: ServiceFormData) => Promise<void>;
+  deleteService: (id: number) => Promise<void>;
+  loading:       boolean;
+  error:         string | null;
 }
 
 export function useServices(): UseServicesReturn {
-  const [services, setServices] = useState<Service[]>(INITIAL_SERVICES);
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const addService = (data: ServiceFormData): void => {
-    setServices((prev) => [
-      ...prev,
-      { ...data, id: Date.now(), price: Number(data.price), subscribers: 0 },
-    ]);
+  useEffect(() => {
+    fetchServices();
+  }, []);
+
+  const fetchServices = async () => {
+    try {
+      setLoading(true);
+      const data = await api.get("services").json<Service[]>();
+      setServices(data);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to fetch services");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const updateService = (id: number, data: ServiceFormData): void => {
-    setServices((prev) =>
-      prev.map((s) =>
-        s.id === id ? { ...s, ...data, price: Number(data.price) } : s
-      )
-    );
+  const addService = async (data: ServiceFormData): Promise<void> => {
+    try {
+      const payload = {
+        ...data,
+        price: Number(data.price),
+      };
+      const newService = await api.post("services", { json: payload }).json<Service>();
+      setServices((prev) => [...prev, newService]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to add service");
+      throw err;
+    }
   };
 
-  const deleteService = (id: number): void => {
-    setServices((prev) => prev.filter((s) => s.id !== id));
+  const updateService = async (id: number, data: ServiceFormData): Promise<void> => {
+    try {
+      const payload = {
+        ...data,
+        price: Number(data.price),
+      };
+      const updated = await api.put(`services/${id}`, { json: payload }).json<Service>();
+      setServices((prev) => prev.map((s) => (s.id === id ? updated : s)));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update service");
+      throw err;
+    }
   };
 
-  const toggleService = (id: number): void => {
-    setServices((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, active: !s.active } : s))
-    );
+  const deleteService = async (id: number): Promise<void> => {
+    try {
+      await api.delete(`services/${id}`);
+      setServices((prev) => prev.filter((s) => s.id !== id));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete service");
+      throw err;
+    }
   };
 
-  return { services, addService, updateService, deleteService, toggleService };
+  return { services, addService, updateService, deleteService, loading, error };
 }
 
-// ─── useModal ─────────────────────────────────────────────────────────────────
+// ─── useUsers ──────────────────────────────────────────────────────────────
 
-export function useModal<T>(): UseModalReturn<T> {
-  const [modal,    setModal]    = useState<ModalType>(null);
-  const [selected, setSelected] = useState<T | null>(null);
+interface UseUsersReturn {
+  users:      User[];
+  addUser:    (data: UserFormData) => Promise<void>;
+  updateUser: (id: number, data: UserFormData) => Promise<void>;
+  deleteUser: (id: number) => Promise<void>;
+  loading:    boolean;
+  error:      string | null;
+}
 
-  const open = (type: NonNullable<ModalType>, item?: T): void => {
-    setSelected(item ?? null);
+export function useUsers(): UseUsersReturn {
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const data = await api.get("users").json<User[]>();
+      setUsers(data);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to fetch users");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const addUser = async (data: UserFormData): Promise<void> => {
+    try {
+      const newUser = await api.post("users", { json: data }).json<User>();
+      setUsers((prev) => [...prev, newUser]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to add user");
+      throw err;
+    }
+  };
+
+  const updateUser = async (id: number, data: UserFormData): Promise<void> => {
+    try {
+      const updated = await api.put(`users/${id}`, { json: data }).json<User>();
+      setUsers((prev) => prev.map((u) => (u.id === id ? updated : u)));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update user");
+      throw err;
+    }
+  };
+
+  const deleteUser = async (id: number): Promise<void> => {
+    try {
+      await api.delete(`users/${id}`);
+      setUsers((prev) => prev.filter((u) => u.id !== id));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete user");
+      throw err;
+    }
+  };
+
+  return { users, addUser, updateUser, deleteUser, loading, error };
+}
+
+// ─── useModal ──────────────────────────────────────────────────────────────
+
+interface UseModalReturn {
+  modal:      ModalType | null;
+  openModal:  (type: ModalType) => void;
+  closeModal: () => void;
+}
+
+export function useModal(): UseModalReturn {
+  const [modal, setModal] = useState<ModalType | null>(null);
+
+  const openModal = (type: ModalType): void => {
     setModal(type);
   };
 
-  const close = (): void => {
+  const closeModal = (): void => {
     setModal(null);
-    setSelected(null);
   };
 
-  return { modal, selected, open, close };
+  return { modal, openModal, closeModal };
 }
