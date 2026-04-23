@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import type { Order, WishlistItem } from "../types/dashboard.types";
+import type { Order, WishlistItem } from "../../types/dashboard.types";
 
 interface OrdersPanelProps {
   orders: Order[];

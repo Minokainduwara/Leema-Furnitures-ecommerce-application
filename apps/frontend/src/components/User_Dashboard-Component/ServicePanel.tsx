@@ -6,7 +6,7 @@
 //   onSubmit        - called when form is submitted
 // ============================================================
 import React, { useState, useRef } from "react";
-import type { ServiceRequest } from "../types/dashboard.types";
+import type { ServiceRequest } from "../../types/dashboard.types";
 
 interface ServicePanelProps {
   serviceRequests: ServiceRequest[];

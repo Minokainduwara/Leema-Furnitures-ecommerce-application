@@ -6,7 +6,7 @@
 //   onSave   - called with updated UserProfile when Save is clicked
 // ============================================================
 import React, { useState, useRef } from "react";
-import type { UserProfile } from "../types/dashboard.types";
+import type { UserProfile } from "../../types/dashboard.types";
 
 interface DetailsPanelProps {
   user: UserProfile;

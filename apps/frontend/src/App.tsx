@@ -1,11 +1,14 @@
 
-import UserDashboard from './pages/UserDashboard.tsx'
+import Navbar from './components/Navbar.tsx'
+import UserDashboard from './pages/UserDashboard-pages/UserDashboard.tsx'
 function App() {
 
   return (
     <>
-   <UserDashboard/>
-    </>
+       <Navbar/>
+      <UserDashboard/>
+  </>
+  
   )
 }
 

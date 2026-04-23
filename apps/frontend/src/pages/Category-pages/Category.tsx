@@ -1,9 +1,9 @@
 import { useState } from "react";
-import CategoryBanner from "../components/CategoryBanner";
-import ProductCard from "../components/ProductCard";
-import FilterBar, { PRICE_RANGES } from "../components/FilterBar";
-import { PRODUCTS } from "../data/Product";
-import type { Product } from "../types/Product";
+import CategoryBanner from "../../components/Category-Componanent/CategoryBanner";
+import ProductCard from "../../components/Category-Componanent/ProductCard";
+import FilterBar, { PRICE_RANGES } from "../../components/Category-Componanent/FilterBar";
+import { PRODUCTS } from "../../data/Product";
+import type { Product } from "../../types/Product";
 
 // Calculate discounted price
 const getDiscountedPrice = (price: number, discount: number) =>
