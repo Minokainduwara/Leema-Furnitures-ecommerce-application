@@ -1,33 +1,45 @@
-import React, { useState } from "react";
-import Sidebar from "../../components/User-Components/Sidebar";
-import DetailsPanel from "../../components/User-Components/DetailsPanel";
-import OrdersPanel from "../../components/User-Components/OrdersPanel";
-import ServicePanel from "../../components/User-Components/ServicePanel";
-import type { UserProfile, ActivePanel } from "../../types/dashboard.types";
-import { MOCK_USER, MOCK_ORDERS, MOCK_WISHLIST, MOCK_SERVICE_REQUESTS } from "../../data/mockData";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import Sidebar from "../components/User-Components/Sidebar";
 
-export default function UserDashboard() {
-  const [activePanel, setActivePanel] = useState<ActivePanel>("details");
-  const [user, setUser] = useState<UserProfile>(MOCK_USER);
+import type { UserProfile, ActivePanel } from "../types/dashboard.types";
 
-  const handleSave = (updated: UserProfile) => {
-    // update local state so Sidebar and other components reflect changes
-    setUser(updated);
-    console.log("Saved user:", updated);
+import {
+  MOCK_USER,
+} from "../data/SellermockData";
+
+export default function UserLayout() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const user: UserProfile = MOCK_USER;
+
+  // detect active panel from URL
+  const activePanel = location.pathname.includes("/orders")
+    ? "orders"
+    : location.pathname.includes("/service")
+    ? "service"
+    : "details";
+
+  const handleSelect = (panel: ActivePanel) => {
+    navigate(`/user/${panel}`);
   };
 
   const handleLogout = () => {
     console.log("logout");
+    navigate("/login");
   };
 
   return (
     <div className="flex h-screen">
-  <Sidebar user={user} activePanel={activePanel} onSelect={setActivePanel} onLogout={handleLogout} />
+      <Sidebar
+        user={user}
+        activePanel={activePanel}
+        onSelect={handleSelect}
+        onLogout={handleLogout}
+      />
 
       <main className="flex-1 p-8 overflow-auto">
-  {activePanel === "details" && <DetailsPanel user={user} onSave={handleSave} />}
-  {activePanel === "orders" && <OrdersPanel orders={MOCK_ORDERS} wishlist={MOCK_WISHLIST} />}
-  {activePanel === "service" && <ServicePanel serviceRequests={MOCK_SERVICE_REQUESTS} onSubmit={(d) => console.log("service submit", d)} />}
+        <Outlet />
       </main>
     </div>
   );
