@@ -12,10 +12,10 @@ export default function Sidebar() {
   };
 
   return (
-    <div className="w-72 min-h-screen bg-gradient-to-b from-stone-900 to-stone-800 text-white p-6 border-r border-stone-700">
+    <div className="w-72 min-h-screen bg-linear-to-b from-stone-900 to-stone-800 text-white p-6 border-r border-stone-700">
       {/* Logo */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-400 to-amber-600 bg-clip-text text-transparent">
+        <h1 className="text-2xl font-bold bg-linear-to-r from-amber-400 to-amber-600 bg-clip-text text-transparent">
           LEEMA
         </h1>
         <p className="text-xs text-stone-400 mt-1">Admin Dashboard</p>

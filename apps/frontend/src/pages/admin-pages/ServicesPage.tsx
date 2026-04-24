@@ -117,7 +117,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, onEdit, onDelete, on
       <button
         type="button"
         onClick={() => onToggle(service.id)}
-        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors flex-shrink-0 ${
+        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors shrink-0 ${
           service.active ? "bg-amber-500" : "bg-stone-200"
         }`}
       >

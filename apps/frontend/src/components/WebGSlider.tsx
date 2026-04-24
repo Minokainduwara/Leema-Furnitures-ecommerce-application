@@ -52,7 +52,7 @@ const WebGLSlider: React.FC = () => {
   }, []);
 
   return (
-    <div className="w-full md:w-[650px] h-[450px] rounded-2xl overflow-hidden">
+    <div className="w-full md:w-162.5 h-112.5 rounded-2xl overflow-hidden">
       <Canvas
         shadows
         style={{ width: "100%", height: "100%" }}

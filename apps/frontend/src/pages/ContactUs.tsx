@@ -26,7 +26,7 @@ const ContactUs: React.FC = () => {
   return (
     <div className="min-h-screen bg-stone-50">
       {/* Header */}
-      <div className="bg-gradient-to-r from-amber-500 to-amber-600 text-white py-16">
+      <div className="bg-linear-to-r from-amber-500 to-amber-600 text-white py-16">
         <div className="max-w-6xl mx-auto px-4">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Contact Us</h1>
           <p className="text-lg md:text-xl">We'd love to hear from you</p>
@@ -41,21 +41,21 @@ const ContactUs: React.FC = () => {
             <h2 className="text-3xl font-bold text-stone-900 mb-8">Get in Touch</h2>
             <div className="space-y-8">
               <div className="flex gap-4">
-                <Phone size={24} className="text-amber-500 flex-shrink-0 mt-1" />
+                <Phone size={24} className="text-amber-500 shrink-0 mt-1" />
                 <div>
                   <h3 className="font-semibold text-stone-900">Phone</h3>
                   <p className="text-stone-600">+94 77 123 4567</p>
                 </div>
               </div>
               <div className="flex gap-4">
-                <Mail size={24} className="text-amber-500 flex-shrink-0 mt-1" />
+                <Mail size={24} className="text-amber-500 shrink-0 mt-1" />
                 <div>
                   <h3 className="font-semibold text-stone-900">Email</h3>
                   <p className="text-stone-600">contact@leema.com</p>
                 </div>
               </div>
               <div className="flex gap-4">
-                <MapPin size={24} className="text-amber-500 flex-shrink-0 mt-1" />
+                <MapPin size={24} className="text-amber-500 shrink-0 mt-1" />
                 <div>
                   <h3 className="font-semibold text-stone-900">Address</h3>
                   <p className="text-stone-600">123 Furniture Street, Colombo, Sri Lanka</p>

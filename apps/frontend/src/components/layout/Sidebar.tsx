@@ -103,7 +103,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
         className={`
           fixed lg:relative z-40
           w-64 h-screen
-          bg-gradient-to-b from-stone-900 to-stone-800
+          bg-linear-to-b from-stone-900 to-stone-800
           border-r border-stone-700
           flex flex-col
           transition-transform duration-300 ease-in-out
@@ -111,7 +111,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
         `}
       >
         {/* ─── Logo Section ───────────────────────────── */}
-        <div className="px-6 py-6 border-b border-stone-700 flex-shrink-0">
+        <div className="px-6 py-6 border-b border-stone-700 shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center text-white font-black text-lg shadow-lg">
               L
@@ -162,11 +162,11 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
         </nav>
 
         {/* ─── Footer ─────────────────────────────────── */}
-        <div className="border-t border-stone-700 p-4 space-y-3 flex-shrink-0">
+        <div className="border-t border-stone-700 p-4 space-y-3 shrink-0">
           {/* User Info */}
           {user && (
             <div className="flex items-center gap-3 px-2">
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white text-sm font-bold">
+              <div className="w-9 h-9 rounded-lg bg-linear-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white text-sm font-bold">
                 {user.name?.charAt(0).toUpperCase()}
               </div>
 
