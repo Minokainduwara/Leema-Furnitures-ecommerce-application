@@ -16,7 +16,7 @@ def admin_only(user=Depends(require_role("admin"))):
 def create_user_by_admin(
     data: AdminCreateUserRequest,
     db: Session = Depends(get_db),
-    user=Depends(require_role("admin"))  # 🔥 ONLY ADMIN
+    user=Depends(require_role("admin")) 
 ):
     new_user = admin_create_user(
         db,
