@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import Sidebar from "../../components/User_Dashboard-Component/Sidebar";
-import DetailsPanel from "../../components/User_Dashboard-Component/DetailsPanel";
-import OrdersPanel from "../../components/User_Dashboard-Component/OrdersPanel";
-import ServicePanel from "../../components/User_Dashboard-Component/ServicePanel";
+import Sidebar from "../../components/User-Components/Sidebar";
+import DetailsPanel from "../../components/User-Components/DetailsPanel";
+import OrdersPanel from "../../components/User-Components/OrdersPanel";
+import ServicePanel from "../../components/User-Components/ServicePanel";
 import type { UserProfile, ActivePanel } from "../../types/dashboard.types";
 import { MOCK_USER, MOCK_ORDERS, MOCK_WISHLIST, MOCK_SERVICE_REQUESTS } from "../../data/mockData";
 
