@@ -13,7 +13,11 @@ const ServicesPage  = lazy(() => import("../pages/admin-pages/ServicesPage"));
 const AnalyticsPage = lazy(() => import("../pages/admin-pages/AnalyticsPage"));
 const ProfilePage   = lazy(() => import("../pages/admin-pages/ProfilePage"));
 const LoginPage     = lazy(() => import("../pages/LoginPage"));
+const SignupPage = lazy(() => import("../pages/SignupPage"));
 const Home          = lazy(() => import("../pages/Home"));
+const AboutUs = lazy(() => import("../pages/AboutUs"));
+const Products = lazy(() => import("../pages/Products"));
+const ContactUs = lazy(() => import("../pages/ContactUs"));
 
 // ─── Spinner ──────────────────────────────────────────────────────────────────
 
@@ -32,8 +36,12 @@ const S = (el: React.ReactNode) => (
 const AppRoutes: React.FC = () => (
   <Routes>
     {/* Public Routes */}
-    <Route path="/login" element={S(<LoginPage />)} />
     <Route path="/" element={S(<Home />)} />
+    <Route path="/login" element={S(<LoginPage />)} />
+    <Route path="/signup" element={S(<SignupPage />)} />
+    <Route path="/about" element={S(<AboutUs />)} />
+    <Route path="/products" element={S(<Products />)} />
+    <Route path="/contact" element={S(<ContactUs />)} />
 
     {/* Admin Routes with Layout */}
     <Route
