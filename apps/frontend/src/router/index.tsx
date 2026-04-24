@@ -22,6 +22,11 @@ const AboutUs = lazy(() => import("../pages/AboutUs"));
 const Products = lazy(() => import("../pages/Products"));
 const ContactUs = lazy(() => import("../pages/ContactUs"));
 
+const UserDashboardPage = lazy(() => import("../pages/admin-pages/DashboardPage"));
+const UserDetailsPanel = lazy(() => import("../components/User-Components/DetailsPanel"));
+const OrdersPanel = lazy(() => import("../components/User-Components/OrdersPanel"));
+const UserServicePanel = lazy(() => import("../components/User-Components/ServicePanel"));
+
 // ─── Spinner ──────────────────────────────────────────────────────────────────
 
 const PageLoader: React.FC = () => (
