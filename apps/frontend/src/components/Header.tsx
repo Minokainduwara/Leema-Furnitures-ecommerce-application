@@ -1,66 +1,59 @@
 import React from "react";
-import Menu from "./Menu";
-import logo from "/images/logo.png";
+import Navbar from "./Navbar";
 import WebGLSlider from "./WebGSlider";
 
 const Header: React.FC = () => {
   return (
-    <div className="min-h-[80vh] lg:min-h-[90vh] bg-gradient-to-r from-green-500 via-green-400 to-emerald-300 relative overflow-hidden px-5 md:px-10 py-10 md:py-4">
-      <div className="absolute top-10 right-10 w-32 h-32 bg-white/30 rounded-full blur-2xl animate-pulse -z-10"></div>
-      <div className="absolute bottom-20 left-20 w-48 h-48 bg-orange-300/40 rounded-full blur-3xl animate-pulse -z-10"></div>
+    <header className="relative min-h-screen bg-gradient-to-br from-emerald-600 via-green-500 to-lime-400 overflow-hidden">
 
-      <div className=" text-white flex flex-col lg:flex-row justify-between items-center gap-6 lg:gap-10 px-5 md:px-10 py-4">
-        <div>
-          <a>
-            <img src={logo} alt="logo" className="w-[100px]" />
-          </a>
-        </div>
+      {/* Background */}
+      <div className="absolute w-72 h-72 bg-white/10 blur-3xl rounded-full top-10 left-10"></div>
+      <div className="absolute w-96 h-96 bg-orange-300/20 blur-3xl rounded-full bottom-0 right-0"></div>
 
-        <div className="flex flex-wrap justify-center mt-4 lg:mt-0 gap-4">
-          <Menu linkname="Home" url="/" />
-          <Menu linkname="Products" url="/products" />
-          <Menu linkname="About us" url="/about" />
-          <Menu linkname="Contact us" url="/contact" />
-        </div>
+      {/* Navbar */}
+      <Navbar />
 
-        <div className="flex flex-col lg:flex-row gap-2 lg:gap-4 mt-4 lg:mt-0">
-          <Menu linkname="Login" url="/login" />
-          <Menu linkname="Sign Up" url="/sign" />
-        </div>
-      </div>
+      {/* Hero */}
+      <div className="max-w-7xl mx-auto px-6 lg:px-10 pt-10 lg:pt-20">
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
 
-      <div className="flex justify-around items-center">
-        <div className="flex flex-col">
-          <h3 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white font-sans leading-tight">
-            Mordern furniture
-          </h3>
-          <h3 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white font-sans leading-tight">
-            Products
-          </h3>
-          <div className="ml-11">
-            <h5 className="text-lg md:text-xl lg:text-2xl text-white font-light leading-relaxed mt-4 md:mt-6">
-              Discover stylish furniture that brings comfort,
-            </h5>
-            <h5 className="text-xl lg:text-2xl text-white font-light leading-relaxed">
-              elegance, and warmth to your home.
-            </h5>
-            <div className="flex">
-              <a>
-                <button className="bg-orange-500 hover:bg-orange-600 rounded-lg px-5 md:px-6 py-2 md:py-3 font-semibold font-sans mt-6 md:mt-8 text-white shadow-lg transform hover:-translate-y-1 transition duration-300">
-                  About Us
-                </button>
+          {/* Text */}
+          <div className="text-center lg:text-left text-white">
+            <h1 className="text-5xl md:text-6xl font-black leading-tight">
+              Modern <span className="text-orange-200">Furniture</span>
+            </h1>
+
+            <p className="mt-6 text-lg text-white/90">
+              Stylish, comfortable, and premium furniture for your home.
+            </p>
+
+            <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+              <a
+                href="/products"
+                className="bg-orange-500 px-8 py-3 rounded-xl font-bold hover:bg-orange-600 transition"
+              >
+                Shop Now
+              </a>
+
+              <a
+                href="/about"
+                className="bg-white/20 px-8 py-3 rounded-xl backdrop-blur border border-white/30"
+              >
+                Learn More
               </a>
             </div>
           </div>
-        </div>
 
-        <div className="relative w-full md:w-auto">
-          <div className="relative overflow-hidden rounded-xl w-full md:w-[500px] lg:w-[650px] h-[350px] md:h-[450px] transform hover:scale-105 transition duration-500">
-            <WebGLSlider />
+          {/* Slider */}
+          <div className="relative">
+            <div className="rounded-2xl overflow-hidden shadow-2xl border border-white/20 h-[350px] md:h-[500px]">
+              <WebGLSlider />
+            </div>
           </div>
+
         </div>
       </div>
-    </div>
+    </header>
   );
 };
 
