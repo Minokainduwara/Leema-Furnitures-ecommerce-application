@@ -1,4 +1,4 @@
-import React, { useState, useRef, ChangeEvent, FormEvent } from "react";
+import React, { useState, useRef, type ChangeEvent, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 const categories = ["Furniture", "Electronics", "Clothing", "Books", "Toys"];
