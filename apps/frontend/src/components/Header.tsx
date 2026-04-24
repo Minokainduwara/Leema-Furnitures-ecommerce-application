@@ -4,7 +4,7 @@ import WebGLSlider from "./WebGSlider";
 
 const Header: React.FC = () => {
   return (
-    <header className="relative min-h-screen bg-gradient-to-br from-emerald-600 via-green-500 to-lime-400 overflow-hidden">
+    <header className="relative min-h-screen bg-linear-to-br from-emerald-600 via-green-500 to-lime-400 overflow-hidden">
 
       {/* Background */}
       <div className="absolute w-72 h-72 bg-white/10 blur-3xl rounded-full top-10 left-10"></div>
@@ -46,7 +46,7 @@ const Header: React.FC = () => {
 
           {/* Slider */}
           <div className="relative">
-            <div className="rounded-2xl overflow-hidden shadow-2xl border border-white/20 h-[350px] md:h-[500px]">
+            <div className="rounded-2xl overflow-hidden shadow-2xl border border-white/20 h-87.5 md:h-125">
               <WebGLSlider />
             </div>
           </div>

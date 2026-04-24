@@ -550,7 +550,7 @@ const ProductsPage: React.FC = () => {
             setSearch(e.target.value)
           }
           placeholder="Search products..."
-          className="flex-1 min-w-[200px]"
+          className="flex-1 min-w-50"
         />
 
         <div className="flex gap-1.5 flex-wrap">

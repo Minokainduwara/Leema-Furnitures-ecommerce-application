@@ -1,11 +1,10 @@
-import React from "react";
 
 function Footer() {
   return (
     <div className="bg-gray-900  text-gray-300  ">
         <div className="grid grid-cols-3 gap-8  p-5">
       <div className="border-r border-gray-700">
-        <h4 className="text-white text-lg font-semibold mb-3 text-yellow-400">CATEGORIES</h4>
+        <h4 className="text-lg font-semibold mb-3 text-yellow-400">CATEGORIES</h4>
         <ul className="space-y-2 text-sm">
             <li className="hover:text-white cursor-pointer"><a>Wood Furniture</a></li>
             <li className="hover:text-white cursor-pointer"><a>Plastic Furniture</a></li>
@@ -15,7 +14,7 @@ function Footer() {
          
       </div>
       <div className="border-r border-gray-700">
-        <h4 className="text-white text-lg font-semibold mb-3 text-yellow-400">OUR COMPANY</h4>
+        <h4 className="text-lg font-semibold mb-3 text-yellow-400">OUR COMPANY</h4>
         <ul className="space-y-2 text-sm">
             <li className="hover:text-white cursor-pointer"><a>Home</a></li>
             <li className="hover:text-white cursor-pointer"><a>Contact us</a></li>
@@ -27,7 +26,7 @@ function Footer() {
         <h4 className="text-yellow-400 text-lg font-semibold mb-3">VISIT OUR SHOWROOMS</h4>
         <div className="flex justify-around items-center">
           <div >
-<div className="flex items-center gap-2 text-sm mb-1 mr-[1px]">
+<div className="flex items-center gap-2 text-sm mb-1 mr-px">
   <img src="/images/location.png" alt="Showroom 2" className="w-3 h-3 rounded-lg" />
   <span>123/A, Main Street, Kegalle</span>
 

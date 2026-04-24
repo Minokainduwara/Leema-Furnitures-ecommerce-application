@@ -4,6 +4,8 @@ import ForbiddenPage from "../pages/ForbiddenPage";
 import AdminLayout from "../pages/admin-pages/AdminLayout";
 import ProtectedRoute from "../components/ProtectedRoute";
 
+
+
 // ─── Lazy page chunks ─────────────────────────────────────────────────────────
 
 const DashboardPage = lazy(() => import("../pages/admin-pages/DashboardPage"));
@@ -12,6 +14,7 @@ const UsersPage     = lazy(() => import("../pages/admin-pages/UsersPage"));
 const ServicesPage  = lazy(() => import("../pages/admin-pages/ServicesPage"));
 const AnalyticsPage = lazy(() => import("../pages/admin-pages/AnalyticsPage"));
 const ProfilePage   = lazy(() => import("../pages/admin-pages/ProfilePage"));
+
 const LoginPage     = lazy(() => import("../pages/LoginPage"));
 const SignupPage = lazy(() => import("../pages/SignupPage"));
 const Home          = lazy(() => import("../pages/Home"));
@@ -52,6 +55,8 @@ const AppRoutes: React.FC = () => (
         </ProtectedRoute>
       }
     >
+      <Route index element={S(<DashboardPage />)} />
+      
       <Route path="dashboard" element={S(<DashboardPage />)} />
       <Route path="products" element={S(<ProductsPage />)} />
       <Route path="users" element={S(<UsersPage />)} />

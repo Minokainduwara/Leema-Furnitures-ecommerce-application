@@ -3,7 +3,7 @@ import { Plus, Edit2, Trash2, Save } from "lucide-react";
 import type { User, UserFormData } from "../../types";
 import { useUsers } from "../../hooks/Usestore";
 import { useModal } from "../../hooks/Usestore";
-import { Input, Select, Textarea } from "../../components/ui/admin-ui";
+import { Input, Select } from "../../components/ui/admin-ui";
 import { Button } from "../../components/ui/button";
 import Modal from "../../components/ui/Modals";
 import ConfirmDelete from "../../components/ui/ConfirmDelete";
@@ -92,7 +92,7 @@ interface UserCardProps {
 const UserCard: React.FC<UserCardProps> = ({ user, onEdit, onDelete }) => (
   <div className="bg-white rounded-2xl p-5 shadow-sm border border-stone-100 hover:shadow-md transition-all">
     <div className="flex items-center gap-3 mb-4">
-      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white font-bold">
+      <div className="w-10 h-10 rounded-full bg-linear-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white font-bold">
         {user.name.charAt(0).toUpperCase()}
       </div>
       <div>
