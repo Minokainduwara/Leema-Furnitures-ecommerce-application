@@ -1,19 +1,29 @@
-import { useContext } from "react";
+import React from "react";
 import { Navigate } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext";
 
-function ProtectedRoute({ children }: { children: JSX.Element }) {
-  const { token, loading } = useContext(AuthContext);
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+  requireAdmin?: boolean;
+}
 
-  if (loading) {
-    return <p>Loading...</p>;
+const isAuthenticated = (): boolean => {
+  return Boolean(localStorage.getItem("authToken"));
+};
+
+const isAdminUser = (): boolean => {
+  return localStorage.getItem("userRole") === "admin";
+};
+
+function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
+  if (!isAuthenticated()) {
+    return <Navigate to="/login" replace />;
   }
 
-  if (!token) {
-    return <Navigate to="/login" />;
+  if (requireAdmin && !isAdminUser()) {
+    return <Navigate to="/forbidden" replace />;
   }
 
-  return children;
+  return <>{children}</>;
 }
 
 export default ProtectedRoute;
