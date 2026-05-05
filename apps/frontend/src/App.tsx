@@ -1,6 +1,8 @@
 import React, { useEffect } from "react";
 import { AuthProvider } from "./hooks/Authcontext";
 import AppRoutes from "./router/index";
+import CategoryPage from "./pages/Category-pages/Category";
+
 
 const App: React.FC = () => {
   useEffect(() => {
@@ -13,8 +15,10 @@ const App: React.FC = () => {
 
   return (
     <AuthProvider>
-      <AppRoutes />
+      {/* <AppRoutes /> */}
+      <CategoryPage/>
     </AuthProvider>
+
   );
 };
 
