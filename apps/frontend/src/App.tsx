@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { AuthProvider } from "./hooks/Authcontext";
 import AppRoutes from "./router/index";
-import CategoryPage from "./pages/Category-pages/Category";
+
 
 
 const App: React.FC = () => {
@@ -15,8 +15,8 @@ const App: React.FC = () => {
 
   return (
     <AuthProvider>
-      {/* <AppRoutes /> */}
-      <CategoryPage/>
+      <AppRoutes />
+    
     </AuthProvider>
 
   );

@@ -19,8 +19,8 @@ const InputField: React.FC<{
   onChange: (v: string) => void;
   type?: string;
 }> = ({ label, value, editable, onChange, type = "text" }) => (
-  <div className="flex items-center gap-3">
-    <label className="text-white/70 text-sm font-medium w-28 text-right shrink-0">
+  <div className="flex items-center gap-3 bg-gray-200">
+    <label className="text-black/70 text-sm font-medium w-28 text-right shrink-0">
       {label}:
     </label>
     <input
@@ -113,12 +113,12 @@ const DetailsPanel: React.FC<DetailsPanelProps> = ({ user, onSave }) => {
       {/* Header */}
       <div className="flex items-start justify-between mb-8">
         <h2
-          className="text-white font-black text-2xl leading-tight"
+          className="text-black font-black text-2xl leading-tight"
           style={{ fontFamily: "'Georgia', serif" }}
         >
           My Personal <br /> Details
         </h2>
-        <p className="text-white/50 text-xs tracking-widest mt-1">
+        <p className="text-black/50 text-xs tracking-widest mt-1">
           USER ID:{user.id}
         </p>
       </div>
@@ -140,7 +140,7 @@ const DetailsPanel: React.FC<DetailsPanelProps> = ({ user, onSave }) => {
       {/* Form */}
       <div className="grid grid-cols-2 gap-x-10 gap-y-4 mb-10">
         {/* Left */}
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col  gap-4">
           <InputField label="First Name" value={form.firstName} editable={editMode} onChange={set("firstName")} />
           <InputField label="Address" value={form.address} editable={editMode} onChange={set("address")} />
           <InputField label="City" value={form.city} editable={editMode} onChange={set("city")} />
@@ -154,7 +154,7 @@ const DetailsPanel: React.FC<DetailsPanelProps> = ({ user, onSave }) => {
 
           {/* Avatar */}
           <div className="flex items-center gap-3">
-            <label className="text-white/70 text-sm font-medium w-28 text-right shrink-0">
+            <label className="text-black/70 text-sm font-medium w-28 text-right shrink-0">
               Profile Pic
             </label>
 
@@ -162,7 +162,7 @@ const DetailsPanel: React.FC<DetailsPanelProps> = ({ user, onSave }) => {
               {form.avatar ? (
                 <img src={form.avatar} alt="avatar" className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-white/50 text-xs">
+                <div className="w-full h-full flex items-center justify-center text-/50 text-xs">
                   No image
                 </div>
               )}
@@ -204,7 +204,7 @@ const DetailsPanel: React.FC<DetailsPanelProps> = ({ user, onSave }) => {
       {/* 🔐 Change Password Section */}
       {editMode && (
         <div className="mt-6 border-t border-white/10 pt-6">
-          <h3 className="text-white font-semibold mb-4">Change Password</h3>
+          <h3 className="text-black font-semibold mb-4">Change Password</h3>
 
           <div className="flex flex-col gap-4">
             <InputField label="Current" value={passwords.currentPassword} editable={true} onChange={setPassword("currentPassword")} type="password" />

@@ -3,6 +3,9 @@ import { Routes, Route } from "react-router-dom";
 import ForbiddenPage from "../pages/ForbiddenPage";
 import AdminLayout from "../pages/admin-pages/AdminLayout";
 import ProtectedRoute from "../components/ProtectedRoute";
+import CategoryPage from "@/pages/Category-pages/Category";
+import ProductDetail from "@/pages/ProductDetailpage/ProductDetail";
+import UserDashboard from "@/pages/UserDashboard-pages/UserDashboard";
 
 // ─── Lazy page chunks ─────────────────────────────────────────────────────────
 
@@ -33,7 +36,7 @@ const AppRoutes: React.FC = () => (
   <Routes>
     {/* Public Routes */}
     <Route path="/login" element={S(<LoginPage />)} />
-    <Route path="/" element={S(<Home />)} />
+    <Route path="/" element={S(<ProductDetail/>)} />
 
     {/* Admin Routes with Layout */}
     <Route

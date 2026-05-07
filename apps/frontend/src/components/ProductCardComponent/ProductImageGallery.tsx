@@ -8,8 +8,8 @@ const ProductImageGallery = ({ images, name }: Props) => {
 
   return (
     <div>
-        <div className="bg-orange-500 p-4 rounded"></div>
-      <h1 className="text-2xl font-bold mb-4 uppercase">{name}</h1>
+        <div className="bg-white p-4 rounded"></div>
+      <h1 className="text-2xl font-bold mb-4 text-black uppercase">{name}</h1>
       <img
         src={images[selected]}
         alt={name}
@@ -22,7 +22,7 @@ const ProductImageGallery = ({ images, name }: Props) => {
             src={img}
             onClick={() => setSelected(i)}
             className={`w-24 h-16 object-cover rounded cursor-pointer border-2 ${
-              selected === i ? 'border-green-500' : 'border-transparent'
+              selected === i ? 'border-yellow-500' : 'border-transparent'
             }`}
           />
         ))}

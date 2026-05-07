@@ -13,7 +13,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   return (
     <div
       onClick={() => navigate(`/product/${product.id}`)}
-      className="bg-yellow-600 rounded-lg overflow-hidden shadow hover:shadow-xl transition hover:-translate-y-1 cursor-pointer"
+      className="bg-yellow-500 rounded-lg overflow-hidden shadow hover:shadow-xl transition hover:-translate-y-1 cursor-pointer"
     >
       <div className="relative h-48 bg-gray-100 overflow-hidden">
         {product.discount > 0 && (
@@ -31,7 +31,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       <div className="p-4">
         <h3 className="font-semibold text-sm truncate">{product.name}</h3>
         <p className="text-xs text-white-500 mb-2">{product.sub}</p>
-        <p className="font-bold text-[#66ff00]">LKR {finalPrice.toLocaleString()}</p>
+        <p className="font-bold text-[#000000]">LKR {finalPrice.toLocaleString()}</p>
 
         <button
           onClick={(e) => {

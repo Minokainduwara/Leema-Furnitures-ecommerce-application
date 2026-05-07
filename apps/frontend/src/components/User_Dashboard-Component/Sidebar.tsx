@@ -26,7 +26,7 @@ const NAV_ITEMS: { label: string; panel: ActivePanel }[] = [
 const Sidebar: React.FC<SidebarProps> = ({ user, activePanel, onSelect, onLogout }) => {
   return (
     <aside className="flex flex-col items-center w-64 min-h-screen py-8 px-4"
-           style={{ background: "#2d5a4e" }}>
+           style={{ background: "#111827" }}>
 
       {/* Title */}
       <h2 className="text-white font-black tracking-widest text-sm uppercase mb-8"
@@ -36,7 +36,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user, activePanel, onSelect, onLogout
 
       {/* Avatar */}
       <div className="w-24 h-24 rounded-full overflow-hidden mb-4 border-4 border-white/20 shadow-xl"
-           style={{ background: "#4a8a7a" }}>
+           style={{ background: "#4a8a" }}>
         {user.avatar ? (
           <img src={user.avatar} alt={user.firstName} className="w-full h-full object-cover" />
         ) : (
@@ -63,8 +63,8 @@ const Sidebar: React.FC<SidebarProps> = ({ user, activePanel, onSelect, onLogout
               onClick={() => onSelect(panel)}
               className="w-full py-3 px-6 rounded-lg text-sm font-bold tracking-widest uppercase transition-all duration-200"
               style={{
-                background:  isActive ? "#1a3d35" : "rgba(255,255,255,0.12)",
-                color:       isActive ? "#7dd4c4" : "rgba(255,255,255,0.85)",
+                background:  isActive ? "#eab308" : "rgba(255,255,255,0.12)",
+                color:       isActive ? "#ffffff" : "rgba(255,255,255,0.85)",
                 border:      isActive ? "1px solid rgba(125,212,196,0.4)" : "1px solid transparent",
                 boxShadow:   isActive ? "0 4px 16px rgba(0,0,0,0.2)" : "none",
               }}

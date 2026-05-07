@@ -3,7 +3,7 @@ import type { Dispatch, SetStateAction } from "react";
 
 export const CATEGORIES = [
   "All",
-  "Living Room Furniture",
+  "Chairs",
   "Bedroom Furniture",
   "Dining Room Furniture",
 ] as const;

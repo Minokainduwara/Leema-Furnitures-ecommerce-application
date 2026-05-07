@@ -62,7 +62,7 @@ const InstallmentPlanner = ({ price }: Props) => {
       <div className="flex justify-between items-center mt-2">
         <button
           onClick={calculate}
-          className="bg-teal-500 text-black px-4 py-1.5 rounded font-semibold hover:bg-teal-600"
+          className="bg-orange-600 text-black px-4 py-1.5 rounded font-semibold hover:bg-teal-600"
         >
           Calculate
         </button>

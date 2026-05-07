@@ -4,7 +4,7 @@ import React, { useState } from "react";
 // import OrdersPanel from "../components/OrdersPanel";
 // import ServicePanel from "../components/ServicePanel";
 
-import Sidebar from "@/components/Admin-Components/Sidebar";
+import Sidebar from "@/components/User_Dashboard-Component/Sidebar";
 import DetailsPanel from "@/components/User_Dashboard-Component/DetailsPanel";
 import OrdersPanel from "@/components/User_Dashboard-Component/OrdersPanel";
 import ServicePanel from "@/components/User_Dashboard-Component/ServicePanel";
@@ -59,7 +59,7 @@ export default function UserDashboard() {
   };
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen bg-gray-100">
   <Sidebar user={user} activePanel={activePanel} onSelect={setActivePanel} onLogout={handleLogout} />
 
       <main className="flex-1 p-8 overflow-auto">

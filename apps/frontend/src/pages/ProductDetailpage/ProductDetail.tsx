@@ -12,7 +12,7 @@ const ProductDetail = () => {
     id,
     name: 'Sectional Sofa Set',
     price: 53000,
-    images: ['/img1.jpg', '/img2.jpg', '/img3.jpg'],
+    images: ['/product-1.png', '/product-4.png', '/product-6.png'],
     description: 'Compliment your room interior with a modern touch...',
     sku: 'Modular Wardrobe',
     warranty: '10 year comprehensive warranty',
@@ -20,13 +20,13 @@ const ProductDetail = () => {
   }
 
   const similarProducts = [
-    { id: 2, name: 'Sectional Sofa', category: 'Sofa', sub: '3-seater', price: 53000, discount: 0, img: '/s1.jpg' },
-    { id: 3, name: 'Sectional Sofa', category: 'Sofa', sub: '2-seater', price: 53000, discount: 10, img: '/s2.jpg' },
-    { id: 4, name: 'Sectional Sofa', category: 'Sofa', sub: 'L-shape', price: 53000, discount: 5, img: '/s3.jpg' },
+    { id: 2, name: 'Sectional Sofa', category: 'Sofa', sub: '3-seater', price: 53000, discount: 0, img: '/product-1.png' },
+    { id: 3, name: 'Sectional Sofa', category: 'Sofa', sub: '2-seater', price: 53000, discount: 10, img: '/product-4.png' },
+    { id: 4, name: 'Sectional Sofa', category: 'Sofa', sub: 'L-shape', price: 53000, discount: 5, img: '/product-6.png' },
   ]
 
   return (
-    <div className="max-w-5xl mx-auto bg-amber-200 px-4 py-8">
+    <div className="max-w-5xl mx-auto bg-gray-50 px-4 py-8">
       {/* Top Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
         <ProductImageGallery images={product.images} name={product.name} />
@@ -34,16 +34,16 @@ const ProductDetail = () => {
       </div>
 
       {/* Info Banner */}
-      <div className="grid grid-cols-3 bg-green-700 text-white rounded p-6 gap-4 mb-10">
+      <div className="grid grid-cols-3 bg-white text-black rounded p-6 gap-4 mb-10">
         <div>
           <p className="font-semibold">{product.sku}</p>
           <p className="text-sm">{product.description}</p>
         </div>
         <div>
-          <p className="font-semibold">🚚 {product.delivery}</p>
+          <p className="font-semibold"> {product.delivery}</p>
         </div>
         <div>
-          <p className="font-semibold">🛡 {product.warranty}</p>
+          <p className="font-semibold"> {product.warranty}</p>
         </div>
       </div>
 
