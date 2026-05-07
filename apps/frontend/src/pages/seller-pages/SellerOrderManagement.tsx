@@ -1,114 +1,44 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
 /* ================= TYPES ================= */
 
-type OrderItem = {
-  name: string;
-  qty: number;
-};
-
 type Order = {
   id: number;
-  customer: string;
-  total: string;
+  orderNumber?: string;
+  totalAmount?: number;
   status: string;
-  date: string;
-  items: OrderItem[];
+  customerName?: string;
+  paymentStatus?: string;
+  phone?: string;
+  address?: string;
+  estimatedCost?: number;
+  items: any[];
 };
 
-/* ================= ICONS ================= */
-
-const ViewIcon = () => <span>👁️</span>;
-const EditIcon = () => <span>✏️</span>;
-
 /* ================= COMPONENT ================= */
+
 function SellerOrderManagement() {
-  const Navigate = useNavigate();
-  const [sidebaropen, setsidebar] = useState<boolean>(false);
-  const [darkmode, setdarkmode] = useState<boolean>(false);
-
-  /* ================= STATE ================= */
-
-  const [orders, setOrders] = useState<Order[]>([
-    {
-      id: 101,
-      customer: "Kasun",
-      total: "5000",
-      status: "Pending",
-      date: "2026-04-16",
-      items: [
-        { name: "Chair", qty: 2 },
-        { name: "Table", qty: 1 },
-      ],
-    },
-    {
-      id: 102,
-      customer: "Nimal",
-      total: "8000",
-      status: "Confirmed",
-      date: "2026-04-15",
-      items: [{ name: "Cupboard", qty: 1 }],
-    },
-  ]);
-
+  const [orders, setOrders] = useState<Order[]>([]);
   const [search, setSearch] = useState<string>("");
   const [viewOrder, setViewOrder] = useState<Order | null>(null);
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [showStatusModal, setShowStatusModal] = useState<boolean>(false);
-
-  /* ================= FUNCTIONS ================= */
-
-  const filteredOrders = orders.filter(
-    (o) =>
-      o.customer.toLowerCase().includes(search.toLowerCase()) ||
-      o.id.toString().includes(search),
+  const [sidebaropen, setsidebar] = useState(false);
+  const [showRepairForm, setShowRepairForm] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
+  const [selectedProductId, setSelectedProductId] = useState<number | null>(
+    null,
   );
 
-  const handleViewOrder = (order: Order) => {
-    setViewOrder(order);
-  };
+  const [issue, setIssue] = useState("");
+  const [estimatedCost, setEstimatedCost] = useState("");
 
-  const handleOpenStatusModal = (order: Order) => {
-    setSelectedOrder(order);
-    setShowStatusModal(true);
-  };
-
-  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    if (!selectedOrder) return;
-
-    setSelectedOrder({
-      ...selectedOrder,
-      status: e.target.value,
-    });
-  };
-
-  const handleStatusUpdate = () => {
-    if (!selectedOrder) return;
-
-    setOrders((prev) =>
-      prev.map((o) => (o.id === selectedOrder.id ? selectedOrder : o)),
-    );
-
-    setShowStatusModal(false);
-  };
-
-  const getStatusStyle = (status: string) => {
-    switch (status) {
-      case "Pending":
-        return "bg-yellow-100 text-yellow-700";
-      case "Confirmed":
-        return "bg-blue-100 text-blue-700";
-      case "Delivered":
-        return "bg-green-100 text-green-700";
-      default:
-        return "bg-gray-100 text-gray-700";
-    }
-  };
   const sideBarItems = [
     { name: "Dashboard", icon: "/images/dashboard.png", path: "/dashboard" },
     { name: "Products", icon: "/images/products.png", path: "/products" },
+    { name: "Category", icon: "/images/products.png", path: "/category" },
+
     { name: "Orders", icon: "/images/orders.png", path: "/orders" },
+    { name: "Repair", icon: "/images/products.png", path: "/repairs" },
     {
       name: "Customer Details",
       icon: "/images/Details.png",
@@ -119,126 +49,345 @@ function SellerOrderManagement() {
     { name: "Profile", icon: "/images/profile.png", path: "/profile" },
   ];
 
-  const navigate = useNavigate();
+  /* ================= LOAD ALL ================= */
+
+  useEffect(() => {
+    loadOrders();
+  }, []);
+
+  const loadOrders = async () => {
+    try {
+      const res = await fetch("http://localhost:8080/api/orders/all");
+      const data = await res.json();
+      setOrders(data);
+    } catch (err) {
+      console.error("Error loading orders:", err);
+    }
+  };
+
+  /* ================= SEARCH (BACKEND) ================= */
+
+  const searchOrders = async (query: string) => {
+    setSearch(query);
+
+    if (!query) {
+      loadOrders();
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        `http://localhost:8080/api/orders/search?query=${query}`,
+      );
+
+      const data = await res.json();
+      setOrders(data);
+    } catch (err) {
+      console.error("Search error:", err);
+    }
+  };
+
+  /* ================= STATUS FILTER ================= */
+
+  const filterByStatus = async (status: string) => {
+    const res = await fetch(
+      `http://localhost:8080/api/orders/status?status=${status}`,
+    );
+
+    const data = await res.json();
+    setOrders(Array.isArray(data) ? data : []);
+  };
+
+  /* ================= DATE FILTER ================= */
+
+  const filterByDate = async (type: string) => {
+    const res = await fetch(
+      `http://localhost:8080/api/orders/filter?type=${type}`,
+    );
+
+    const data = await res.json();
+    setOrders(Array.isArray(data) ? data : []);
+  };
+
+  /* ================= STATUS STYLE ================= */
+
+  const getStatusStyle = (status: string) => {
+    switch (status) {
+      case "PENDING":
+        return "bg-yellow-100 text-yellow-700";
+      case "CONFIRMED":
+        return "bg-blue-100 text-blue-700";
+      case "DELIVERED":
+        return "bg-green-100 text-green-700";
+      case "CANCELLED":
+        return "bg-red-100 text-red-700";
+      default:
+        return "bg-gray-100 text-gray-700";
+    }
+  };
+  const getPaymentStyle = (status: string) => {
+    switch (status) {
+      case "COMPLETED":
+        return "bg-green-100 text-green-700";
+      case "PENDING":
+        return "bg-yellow-100 text-yellow-700";
+      case "FAILED":
+        return "bg-red-100 text-red-700";
+      case "REFUNDED":
+        return "bg-purple-100 text-purple-700";
+      case "CANCELLED":
+        return "bg-gray-100 text-gray-700";
+      default:
+        return "bg-gray-100 text-gray-700";
+    }
+  };
+  /* ================= UPDATE STATUS ================= */
+
+  const updateStatus = async (id: number, status: string) => {
+    await fetch(`http://localhost:8080/api/orders/${id}/status`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    });
+
+    loadOrders();
+  };
+  const updatePaymentStatus = async (id: number, status: string) => {
+    await fetch(`http://localhost:8080/api/orders/${id}/payment-status`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ paymentStatus: status }),
+    });
+
+    loadOrders();
+  };
+  const submitRepair = async () => {
+    try {
+      await fetch("http://localhost:8080/api/repairs", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: 1, // temporary
+          orderId: selectedOrderId,
+          productId: selectedProductId,
+          issueDescription: issue,
+          estimatedCost: Number(estimatedCost),
+        }),
+      });
+
+      alert("Repair Created ✅");
+
+      setShowRepairForm(false);
+      setIssue("");
+      setEstimatedCost("");
+    } catch (err) {
+      console.error(err);
+      alert("Error creating repair ❌");
+    }
+  };
+  const openRepairForm = (orderId: number, productId: number) => {
+    setSelectedOrderId(orderId);
+    setSelectedProductId(productId);
+    setShowRepairForm(true);
+  };
+
+  /* ================= UI ================= */
 
   return (
-    <div
-      className={`bg-gray-100 min-h-screen font-sans ${darkmode ? "dark" : ""} flex`}
-    >
-      {/* Sidebar */}
+    <div className="min-h-screen flex bg-white">
+      {/* SIDEBAR (unchanged) */}
       <aside
-        className={`bg-white w-64 h-screen dark:bg-gray-900 fixed shadow-lg border-r border-gray-200 dark:border-gray-800 z-20 ${
+        className={`bg-gray-900 w-70 h-screen fixed shadow-lg z-20 ${
           sidebaropen ? "translate-x-0" : "-translate-x-64"
-        } lg:translate-x-0 lg:static transition-all duration-300 flex flex-col`}
+        } lg:translate-x-0 lg:static transition-all flex flex-col`}
       >
-        <div className="flex items-center gap-2 p-4 border-b border-gray-200 dark:border-gray-800">
-          <img src="/images/logo.png" alt="Logo" className="h-12 w-12" />
-          <span className="text-xl font-bold text-gray-800 dark:text-gray-100">
-            Seller Dashboard
-          </span>
-          <button
-            className="ml-auto lg:hidden"
-            onClick={() => setsidebar(false)}
-          >
-            <img src="/images/close.png" alt="close" className="h-8 w-8 p-1" />
-          </button>
+        <div className="flex items-center gap-2 p-4 border-b border-white">
+          <img src="/images/leemalogo.jpg" className="h-6 w-18" />
+          <span className="font-bold text-white ">Seller Dashboard</span>
         </div>
+
         <nav className="flex-1 mt-6">
           {sideBarItems.map((item) => (
             <Link
               key={item.name}
               to={item.path!}
-              className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-800 transition font-medium mb-2"
+              className="flex items-center gap-3 px-4 py-3 hover:bg-yellow-500 hover:rounded-md"
             >
-              <img src={item.icon} alt={item.name} className="w-6 h-6" />
-              <span>{item.name}</span>
+              <img src={item.icon} className="w-6 h-6" />
+              <span className="text-white font-medium">{item.name}</span>
             </Link>
           ))}
         </nav>
-        <div className="px-4 py-3 mt-2">
-          <button className="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-2 rounded-lg transition">
+
+        <div className="p-4 border-t border-white">
+          <button className="w-full bg-red-500 text-white py-2 rounded">
             Logout
-          </button>
-        </div>
-        <div className="mt-auto flex justify-center items-center p-4 border-t border-gray-200 dark:border-gray-800">
-          <button
-            className="bg-gray-200 dark:bg-gray-700 p-2 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-            onClick={() => setdarkmode(!darkmode)}
-            aria-label="Toggle dark mode"
-          >
-            {darkmode ? (
-              <img src="/images/moon.png" alt="moon" className="w-6 h-6" />
-            ) : (
-              <img src="/images/sun.png" alt="sun" className="w-6 h-6" />
-            )}
           </button>
         </div>
       </aside>
 
-      {/* ================= MAIN ================= */}
-
-      <main className="bg-white flex-1 dark:bg-gray-900 min-h-screen p-6">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4 md:mb-0 dark:text-gray-100">
-            Order Management
-          </h2>
+      {/* MAIN */}
+      <main className=" p-6 w-full text-gray-900">
+        {/* HEADER */}
+        <div className="flex justify-between mb-4">
+          <h1 className="text-xl font-bold">Order Management</h1>
 
           <input
-            type="text"
-            placeholder="Search by Order ID or Customer"
+            className="border px-3 py-2 rounded border-gray-200"
+            placeholder="Search by Order ID "
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="rounded-lg border border-gray-300 px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-200 focus:outline-none transition text-sm bg-white"
+            onChange={(e) => searchOrders(e.target.value)}
           />
         </div>
 
-        {/* Table */}
-        <div className="bg-white rounded-xl shadow-lg p-4 overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead>
-              <tr className="bg-gray-200 text-gray-700">
-                <th className="px-3 py-2 text-left">Order ID</th>
-                <th className="px-3 py-2 text-left">Customer</th>
-                <th className="px-3 py-2 text-left">Total</th>
-                <th className="px-3 py-2 text-left">Status</th>
-                <th className="px-3 py-2 text-left">Date</th>
-                <th className="px-3 py-2 text-left">Actions</th>
+        {/* FILTERS */}
+        <div className="flex gap-2 mb-4 flex-wrap">
+          {/* STATUS FILTER */}
+          <button
+            onClick={() => loadOrders()}
+            className="px-3 py-1 bg-gray-200 rounded"
+          >
+            All
+          </button>
+
+          <button
+            onClick={() => filterByStatus("PENDING")}
+            className="px-3 py-1 bg-yellow-200 rounded"
+          >
+            Pending
+          </button>
+
+          <button
+            onClick={() => filterByStatus("DELIVERED")}
+            className="px-3 py-1 bg-green-200 rounded"
+          >
+            Delivered
+          </button>
+
+          <button
+            onClick={() => filterByStatus("CANCELLED")}
+            className="px-3 py-1 bg-red-200 rounded"
+          >
+            Cancelled
+          </button>
+
+          {/* DATE FILTER */}
+          <button
+            onClick={() => filterByDate("TODAY")}
+            className="px-3 py-1 bg-blue-100 rounded"
+          >
+            Today
+          </button>
+
+          <button
+            onClick={() => filterByDate("WEEK")}
+            className="px-3 py-1 bg-blue-100 rounded"
+          >
+            This Week
+          </button>
+
+          <button
+            onClick={() => filterByDate("MONTH")}
+            className="px-3 py-1 bg-blue-100 rounded"
+          >
+            This Month
+          </button>
+        </div>
+
+        {/* TABLE */}
+        <div className="bg-white shadow rounded overflow-x-auto overflow-y-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="p-3">Order</th>
+                <th className="p-3">Status</th>
+                <th className="p-3">Items</th>
+                <th className="p-3">Unit Price</th>
+                <th className="p-3">Total</th>
+                <th className="p-3">Change</th>
+                <th className="p-3">Payment status</th>
+                <th className="p-3">Payment</th>
+                <th className="p-3">Action</th>
               </tr>
             </thead>
 
             <tbody>
-              {filteredOrders.map((order) => (
-                <tr key={order.id} className="border-b hover:bg-gray-50">
-                  <td className="px-3 py-2">{order.id}</td>
-                  <td className="px-3 py-2">{order.customer}</td>
-                  <td className="px-3 py-2 text-green-600 font-semibold">
-                    Rs{order.total}
+              {orders.map((order) => (
+                <tr key={order.id} className="border-t">
+                  <td className="p-3 font-semibold">
+                    {order.orderNumber || order.id}
                   </td>
 
-                  <td className="px-3 py-2">
+                  <td className="p-3">
                     <span
-                      className={`px-2 py-1 rounded text-xs font-semibold ${getStatusStyle(order.status)}`}
+                      className={`px-2 py-1 rounded text-xs ${getStatusStyle(order.status)}`}
                     >
                       {order.status}
                     </span>
                   </td>
 
-                  <td className="px-3 py-2">{order.date}</td>
+                  <td className="p-3">
+                    {order.items?.map((i, idx) => (
+                      <div key={idx}>
+                        {i.productName} × {i.quantity}
+                      </div>
+                    ))}
+                  </td>
 
-                  <td className="px-3 py-2 flex gap-1">
-                    <button
-                      className="bg-gray-100 p-1 rounded"
-                      onClick={() => navigate(`/vieworder/${order.id}`)}
-                    >
-                      <ViewIcon />
-                    </button>
+                  <td className="p-3">
+                    {order.items?.map((i, idx) => (
+                      <div key={idx}>Rs {i.unitPrice}</div>
+                    ))}
+                  </td>
 
-                    <button
-                      className="bg-blue-100 p-1 rounded"
-                      onClick={() => navigate(`/updateorder/${order.id}`)}
+                  <td className="p-3 font-bold">Rs {order.totalAmount}</td>
+
+                  <td className="p-3">
+                    <select
+                      value={order.status}
+                      onChange={(e) => updateStatus(order.id, e.target.value)}
+                      className="border px-2 py-1"
                     >
-                      <EditIcon />
+                      <option>PENDING</option>
+                      <option>CONFIRMED</option>
+                      <option>PROCESSING</option>
+                      <option>SHIPPED</option>
+                      <option>DELIVERED</option>
+                      <option>CANCELLED</option>
+                      <option>REFUNDED</option>
+                      <option>RETURNED</option>
+                    </select>
+                  </td>
+                  <td className="p-3">
+                    <span
+                      className={`px-2 py-1 rounded text-xs ${getPaymentStyle(order.paymentStatus|| "PENDING")}`}
+                    >
+                      {order.paymentStatus || "PENDING"}
+                    </span>
+                  </td>
+                  <td className="p-3">
+                    <select
+                      value={order.paymentStatus || "PENDING"}
+                      onChange={(e) =>
+                        updatePaymentStatus(order.id, e.target.value)
+                      }
+                      className="border px-2 py-1 rounded"
+                    >
+                      <option>PENDING</option>
+                      <option>COMPLETED</option>
+                      <option>FAILED</option>
+                      <option>REFUNDED</option>
+                      <option>CANCELLED</option>
+                    </select>
+                  </td>
+                  <td className="p-3">
+                    <button
+                      onClick={() => setViewOrder(order)}
+                      className="bg-blue-500 text-white px-3 py-1 rounded"
+                    >
+                      View
                     </button>
                   </td>
                 </tr>
@@ -247,35 +396,55 @@ function SellerOrderManagement() {
           </table>
         </div>
 
-        {/* View Modal */}
+        {/* MODAL */}
         {viewOrder && (
-          <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center">
-            <div className="bg-white p-6 rounded-xl w-full max-w-lg">
-              <h3 className="text-lg font-bold mb-4">Order Details</h3>
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
+            <div className="bg-white p-6 rounded w-96">
+              <h2 className="font-bold mb-3">Order Details</h2>
 
               <p>
-                <strong>ID:</strong> {viewOrder.id}
+                <b>Order:</b> {viewOrder.orderNumber}
               </p>
               <p>
-                <strong>Customer:</strong> {viewOrder.customer}
+                <b>Status:</b> {viewOrder.status}
               </p>
               <p>
-                <strong>Total:</strong> Rs{viewOrder.total}
-              </p>
-              <p>
-                <strong>Status:</strong> {viewOrder.status}
+                <b>Total:</b> Rs {viewOrder.totalAmount}
               </p>
 
-              <ul className="mt-4 list-disc ml-6">
-                {viewOrder.items.map((item, i) => (
-                  <li key={i}>
-                    {item.name} - {item.qty}
-                  </li>
+              <div className="mt-2">
+                <b>Items:</b>
+                {viewOrder.items?.map((i, idx) => (
+                  <div
+                    key={idx}
+                    className="flex justify-between items-center mb-2"
+                  >
+                    <div>
+                      {i.productName} × {i.quantity}
+                    </div>
+
+                    <button
+                      onClick={() => openRepairForm(viewOrder.id, i.productId)}
+                      className="bg-orange-500 text-white px-2 py-1 rounded text-xs"
+                    >
+                      Add Repair
+                    </button>
+                  </div>
                 ))}
-              </ul>
+              </div>
+
+              <p>
+                <b>Name:</b> {viewOrder.customerName}
+              </p>
+              <p>
+                <b>Phone:</b> {viewOrder.phone}
+              </p>
+              <p>
+                <b>Address:</b> {viewOrder.address}
+              </p>
 
               <button
-                className="mt-4 bg-gray-200 px-4 py-2 rounded"
+                className="mt-4 bg-gray-500 text-white px-3 py-1 rounded"
                 onClick={() => setViewOrder(null)}
               >
                 Close
@@ -283,36 +452,39 @@ function SellerOrderManagement() {
             </div>
           </div>
         )}
+        {showRepairForm && (
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
+            <div className="bg-white p-6 rounded w-80">
+              <h3 className="font-bold mb-3">Add Repair</h3>
 
-        {/* Status Modal */}
-        {showStatusModal && selectedOrder && (
-          <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center">
-            <div className="bg-white p-6 rounded-xl w-full max-w-sm">
-              <h3 className="text-lg font-bold mb-4">Update Status</h3>
+              <input
+                className="border w-full mb-2 px-2 py-1"
+                placeholder="Issue Description"
+                value={issue}
+                onChange={(e) => setIssue(e.target.value)}
+              />
 
-              <select
-                value={selectedOrder.status}
-                onChange={handleStatusChange}
-                className="w-full border px-3 py-2 rounded mb-4"
-              >
-                <option>Pending</option>
-                <option>Confirmed</option>
-                <option>Delivered</option>
-              </select>
+              <input
+                className="border w-full mb-2 px-2 py-1"
+                type="number"
+                placeholder="Estimated Cost"
+                value={estimatedCost}
+                onChange={(e) => setEstimatedCost(e.target.value)}
+              />
 
-              <div className="flex justify-end gap-2">
+              <div className="flex justify-between">
                 <button
-                  className="bg-gray-200 px-4 py-2 rounded"
-                  onClick={() => setShowStatusModal(false)}
+                  onClick={submitRepair}
+                  className="bg-green-500 text-white px-3 py-1 rounded"
                 >
-                  Cancel
+                  Submit
                 </button>
 
                 <button
-                  className="bg-green-500 text-white px-4 py-2 rounded"
-                  onClick={handleStatusUpdate}
+                  onClick={() => setShowRepairForm(false)}
+                  className="bg-gray-400 text-white px-3 py-1 rounded"
                 >
-                  Update
+                  Cancel
                 </button>
               </div>
             </div>

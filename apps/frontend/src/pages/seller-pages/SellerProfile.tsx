@@ -1,66 +1,65 @@
 import React from 'react'
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import { Link } from 'react-router-dom';
 function SellerProfile() {
     const [sidebaropen, setsidebar] = useState<boolean>(false);
       const [darkmode, setdarkmode] = useState<boolean>(false);
+      useEffect(() => {
+  if (darkmode) {
+    document.documentElement.classList.add("dark");
+  } else {
+    document.documentElement.classList.remove("dark");
+  }
+}, [darkmode]);
 
     const sideBarItems = [
     { name: "Dashboard", icon: "/images/dashboard.png", path: "/dashboard" },
     { name: "Products", icon: "/images/products.png", path: "/products" },
+    { name: "Category", icon: "/images/products.png", path: "/category" },
+
     { name: "Orders", icon: "/images/orders.png", path: "/orders" },
-    { name: "Customer Details", icon: "/images/Details.png", path: "/customers" },
+    { name: "Repair", icon: "/images/products.png", path: "/repairs" },
+    {
+      name: "Customer Details",
+      icon: "/images/Details.png",
+      path: "/customers",
+    },
     { name: "Promotions", icon: "/images/promotion.png", path: "/promotions" },
     { name: "Messages", icon: "/images/msg.png", path: "/messages" },
     { name: "Profile", icon: "/images/profile.png", path: "/profile" },
   ];
+
   return (
-    <div className={`bg-gray-100 min-h-screen font-sans ${darkmode ? "dark" : ""} flex`}>
+    <div className={`bg-gray-100 min-h-screen font-sans  flex`}>
               <aside
-                className={`bg-white w-64 h-screen dark:bg-gray-900 fixed shadow-lg border-r border-gray-200 dark:border-gray-800 z-20 ${
-                  sidebaropen ? "translate-x-0" : "-translate-x-64"
-                } lg:translate-x-0 lg:static transition-all duration-300 flex flex-col`}
-              >
-                <div className="flex items-center gap-2 p-4 border-b border-gray-200 dark:border-gray-800">
-                  <img src="/images/logo.png" alt="Logo" className="h-12 w-12" />
-                  <span className="text-xl font-bold text-gray-800 dark:text-gray-100">
-                    Seller Dashboard
-                  </span>
-                  <button className="ml-auto lg:hidden" onClick={() => setsidebar(false)}>
-                    <img src="/images/close.png" alt="close" className="h-8 w-8 p-1" />
-                  </button>
-                </div>
-                <nav className="flex-1 mt-6">
-                  {sideBarItems.map((item) => (
-                    <Link
-                      key={item.name}
-                      to={item.path!}
-                      className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-800 transition font-medium mb-2"
+                      className={`bg-orange-400 w-70 h-screen fixed shadow-lg z-20 ${
+                        sidebaropen ? "translate-x-0" : "-translate-x-64"
+                      } lg:translate-x-0 lg:static transition-all flex flex-col`}
                     >
-                      <img src={item.icon} alt={item.name} className="w-6 h-6" />
-                      <span>{item.name}</span>
-                    </Link>
-                  ))}
-                </nav>
-                <div className="px-4 py-3 mt-2">
-                  <button className="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-2 rounded-lg transition">
-                    Logout
-                  </button>
-                </div>
-                <div className="mt-auto flex justify-center items-center p-4 border-t border-gray-200 dark:border-gray-800">
-                  <button
-                    className="bg-gray-200 dark:bg-gray-700 p-2 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-                    onClick={() => setdarkmode(!darkmode)}
-                    aria-label="Toggle dark mode"
-                  >
-                    {darkmode ? (
-                      <img src="/images/moon.png" alt="moon" className="w-6 h-6" />
-                    ) : (
-                      <img src="/images/sun.png" alt="sun" className="w-6 h-6" />
-                    )}
-                  </button>
-                </div>
-              </aside>
+                      <div className="flex items-center gap-2 p-4 border-b border-white">
+                        <img src="/images/leemalogo.jpg" className="h-6 w-18" />
+                        <span className="font-bold text-gray-700 ">Seller Dashboard</span>
+                      </div>
+              
+                      <nav className="flex-1 mt-6">
+                        {sideBarItems.map((item) => (
+                          <Link
+                            key={item.name}
+                            to={item.path!}
+                            className="flex items-center gap-3 px-4 py-3 hover:bg-white hover:rounded-md"
+                          >
+                            <img src={item.icon} className="w-6 h-6" />
+                            <span className="text-gray-900 font-medium">{item.name}</span>
+                          </Link>
+                        ))}
+                      </nav>
+              
+                      <div className="p-4 border-t border-white">
+                        <button className="w-full bg-red-500 text-white py-2 rounded">
+                          Logout
+                        </button>
+                      </div>
+                    </aside>
               <main
   className={`flex-1 min-h-screen p-6 flex items-center justify-center ${
     darkmode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-800"

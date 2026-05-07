@@ -112,7 +112,9 @@ function SellerDashboard() {
   const sideBarItems: SidebarItem[] = [
     { name: "Dashboard", icon: "/images/dashboard.png", path: "/dashboard" },
     { name: "Products", icon: "/images/products.png", path: "/products" },
+    { name: "Category", icon: "/images/orders.png", path: "/category" },
     { name: "Orders", icon: "/images/orders.png", path: "/orders" },
+    { name: "Repair", icon: "/images/orders.png", path: "/repairs" },
     {
       name: "Customer Details",
       icon: "/images/Details.png",
@@ -150,17 +152,17 @@ function SellerDashboard() {
 
   return (
     <div
-      className={`bg-gray-100 h-screen ${darkmode ? "dark" : ""} flex font-sans dark:bg-gray-950`}
+      className="min-h-screen flex bg-white"
     >
       {/* Sidebar */}
       <aside
-        className={`bg-white w-64 h-screen dark:bg-gray-900 fixed shadow-lg border-r border-gray-200 dark:border-gray-800 z-20 ${
+        className={`bg-gray-900 w-64 h-screen overflow-y-auto  fixed shadow-lg border-r border-gray-200  z-20 ${
           sidebaropen ? "translate-x-0" : "-translate-x-64"
         } lg:translate-x-0 lg:static transition-all duration-300 flex flex-col`}
       >
-        <div className="flex items-center gap-2 p-4 border-b border-gray-200 dark:border-gray-800">
-          <img src="/images/logo.png" alt="Logo" className="h-12 w-12" />
-          <span className="text-xl font-bold text-gray-800 dark:text-gray-100">
+        <div className="flex items-center gap-2 p-4 border-b border-gray-200 ">
+          <img src="/images/leemalogo.jpg" alt="Logo" className="h-6 w-18" />
+          <span className="text-xl font-bold text-white ">
             Seller Dashboard
           </span>
           <button
@@ -175,10 +177,10 @@ function SellerDashboard() {
             <Link
               key={item.name}
               to={item.path || "#"}
-              className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-800 transition font-medium mb-2"
+              className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-yellow-500  transition font-medium mb-2"
             >
               <img src={item.icon} alt={item.name} className="w-6 h-6" />
-              <span>{item.name}</span>
+              <span className="font-medium text-white">{item.name}</span>
             </Link>
           ))}
         </nav>
@@ -188,41 +190,29 @@ function SellerDashboard() {
             Logout
           </button>
         </div>
-        <div className="mt-auto flex justify-center items-center p-4 border-t border-gray-200 dark:border-gray-800">
-          <button
-            className="bg-gray-200 dark:bg-gray-700 p-2 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-            onClick={() => setdarkmode(!darkmode)}
-            aria-label="Toggle dark mode"
-          >
-            {darkmode ? (
-              <img src="/images/moon.png" alt="moon" className="w-6 h-6" />
-            ) : (
-              <img src="/images/sun.png" alt="sun" className="w-6 h-6" />
-            )}
-          </button>
-        </div>
+        
       </aside>
       
-      <main className="bg-white flex-1 dark:bg-gray-900 min-h-screen ">
+      <main className="bg-white w-full  min-h-screen ">
         
-        <header className="flex items-center justify-between bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-6 py-4 shadow-sm sticky top-0 z-10">
+        <header className="flex items-center justify-between bg-white  border-b   px-6 py-4 shadow-sm sticky top-0 z-10">
           <button onClick={() => setsidebar(true)} className="lg:hidden">
             <img
               src="/images/menubar.png"
               alt="menubar"
-              className="h-8 w-8 p-1 rounded-full bg-gray-200 dark:bg-gray-700"
+              className="h-8 w-8 p-1 rounded-full bg-gray-200 "
             />
           </button>
-          <span className="text-xl font-bold text-gray-800 dark:text-gray-100">
+          <span className="text-xl font-bold text-gray-800">
             Dashboard
           </span>
           <div className="flex items-center gap-3">
             <img
              src="/images/profile.png"
               alt="Profile"
-              className="h-10 w-10 rounded-full border border-gray-300 dark:border-gray-700 object-cover"
+              className="h-10 w-10 rounded-full border border-gray-300  object-cover"
             />
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+            <span className="text-sm font-medium text-gray-700 ">
               Kasun Perera
             </span>
           </div>
@@ -232,28 +222,28 @@ function SellerDashboard() {
           {cards.map((card) => (
             <div
               key={card.title}
-              className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-shadow p-6 flex flex-col gap-4 border border-gray-100 dark:border-gray-700 group"
+              className="bg-white  rounded-2xl shadow-lg hover:shadow-xl transition-shadow p-6 flex flex-col gap-4 border border-gray-100  group"
             >
               <div className="flex items-center gap-4">
-                <div className="bg-gray-200 dark:bg-gray-700 rounded-full p-3 group-hover:bg-gray-300 dark:group-hover:bg-gray-600 transition">
+                <div className="bg-gray-200  rounded-full p-3 group-hover:bg-gray-300 dark:group-hover:bg-gray-600 transition">
                   {card.icon}
                 </div>
                 <div>
-                  <div className="text-lg font-semibold text-gray-800 dark:text-gray-100">
+                  <div className="text-lg font-semibold text-gray-800 ">
                     {card.title}
                   </div>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-gray-200">
+                  <div className="text-2xl font-bold text-gray-900 ">
                     {card.value}
                   </div>
                 </div>
               </div>
-              <div className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+              <div className="text-sm text-gray-500  mt-2">
                 {card.description}
               </div>
 
               {card.title === "Orders" && recentOrders && (
                 <div className="mt-4">
-                  <div className="text-xs font-semibold text-gray-700 dark:text-gray-200 mb-2">
+                  <div className="text-xs font-semibold text-gray-700  mb-2">
                     Recent Orders
                   </div>
                   <ul className="space-y-1">
@@ -264,7 +254,7 @@ function SellerDashboard() {
                           order.status === "Pending"
                             ? "text-yellow-500"
                             : "text-green-500"
-                        } bg-gray-100 dark:bg-gray-700 rounded px-2 py-1 text-gray-600 dark:text-gray-300`}
+                        } bg-gray-100  rounded px-2 py-1 text-gray-600 `}
                       >
                         <span>
                           {order.id} - {order.customer}
