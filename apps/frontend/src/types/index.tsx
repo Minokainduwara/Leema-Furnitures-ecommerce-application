@@ -18,6 +18,8 @@ export type NavPage       = "dashboard" | "products" | "users" | "services" | "a
 // ─── Product ──────────────────────────────────────────────────────────────────
 
 export interface Product {
+  cost: unknown;
+  sku: string;
   id:          number;
   name:        string;
   category:    string;

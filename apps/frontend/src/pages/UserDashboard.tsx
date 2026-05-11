@@ -6,6 +6,7 @@ import type { UserProfile, ActivePanel } from "../types/dashboard.types";
 import {
   MOCK_USER,
 } from "../data/SellermockData";
+import React from "react";
 
 export default function UserLayout() {
   const navigate = useNavigate();

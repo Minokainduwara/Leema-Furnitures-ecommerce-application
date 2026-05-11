@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { LayoutDashboard, Package, Users, Settings, BarChart3, LogOut } from "lucide-react";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuth } from "../../hooks/Authcontext";
+import React from "react";
 
 export default function Sidebar() {
   const { logout } = useAuth();
@@ -50,6 +51,20 @@ export default function Sidebar() {
         >
           <Package size={20} />
           Products
+        </NavLink>
+
+        <NavLink
+          to="/admin/Categories"
+          className={({ isActive }) =>
+            `flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+              isActive
+                ? "bg-amber-500 text-white"
+                : "text-stone-300 hover:bg-stone-700"
+            }`
+          }
+        >
+          <Package size={20} />
+          Categories
         </NavLink>
 
         <NavLink

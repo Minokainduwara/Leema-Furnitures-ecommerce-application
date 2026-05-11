@@ -1,3 +1,5 @@
+import React from "react";
+
 const ProfileCard = () => {
   return (
     <div className="bg-white rounded-2xl shadow-xl p-8 w-full">

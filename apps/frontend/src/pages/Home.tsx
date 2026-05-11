@@ -2,6 +2,7 @@ import Header from "../components/Header";
 import Body from "../components/Body";
 import Footer from "../components/Footer";
 import Product from "../components/Product";
+import React from "react";
 
 
 function Home() {

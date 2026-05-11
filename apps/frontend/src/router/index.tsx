@@ -9,15 +9,21 @@ import ProtectedRoute from "../components/ProtectedRoute";
 // ─── Lazy page chunks ─────────────────────────────────────────────────────────
 
 const DashboardPage = lazy(() => import("../pages/admin-pages/DashboardPage"));
-const ProductsPage  = lazy(() => import("../pages/admin-pages/ProductsPage"));
-const UsersPage     = lazy(() => import("../pages/admin-pages/UsersPage"));
-const ServicesPage  = lazy(() => import("../pages/admin-pages/ServicesPage"));
+const ProductsPage = lazy(() => import("../pages/admin-pages/ProductsPage"));
+const UsersPage = lazy(() => import("../pages/admin-pages/UsersPage"));
+const ServicesPage = lazy(() => import("../pages/admin-pages/ServicesPage"));
 const AnalyticsPage = lazy(() => import("../pages/admin-pages/AnalyticsPage"));
-const ProfilePage   = lazy(() => import("../pages/admin-pages/ProfilePage"));
+const ProfilePage = lazy(() => import("../pages/admin-pages/ProfilePage"));
+const AdminAddProduct = lazy(() => import("../pages/admin-pages/AdminAddProduct"));
+const AdminEditProduct = lazy(() => import("../pages/admin-pages/AdminEditProduct"));
+const AdminAddCategory = lazy(() => import("../pages/admin-pages/AdminAddCategory"));
+const AdminEditCategory = lazy(() => import("../pages/admin-pages/AdminEditCategory"));
+const AdminCategoryManagement = lazy(() => import("../pages/admin-pages/AdminCategoryManagement"));
 
-const LoginPage     = lazy(() => import("../pages/LoginPage"));
+
+const LoginPage = lazy(() => import("../pages/LoginPage"));
 const SignupPage = lazy(() => import("../pages/SignupPage"));
-const Home          = lazy(() => import("../pages/Home"));
+const Home = lazy(() => import("../pages/Home"));
 const AboutUs = lazy(() => import("../pages/AboutUs"));
 const Products = lazy(() => import("../pages/Products"));
 const ContactUs = lazy(() => import("../pages/ContactUs"));
@@ -43,7 +49,8 @@ const S = (el: React.ReactNode) => (
 
 const AppRoutes: React.FC = () => (
   <Routes>
-    {/* Public Routes */}
+
+    {/* PUBLIC ROUTES */}
     <Route path="/" element={S(<Home />)} />
     <Route path="/login" element={S(<LoginPage />)} />
     <Route path="/signup" element={S(<SignupPage />)} />
@@ -51,7 +58,7 @@ const AppRoutes: React.FC = () => (
     <Route path="/products" element={S(<Products />)} />
     <Route path="/contact" element={S(<ContactUs />)} />
 
-    {/* Admin Routes with Layout */}
+    {/* ADMIN ROUTES */}
     <Route
       path="/admin"
       element={
@@ -61,18 +68,30 @@ const AppRoutes: React.FC = () => (
       }
     >
       <Route index element={S(<DashboardPage />)} />
-      
+
       <Route path="dashboard" element={S(<DashboardPage />)} />
+
+      {/* PRODUCTS */}
       <Route path="products" element={S(<ProductsPage />)} />
+      <Route path="products/add" element={S(<AdminAddProduct />)} />
+      <Route path="products/edit/:id" element={S(<AdminEditProduct />)} />
+      
+      {/* CATEGORIES */}
+      <Route path="categories" element={S(<AdminCategoryManagement />)} />
+      <Route path="categories/add" element={S(<AdminAddCategory />)} />
+      <Route path="categories/edit/:id" element={S(<AdminEditCategory />)} />
+
+      {/* OTHER ADMIN */}
       <Route path="users" element={S(<UsersPage />)} />
       <Route path="services" element={S(<ServicesPage />)} />
       <Route path="analytics" element={S(<AnalyticsPage />)} />
       <Route path="profile" element={S(<ProfilePage />)} />
     </Route>
 
-    {/* Error Routes */}
+    {/* ERROR */}
     <Route path="/forbidden" element={<ForbiddenPage />} />
     <Route path="*" element={<div className="p-8 text-center">404 - Page Not Found</div>} />
+
   </Routes>
 );
 

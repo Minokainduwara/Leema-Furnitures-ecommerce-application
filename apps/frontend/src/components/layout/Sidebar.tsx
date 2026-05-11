@@ -15,7 +15,6 @@ import type { RouteMeta } from "../../types";
 
 // ─── Role Types ────────────────────────────────────────────
 
-type UserRole = "superadmin" | "admin" | "manager";
 
 // ─── Navigation Routes ─────────────────────────────────────
 
@@ -25,33 +24,31 @@ export const NAV_ROUTES: RouteMeta[] = [
     label: "Dashboard",
     icon: LayoutDashboard,
   },
-
   {
     path: "/admin/products",
     label: "Products",
     icon: Package,
   },
-
+  {
+    path: "/admin/categories",
+    label: "Categories",
+    icon: Package,
+  },
   {
     path: "/admin/users",
     label: "Users",
     icon: Users,
-    requiredRole: ["superadmin", "admin"],
   },
-
   {
     path: "/admin/services",
     label: "Services",
     icon: Wrench,
   },
-
   {
     path: "/admin/analytics",
     label: "Analytics",
     icon: BarChart3,
-    requiredRole: ["superadmin", "admin"],
   },
-
   {
     path: "/admin/profile",
     label: "My Profile",
@@ -81,12 +78,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
 
   // ─── Role-based Route Filtering ─────────────────────────
 
-  const visibleRoutes = NAV_ROUTES.filter(
-    (route) =>
-      !route.requiredRole ||
-      (user &&
-        route.requiredRole.includes(user.role as UserRole))
-  );
+  const visibleRoutes = NAV_ROUTES;
 
   return (
     <>
