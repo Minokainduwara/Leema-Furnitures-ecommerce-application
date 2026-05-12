@@ -126,13 +126,13 @@ function SellerPromotions() {
       className={`bg-gray-100 min-h-screen font-sans flex`}
     >
       <aside
-              className={`bg-orange-400 w-70 h-screen fixed shadow-lg z-20 ${
+              className={`bg-gray-900 w-70 h-screen fixed shadow-lg z-20 ${
                 sidebaropen ? "translate-x-0" : "-translate-x-64"
               } lg:translate-x-0 lg:static transition-all flex flex-col`}
             >
               <div className="flex items-center gap-2 p-4 border-b border-white">
                 <img src="/images/leemalogo.jpg" className="h-6 w-18" />
-                <span className="font-bold text-gray-700 ">Seller Dashboard</span>
+                <span className="font-bold text-white ">Seller Dashboard</span>
               </div>
       
               <nav className="flex-1 mt-6">
@@ -140,10 +140,10 @@ function SellerPromotions() {
                   <Link
                     key={item.name}
                     to={item.path!}
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-white hover:rounded-md"
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-yellow-500 hover:rounded-md"
                   >
                     <img src={item.icon} className="w-6 h-6" />
-                    <span className="text-gray-900 font-medium">{item.name}</span>
+                    <span className="text-white font-medium">{item.name}</span>
                   </Link>
                 ))}
               </nav>
@@ -155,7 +155,7 @@ function SellerPromotions() {
               </div>
             </aside>
       <main
-        className={`flex-1 h-screen p-6  overflow-y-auto ${darkmode ? "dark bg-gray-900" : "bg-gray-100"}`}
+        className={`w-full h-screen p-6  overflow-y-auto ${darkmode ? "dark bg-gray-900" : "bg-gray-100"}`}
       >
         <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">
           Furniture Promotions 🪑

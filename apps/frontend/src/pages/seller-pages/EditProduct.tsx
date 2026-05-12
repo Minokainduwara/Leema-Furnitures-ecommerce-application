@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
-
+import { authFetch } from "../../utils/api";
 function EditProduct() {
   const sideBarItems = [
     { name: "Dashboard", icon: "/images/dashboard.png", path: "/dashboard" },
     { name: "Products", icon: "/images/products.png", path: "/products" },
     { name: "Category", icon: "/images/products.png", path: "/category" },
-
     { name: "Orders", icon: "/images/orders.png", path: "/orders" },
     { name: "Repair", icon: "/images/products.png", path: "/repairs" },
     {
@@ -21,8 +20,7 @@ function EditProduct() {
 
   const { id } = useParams();
   const navigate = useNavigate();
-
-  const [sidebaropen, setsidebar] = useState(false);
+  const [sidebaropen] = useState(false);
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [categories, setCategories] = useState<any[]>([]);
@@ -34,46 +32,45 @@ function EditProduct() {
     price: "",
     cost: "",
     stock: "",
-    category: "",
+    categoryId: 0,
     description: "",
     longDescription: "",
     status: "ACTIVE",
     imageUrl: "",
+    discountType: "",
+    discountValue: "",
+    startDate: "",
+    endDate: "",
   });
 
-  // ✅ handle input change
   const handleChange = (e: any) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // ✅ LOAD PRODUCT + CATEGORIES
+  const getImageUrl = (path: string) =>
+    path ? `http://localhost:8080${path}` : "";
+
+  // LOAD
   useEffect(() => {
-    // product
-    fetch(`http://localhost:8080/api/products/${id}`)
+    authFetch(`http://localhost:8080/api/products/${id}`)
       .then((res) => res.json())
       .then((data) => {
-        console.log("FULL PRODUCT:", data);
-        console.log("IMAGE VALUE:", data.image);
-
-        setForm({
+        setForm((prev) => ({
+          ...prev,
           name: data.name,
           code: data.sku,
           price: data.price,
           cost: data.cost,
           stock: data.stock,
-          category: String(data.category?.id || ""),
+          categoryId: data.category?.id ?? "",
           description: data.description,
           longDescription: data.longDescription,
           status: data.status,
-          imageUrl:  data.image || "",
-        });
+          imageUrl: data.image || "",
+        }));
       });
 
-    // categories
-    fetch("http://localhost:8080/api/categories")
+    authFetch("http://localhost:8080/api/categories")
       .then((res) => res.json())
       .then((data) => {
         setCategories(data);
@@ -81,268 +78,273 @@ function EditProduct() {
       });
   }, [id]);
 
-  // ✅ UPDATE PRODUCT
-const handleSubmit = async (e: any) => {
-  e.preventDefault();
-
-  try {
-    // ✅ basic validation (prevents 400 errors)
-    if (!form.name || !form.code || !form.price || !form.category) {
-      alert("Please fill all required fields");
-      return;
-    }
+  // UPDATE
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
 
     const formData = new FormData();
 
-    // ✅ text fields
     formData.append("name", form.name);
     formData.append("sku", form.code);
-    formData.append("description", form.description || "");
-    formData.append("longDescription", form.longDescription || "");
-    formData.append("status", form.status || "ACTIVE");
+    formData.append("price", form.price ? String(Number(form.price)) : "0");
+    formData.append("cost", form.cost ? String(Number(form.cost)) : "0");
+    formData.append("stock", form.stock ? String(Number(form.stock)) : "0");
+    formData.append("description", form.description);
+    formData.append("longDescription", form.longDescription);
+    formData.append("status", (form.status || "ACTIVE").toUpperCase().trim());
+    formData.append(
+      "categoryId",
+      form.categoryId ? String(Number(form.categoryId)) : "0",
+    );
+    if (imageFile) formData.append("image", imageFile);
 
-    // ✅ IMPORTANT: convert numbers properly (avoids 400 error)
-    formData.append("price", String(Number(form.price)));
-    formData.append("cost", String(Number(form.cost)));
-    formData.append("stock", String(Number(form.stock)));
-    formData.append("categoryId", String(Number(form.category)));
-
-    // ✅ image (optional)
-    if (imageFile) {
-      formData.append("image", imageFile);
-    }
-
-    // 🔍 DEBUG (remove later)
-    for (let pair of formData.entries()) {
-      console.log(pair[0], pair[1]);
-    }
-
-    // ✅ API CALL
-    const res = await fetch(`http://localhost:8080/api/products/${id}`, {
+    const res = await authFetch(`http://localhost:8080/api/products/${id}`, {
       method: "PUT",
       body: formData,
     });
 
-    // ❌ backend error handling
     if (!res.ok) {
-      const errorText = await res.text();
-      console.error("Backend Error:", errorText);
-      throw new Error(errorText || "Update failed");
+      alert("Update failed");
+      return;
     }
 
-    alert("✅ Product updated successfully");
-    navigate("/products");
+    if (form.discountType && form.discountValue) {
+      await authFetch("http://localhost:8080/api/product-discounts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productId: Number(id),
+          discountType: form.discountType,
+          value: Number(form.discountValue),
+          startDate: form.startDate || null,
+          endDate: form.endDate || null,
+        }),
+      });
+    }
 
-  } catch (err) {
-    console.error("Update Error:", err);
-    alert("❌ Update failed");
-  }
-};
-const getImageUrl = (path: string) => {
-  if (!path) return "";
-  return `http://localhost:8080${path}`;
-};
+    alert("Updated successfully");
+    navigate("/products");
+  };
+
   return (
-    <div className="bg-gray-100 min-h-screen flex">
+    <div className="bg-gray-100 min-h-screen flex overflow-hidden">
       {/* SIDEBAR (UNCHANGED) */}
       <aside
-              className={`bg-orange-400 w-70 h-screen fixed shadow-lg z-20 ${
-                sidebaropen ? "translate-x-0" : "-translate-x-64"
-              } lg:translate-x-0 lg:static transition-all flex flex-col`}
-            >
-              <div className="flex items-center gap-2 p-4 border-b border-white">
-                <img src="/images/leemalogo.jpg" className="h-6 w-18" />
-                <span className="font-bold text-gray-700 ">Seller Dashboard</span>
-              </div>
-      
-              <nav className="flex-1 mt-6">
-                {sideBarItems.map((item) => (
-                  <Link
-                    key={item.name}
-                    to={item.path!}
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-white hover:rounded-md"
-                  >
-                    <img src={item.icon} className="w-6 h-6" />
-                    <span className="text-gray-900 font-medium">{item.name}</span>
-                  </Link>
-                ))}
-              </nav>
-      
-              <div className="p-4 border-t border-white">
-                <button className="w-full bg-red-500 text-white py-2 rounded">
-                  Logout
-                </button>
-              </div>
-            </aside>
+        className={`bg-gray-900 w-70 h-screen fixed shadow-lg z-20 ${
+          sidebaropen ? "translate-x-0" : "-translate-x-64"
+        } lg:translate-x-0 lg:static transition-all flex flex-col`}
+      >
+        <div className="flex items-center gap-2 p-4 border-b border-white">
+          <img src="/images/leemalogo.jpg" className="h-6 w-18" />
+          <span className="font-bold text-white">Seller Dashboard</span>
+        </div>
 
-      {/* MAIN */}
-      <main className="flex-1 h-screen pl-40 bg-gray-50 p-30 flex items-center justify-center">
+        <nav className="flex-1 mt-6">
+          {sideBarItems.map((item) => (
+            <Link
+              key={item.name}
+              to={item.path!}
+              className="flex items-center gap-3 px-4 py-3 hover:bg-yellow-500"
+            >
+              <img src={item.icon} className="w-6 h-6" />
+              <span className="text-white">{item.name}</span>
+            </Link>
+          ))}
+        </nav>
+
+        <div className="p-4 border-t border-white">
+          <button className="w-full bg-red-500 text-white py-2 rounded">
+            Logout
+          </button>
+        </div>
+      </aside>
+
+      {/* MAIN FIXED AREA */}
+      <main className="w-full  p-6 overflow-y-auto h-screen">
         <form
           onSubmit={handleSubmit}
-          className="w-full max-w-xl bg-white p-6 rounded-xl shadow-lg max-h-[90vh] overflow-y-auto"
+          className="max-w-2xl mx-auto bg-white p-6 rounded-xl shadow-lg"
         >
-          <h2 className="text-2xl font-bold mb-4 text-gray-700">
-            Edit Product ID: {id}
+          <h2 className="text-2xl font-bold mb-4 text-gray-800">
+            Edit Product
           </h2>
 
           {/* NAME */}
-          <label className="block text-sm font-medium mb-1 text-gray-700">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Product Name
           </label>
           <input
+            className="w-full border p-2 mb-3 border-gray-300 text-gray-700"
             name="name"
             value={form.name}
             onChange={handleChange}
-            className="w-full border p-2 mb-3 rounded text-gray-700 border-gray-300"
           />
 
           {/* SKU */}
-          <label className="block text-sm font-medium mb-1 text-gray-700">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Product Code (SKU)
           </label>
           <input
+            className="w-full border p-2 mb-3 border-gray-300 text-gray-700"
             name="code"
             value={form.code}
             onChange={handleChange}
-            className="w-full border p-2 mb-3 rounded text-gray-700 border-gray-300"
           />
 
           {/* PRICE */}
-          <label className="block text-sm font-medium mb-1 text-gray-700">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Price
           </label>
           <input
-            type="number"
+            className="w-full border p-2 mb-3 border-gray-300 text-gray-700"
             name="price"
             value={form.price}
             onChange={handleChange}
-            className="w-full border p-2 mb-3 rounded text-gray-700 border-gray-300"
           />
 
           {/* COST */}
-          <label className="block text-sm font-medium mb-1 text-gray-700">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Cost
           </label>
           <input
-            type="number"
+            className="w-full border p-2 mb-3 border-gray-300 text-gray-700"
             name="cost"
             value={form.cost}
             onChange={handleChange}
-            className="w-full border p-2 mb-3 rounded text-gray-700 border-gray-300"
           />
 
           {/* STOCK */}
-          <label className="block text-sm font-medium mb-1 text-gray-700">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Stock Quantity
           </label>
           <input
-            type="number"
+            className="w-full border p-2 mb-3 border-gray-300 text-gray-700"
             name="stock"
             value={form.stock}
             onChange={handleChange}
-            className="w-full border p-2 mb-3 rounded text-gray-700 border-gray-300"
           />
 
           {/* CATEGORY */}
-          <label className="block text-sm font-medium mb-1 text-gray-700">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Category
           </label>
           <select
-            name="category"
-            value={form.category}
-            onChange={handleChange}
-            className="w-full border p-2 mb-3 rounded text-gray-700 border-gray-300"
+            className="w-full border p-2 mb-3 border-gray-300 text-gray-700"
+            value={form.categoryId || ""}
+            onChange={(e) =>
+              setForm({ ...form, categoryId: Number(e.target.value) })
+            }
           >
-            <option value="">Select Category</option>
-            {loadingCategories ? (
-              <option>Loading...</option>
-            ) : (
-              categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
-              ))
-            )}
-          </select>
+            <option className="text-gray-700" value="">
+              Select Category
+            </option>
 
-          {/* STATUS */}
-          <label className="block text-sm font-medium mb-1 text-gray-700">
-            Status
-          </label>
-          <select
-            name="status"
-            value={form.status}
-            onChange={handleChange}
-            className="w-full border p-2 mb-3 rounded text-gray-700 border-gray-300"
-          >
-            <option value="ACTIVE">Active</option>
-            <option value="INACTIVE">Inactive</option>
-            <option value="DISCONTINUED">Discontinued</option>
-            <option value="DRAFT">Draft</option>
+            {categories.map((cat) => (
+              <option className="text-gray-700" key={cat.id} value={cat.id}>
+                {cat.name}
+              </option>
+            ))}
           </select>
 
           {/* IMAGE */}
-          <label className="block text-sm font-medium mb-1 text-gray-700">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Product Image
           </label>
           <input
             type="file"
-            accept="image/*"
+            className="mb-3 text-gray-700"
             onChange={(e: any) => setImageFile(e.target.files[0])}
-            className="w-full border p-2 mb-3 rounded bg-white text-gray-700 border-gray-300"
           />
 
-          {/* SHOW EXISTING IMAGE */}
           {form.imageUrl && !imageFile && (
-            <img
-              src={getImageUrl(form.imageUrl)}
-              className="w-32 h-32 object-cover rounded mb-3 border"
-            />
-          )}
-
-          {/* PREVIEW NEW IMAGE */}
-          {imageFile && (
-            <img
-              src={URL.createObjectURL(imageFile)}
-              className="w-32 h-32 object-cover rounded mb-3 border"
-            />
+            <img src={getImageUrl(form.imageUrl)} className="w-28 h-28 mb-3" />
           )}
 
           {/* DESCRIPTION */}
-          <label className="block text-sm font-medium mb-1 text-gray-700">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Short Description
           </label>
           <textarea
+            className="w-full border p-2 mb-3 border-gray-300 text-gray-700"
             name="description"
             value={form.description}
             onChange={handleChange}
-            className="w-full border p-2 mb-3 rounded text-gray-700 border-gray-300"
           />
 
           {/* LONG DESCRIPTION */}
-          <label className="block text-sm font-medium mb-1 text-gray-700">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Long Description
           </label>
           <textarea
+            className="w-full border p-2 mb-3 border-gray-300 text-gray-700"
             name="longDescription"
             value={form.longDescription}
             onChange={handleChange}
-            className="w-full border p-2 mb-3 rounded text-gray-700 border-gray-300"
           />
 
-          {/* BUTTONS */}
-          <div className="flex gap-2">
-            <button
-              type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded w-full"
+          {/* DISCOUNT SECTION */}
+          <div className="border-t pt-4 mt-4">
+            <h3 className="font-semibold text-gray-700 mb-2">
+              Discount (Optional)
+            </h3>
+
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Discount Type
+            </label>
+            <select
+              className="w-full border p-2 mb-3 border-gray-300 text-gray-700"
+              name="discountType"
+              value={form.discountType}
+              onChange={handleChange}
             >
-              Update Product
+              <option value="">No Discount</option>
+              <option value="PERCENTAGE">Percentage</option>
+              <option value="FIXED">Fixed</option>
+            </select>
+
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Discount Value
+            </label>
+            <input
+              className="w-full border p-2 mb-3 border-gray-300 text-gray-700"
+              name="discountValue"
+              value={form.discountValue}
+              onChange={handleChange}
+            />
+
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Start Date
+            </label>
+            <input
+              type="datetime-local"
+              className="w-full border p-2 mb-3 border-gray-300 text-gray-700"
+              name="startDate"
+              value={form.startDate}
+              onChange={handleChange}
+            />
+
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              End Date
+            </label>
+            <input
+              type="datetime-local"
+              className="w-full border p-2 mb-3 border-gray-300 text-gray-700"
+              name="endDate"
+              value={form.endDate}
+              onChange={handleChange}
+            />
+          </div>
+
+          {/* BUTTONS */}
+          <div className="flex gap-2 mt-4">
+            <button className="bg-blue-600 text-white w-full py-2 rounded">
+              Update
             </button>
 
             <button
               type="button"
               onClick={() => navigate("/products")}
-              className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded w-full"
+              className="bg-gray-400 text-white w-full py-2 rounded"
             >
               Cancel
             </button>

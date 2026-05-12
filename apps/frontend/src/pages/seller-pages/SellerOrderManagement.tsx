@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-
+import { authFetch } from "../../utils/api";
 /* ================= TYPES ================= */
 
 type Order = {
   id: number;
+  userId?: number;
   orderNumber?: string;
   totalAmount?: number;
   status: string;
@@ -33,7 +34,11 @@ function SellerOrderManagement() {
   const [estimatedCost, setEstimatedCost] = useState("");
 
   const sideBarItems = [
-    { name: "Dashboard", icon: "/images/dashboard.png", path: "/dashboard" },
+    {
+      name: "Dashboard",
+      icon: "/images/dashboard.png",
+      path: "/seller/dashboard",
+    },
     { name: "Products", icon: "/images/products.png", path: "/products" },
     { name: "Category", icon: "/images/products.png", path: "/category" },
 
@@ -57,7 +62,7 @@ function SellerOrderManagement() {
 
   const loadOrders = async () => {
     try {
-      const res = await fetch("http://localhost:8080/api/orders/all");
+      const res = await authFetch("http://localhost:8080/api/orders/all");
       const data = await res.json();
       setOrders(data);
     } catch (err) {
@@ -76,7 +81,7 @@ function SellerOrderManagement() {
     }
 
     try {
-      const res = await fetch(
+      const res = await authFetch(
         `http://localhost:8080/api/orders/search?query=${query}`,
       );
 
@@ -90,7 +95,7 @@ function SellerOrderManagement() {
   /* ================= STATUS FILTER ================= */
 
   const filterByStatus = async (status: string) => {
-    const res = await fetch(
+    const res = await authFetch(
       `http://localhost:8080/api/orders/status?status=${status}`,
     );
 
@@ -101,7 +106,7 @@ function SellerOrderManagement() {
   /* ================= DATE FILTER ================= */
 
   const filterByDate = async (type: string) => {
-    const res = await fetch(
+    const res = await authFetch(
       `http://localhost:8080/api/orders/filter?type=${type}`,
     );
 
@@ -144,7 +149,7 @@ function SellerOrderManagement() {
   /* ================= UPDATE STATUS ================= */
 
   const updateStatus = async (id: number, status: string) => {
-    await fetch(`http://localhost:8080/api/orders/${id}/status`, {
+    await authFetch(`http://localhost:8080/api/orders/${id}/status`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status }),
@@ -153,7 +158,7 @@ function SellerOrderManagement() {
     loadOrders();
   };
   const updatePaymentStatus = async (id: number, status: string) => {
-    await fetch(`http://localhost:8080/api/orders/${id}/payment-status`, {
+    await authFetch(`http://localhost:8080/api/orders/${id}/payment-status`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ paymentStatus: status }),
@@ -163,13 +168,13 @@ function SellerOrderManagement() {
   };
   const submitRepair = async () => {
     try {
-      await fetch("http://localhost:8080/api/repairs", {
+      await authFetch("http://localhost:8080/api/repairs", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          userId: 1, // temporary
+          userId: orders.find(o => o.id === selectedOrderId)?.userId,
           orderId: selectedOrderId,
           productId: selectedProductId,
           issueDescription: issue,
@@ -362,7 +367,7 @@ function SellerOrderManagement() {
                   </td>
                   <td className="p-3">
                     <span
-                      className={`px-2 py-1 rounded text-xs ${getPaymentStyle(order.paymentStatus|| "PENDING")}`}
+                      className={`px-2 py-1 rounded text-xs ${getPaymentStyle(order.paymentStatus || "PENDING")}`}
                     >
                       {order.paymentStatus || "PENDING"}
                     </span>

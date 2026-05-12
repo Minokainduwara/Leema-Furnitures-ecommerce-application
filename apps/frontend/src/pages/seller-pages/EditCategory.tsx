@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-
+import { authFetch } from "../../utils/api";
 function EditCategory() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [sidebaropen, setsidebar] = useState<boolean>(false);
+
   const sideBarItems = [
     { name: "Dashboard", icon: "/images/dashboard.png", path: "/dashboard" },
     { name: "Products", icon: "/images/products.png", path: "/products" },
     { name: "Category", icon: "/images/products.png", path: "/category" },
-
     { name: "Orders", icon: "/images/orders.png", path: "/orders" },
     { name: "Repair", icon: "/images/products.png", path: "/repairs" },
     {
@@ -23,55 +23,122 @@ function EditCategory() {
   ];
 
   const [form, setForm] = useState({
-    name: "",
-    slug: "",
-    description: "",
-    isActive: true,
-  });
+  name: "",
+  slug: "",
+  description: "",
+  isActive: true,
+  discountType: "",
+  discountValue: "",
+  startDate: "",
+  endDate: "",
+  categoryDiscountId: null as any,
+});
 
-  // LOAD CATEGORY
+  // =========================
+  // LOAD CATEGORY + DISCOUNT
+  // =========================
   useEffect(() => {
-    fetch(`http://localhost:8080/api/categories/${id}`)
+    // CATEGORY
+    authFetch(`http://localhost:8080/api/categories/${id}`)
       .then((res) => res.json())
-      .then((data) => setForm(data))
-      .catch((err) => console.log("Error loading category:", err));
+      .then((data) => {
+        setForm((prev) => ({
+          ...prev,
+          name: data.name || "",
+          slug: data.slug || "",
+          description: data.description || "",
+          isActive: data.isActive ?? true,
+        }));
+      });
+
+    // CATEGORY DISCOUNT
+    authFetch("http://localhost:8080/api/seller/category-discounts")
+  .then((res) => res.json())
+  .then((list) => {
+    const discount = list.find((d: any) => d.category.id == id);
+
+    if (discount) {
+      setForm((prev) => ({
+        ...prev,
+        categoryDiscountId: discount.id,
+        discountType: discount.discountType || "",
+        discountValue: discount.value || "",
+        startDate: discount.startDate?.slice(0, 16) || "",
+        endDate: discount.endDate?.slice(0, 16) || "",
+      }));
+    }
+  });
   }, [id]);
 
+  // =========================
+  // HANDLE CHANGE
+  // =========================
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
   ) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
+  // =========================
+  // UPDATE CATEGORY + DISCOUNT
+  // =========================
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    await fetch(`http://localhost:8080/api/categories/${id}`, {
+    // 1. UPDATE CATEGORY
+    await authFetch(`http://localhost:8080/api/categories/${id}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(form),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: form.name,
+        slug: form.slug,
+        description: form.description,
+        isActive: form.isActive 
+      }),
     });
 
+    // 2. SAVE CATEGORY DISCOUNT
+    if (form.discountType && form.discountValue) {
+  const method = form.categoryDiscountId ? "PUT" : "POST";
+
+  const url = form.categoryDiscountId
+    ? `http://localhost:8080/api/seller/category-discounts/${form.categoryDiscountId}`
+    : "http://localhost:8080/api/seller/category-discounts";
+
+  await authFetch(url, {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      categoryId: id,
+      discountType: form.discountType,
+      value: Number(form.discountValue),
+      startDate: form.startDate,
+      endDate: form.endDate,
+    }),
+  });
+}
     alert("Category updated successfully");
     navigate("/category");
   };
 
   return (
     <div className="bg-gray-100 min-h-screen flex font-sans">
-      {/* SIDEBAR (UNCHANGED STYLE) */}
+      {/* ===== SIDEBAR (UNCHANGED) ===== */}
       <aside
-        className={`bg-orange-400 w-70 h-screen fixed shadow-lg z-20 ${
+        className={`bg-gray-900 w-70 h-screen fixed shadow-lg z-20 ${
           sidebaropen ? "translate-x-0" : "-translate-x-64"
         } lg:translate-x-0 lg:static transition-all flex flex-col`}
       >
         <div className="flex items-center gap-2 p-4 border-b border-white">
           <img src="/images/leemalogo.jpg" className="h-6 w-18" />
-          <span className="font-bold text-gray-700 ">Seller Dashboard</span>
+          <span className="font-bold text-white ">Seller Dashboard</span>
         </div>
 
         <nav className="flex-1 mt-6">
@@ -79,10 +146,10 @@ function EditCategory() {
             <Link
               key={item.name}
               to={item.path!}
-              className="flex items-center gap-3 px-4 py-3 hover:bg-white hover:rounded-md"
+              className="flex items-center gap-3 px-4 py-3 hover:bg-yellow-500 hover:rounded-md"
             >
               <img src={item.icon} className="w-6 h-6" />
-              <span className="text-gray-900 font-medium">{item.name}</span>
+              <span className="text-white font-medium">{item.name}</span>
             </Link>
           ))}
         </nav>
@@ -94,8 +161,8 @@ function EditCategory() {
         </div>
       </aside>
 
-      {/* MAIN CONTENT */}
-      <main className="flex-1 ml-64 flex items-center justify-center p-6">
+      {/* ===== MAIN UI (UNCHANGED) ===== */}
+      <main className="w-full flex items-center justify-center p-6">
         <form
           onSubmit={handleUpdate}
           className="bg-white w-full max-w-md p-6 rounded-xl shadow-md"
@@ -104,59 +171,86 @@ function EditCategory() {
             Edit Category #{id}
           </h2>
 
-          {/* NAME */}
-          <label className="text-sm font-medium text-gray-700">
-            Category Name
-          </label>
+          <label className="text-gray-700 font-semibold">Category Name</label>
           <input
             name="name"
             value={form.name}
             onChange={handleChange}
-            className="w-full border px-3 py-2 rounded mb-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            className="w-full border px-3 py-2 rounded mb-4 text-gray-700 border-gray-300"
           />
 
-          {/* SLUG */}
-          <label className="text-sm font-medium text-gray-700">Slug</label>
+          <label className="text-gray-700 font-semibold">Slug</label>
           <input
             name="slug"
             value={form.slug}
             onChange={handleChange}
-            className="w-full border px-3 py-2 rounded mb-4  text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            className="w-full border px-3 py-2 rounded mb-4 text-gray-700 border-gray-300"
           />
 
-          {/* DESCRIPTION */}
-          <label className="text-sm font-medium text-gray-700">
-            Description
-          </label>
+          <label className="text-gray-700 font-semibold">Description</label>
           <textarea
             name="description"
             value={form.description}
             onChange={handleChange}
-            className="w-full border px-3 py-2 rounded mb-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            className="w-full border px-3 py-2 rounded mb-4 text-gray-700 border-gray-300"
           />
 
-          {/* STATUS */}
-          <label className="text-sm font-medium text-gray-700">Status</label>
-
+          <label className="text-gray-700 font-semibold">Status</label>
           <select
             name="isActive"
             value={form.isActive ? "true" : "false"}
             onChange={(e) =>
-              setForm({
-                ...form,
-                isActive: e.target.value === "true",
-              })
+              setForm({ ...form, isActive: e.target.value === "true" })
             }
-            className="w-full border px-3 py-2 rounded mb-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            className="w-full border px-3 py-2 rounded mb-4 text-gray-700 border-gray-300"
           >
             <option value="true">Active</option>
             <option value="false">Inactive</option>
           </select>
-          {/* BUTTONS */}
+
+          {/* DISCOUNT SECTION */}
+          <label className="text-gray-700 font-semibold">Discount Type</label>
+          <select
+            name="discountType"
+            value={form.discountType}
+            onChange={handleChange}
+            className="w-full border px-3 py-2 rounded mb-4 text-gray-700 border-gray-300"
+          >
+            <option value="">No Discount</option>
+            <option value="PERCENTAGE">Percentage</option>
+            <option value="FIXED">Fixed</option>
+          </select>
+
+          <label className="text-gray-700 font-semibold">Discount Value</label>
+          <input
+            name="discountValue"
+            value={form.discountValue}
+            onChange={handleChange}
+            className="w-full border px-3 py-2 rounded mb-4 text-gray-700 border-gray-300"
+          />
+
+          <label className="text-gray-700 font-semibold">Start Date</label>
+          <input
+            type="datetime-local"
+            name="startDate"
+            value={form.startDate}
+            onChange={handleChange}
+            className="w-full border px-3 py-2 rounded mb-4 text-gray-700 border-gray-300"
+          />
+
+          <label className="text-gray-700 font-semibold">End Date</label>
+          <input
+            type="datetime-local"
+            name="endDate"
+            value={form.endDate}
+            onChange={handleChange}
+            className="w-full border px-3 py-2 rounded mb-4 text-gray-700 border-gray-300"
+          />
+
           <div className="flex gap-2">
             <button
               type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded w-full"
+              className="bg-blue-600 text-white px-4 py-2 rounded w-full"
             >
               Update
             </button>
@@ -164,7 +258,7 @@ function EditCategory() {
             <button
               type="button"
               onClick={() => navigate("/category")}
-              className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded w-full"
+              className="bg-gray-400 text-white px-4 py-2 rounded w-full"
             >
               Cancel
             </button>

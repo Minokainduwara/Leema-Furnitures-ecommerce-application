@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-
+import { authFetch } from "../../utils/api";
 /* ================= TYPES ================= */
 
 type Repair = {
@@ -53,7 +53,7 @@ function RepairManagement() {
   }, []);
 
   const loadRepairs = async () => {
-    const res = await fetch("http://localhost:8080/api/repairs");
+    const res = await authFetch("http://localhost:8080/api/repairs");
     const data = await res.json();
     console.log("REPAIRS DATA:", data);
     setRepairs(Array.isArray(data) ? data : []);
@@ -64,7 +64,7 @@ function RepairManagement() {
   const filterByStatus = async (status: string) => {
     if (status === "ALL") return loadRepairs();
 
-    const res = await fetch(
+    const res = await authFetch(
       `http://localhost:8080/api/repairs/status?status=${status}`,
     );
     const data = await res.json();

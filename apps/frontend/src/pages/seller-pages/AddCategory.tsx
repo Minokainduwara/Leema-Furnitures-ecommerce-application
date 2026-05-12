@@ -1,14 +1,22 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-
+import { authFetch } from "../../utils/api";
 function AddCategory() {
   const navigate = useNavigate();
   const [sidebaropen, setsidebar] = useState<boolean>(false);
   const sideBarItems = [
     { name: "Dashboard", icon: "/images/dashboard.png", path: "/dashboard" },
     { name: "Products", icon: "/images/products.png", path: "/products" },
-    { name: "Categories", icon: "/images/category.png", path: "/categories" },
+    { name: "Category", icon: "/images/products.png", path: "/category" },
+
     { name: "Orders", icon: "/images/orders.png", path: "/orders" },
+    { name: "Repair", icon: "/images/products.png", path: "/repairs" },
+    {
+      name: "Customer Details",
+      icon: "/images/Details.png",
+      path: "/customers",
+    },
+    { name: "Promotions", icon: "/images/promotion.png", path: "/promotions" },
     { name: "Messages", icon: "/images/msg.png", path: "/messages" },
     { name: "Profile", icon: "/images/profile.png", path: "/profile" },
   ];
@@ -27,7 +35,7 @@ function AddCategory() {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
 
-    await fetch("http://localhost:8080/api/categories", {
+    await authFetch("http://localhost:8080/api/categories", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
@@ -41,13 +49,13 @@ function AddCategory() {
     <div className="bg-gray-100 min-h-screen font-sans flex">
       {/* SIDEBAR (UNCHANGED STYLE) */}
       <aside
-        className={`bg-orange-400 w-70 h-screen fixed shadow-lg z-20 ${
+        className={`bg-gray-900 w-70 h-screen fixed shadow-lg z-20 ${
           sidebaropen ? "translate-x-0" : "-translate-x-64"
         } lg:translate-x-0 lg:static transition-all flex flex-col`}
       >
         <div className="flex items-center gap-2 p-4 border-b border-white">
           <img src="/images/leemalogo.jpg" className="h-6 w-18" />
-          <span className="font-bold text-gray-700 ">Seller Dashboard</span>
+          <span className="font-bold text-white ">Seller Dashboard</span>
         </div>
 
         <nav className="flex-1 mt-6">
@@ -55,10 +63,10 @@ function AddCategory() {
             <Link
               key={item.name}
               to={item.path!}
-              className="flex items-center gap-3 px-4 py-3 hover:bg-white hover:rounded-md"
+              className="flex items-center gap-3 px-4 py-3 hover:bg-yellow-500 hover:rounded-md"
             >
               <img src={item.icon} className="w-6 h-6" />
-              <span className="text-gray-900 font-medium">{item.name}</span>
+              <span className="text-white font-medium">{item.name}</span>
             </Link>
           ))}
         </nav>
@@ -71,7 +79,7 @@ function AddCategory() {
       </aside>
 
       {/* MAIN */}
-      <main className="flex-1 ml-64 flex items-center justify-center">
+      <main className="w-full  flex items-center justify-center">
         <form
           onSubmit={handleSubmit}
           className="bg-white p-6 rounded shadow w-[420px]"

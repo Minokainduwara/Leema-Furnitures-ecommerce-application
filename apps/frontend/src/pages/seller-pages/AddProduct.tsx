@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { authFetch } from "../../utils/api";
 
 function AddProduct() {
   const sideBarItems = [
@@ -38,6 +39,10 @@ function AddProduct() {
     longDescription: "",
     image: "",
     status: "ACTIVE",
+    discountType: "",
+    discountValue: "",
+    startDate: "",
+    endDate: "",
   });
 
   // ✅ Handle input change
@@ -47,66 +52,89 @@ function AddProduct() {
       [e.target.name]: e.target.value,
     });
   };
-
+  const formatDate = (date: string) => {
+    if (!date) return null;
+    return date.includes(":") ? date : date + ":00";
+  };
   // ✅ Submit form
   const handleSubmit = async (e: any) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  try {
-    // ✅ validation
-    if (!form.name || !form.code || !form.price || !form.category) {
-      alert("Please fill all required fields");
-      return;
+    try {
+      if (!form.name || !form.code || !form.price || !form.category) {
+        alert("Please fill all required fields");
+        return;
+      }
+
+      const formData = new FormData();
+
+      formData.append("name", form.name);
+      formData.append("sku", form.code);
+      formData.append("description", form.description || "");
+      formData.append("longDescription", form.longDescription || "");
+
+      formData.append("price", String(Number(form.price)));
+      formData.append("cost", String(Number(form.cost || 0)));
+      formData.append("stock", String(Number(form.stock || 0)));
+      formData.append("categoryId", String(Number(form.category)));
+      formData.append("status", (form.status || "ACTIVE").toUpperCase());
+
+      if (imageFile) {
+        formData.append("image", imageFile);
+      }
+
+      // 👉 STEP 1: CREATE PRODUCT FIRST
+      const res = await authFetch("http://localhost:8080/api/products", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const err = await res.text();
+        throw new Error(err);
+      }
+
+      const productId = await res.json();
+
+      // 👉 STEP 2: HANDLE DISCOUNT ONLY IF EXISTS
+      const hasDiscount =
+        form.discountType &&
+        form.discountType !== "" &&
+        form.discountValue &&
+        Number(form.discountValue) > 0;
+
+      if (hasDiscount) {
+        const disres = await authFetch(
+          "http://localhost:8080/api/product-discounts",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              productId: productId,
+              discountType: form.discountType,
+              value: Number(form.discountValue),
+              startDate: formatDate(form.startDate),
+              endDate: formatDate(form.endDate),
+            }),
+          },
+        );
+
+        if (!disres.ok) {
+          console.warn("Discount not saved, but product created");
+        }
+      }
+
+      alert("✅ Product added successfully");
+      navigate("/products");
+    } catch (err) {
+      console.error(err);
+      alert("❌ Failed to add product");
     }
-
-    const formData = new FormData();
-
-    // ✅ text fields
-    formData.append("name", form.name);
-    formData.append("sku", form.code);
-    formData.append("description", form.description || "");
-    formData.append("longDescription", form.longDescription || "");
-
-    // ✅ IMPORTANT FIXES
-    formData.append("price", String(Number(form.price)));
-    formData.append("cost", String(Number(form.cost || 0)));
-    formData.append("stock", String(Number(form.stock || 0)));
-    formData.append("categoryId", String(Number(form.category)));
-
-    // ✅ FIX ENUM ISSUE
-    formData.append("status", (form.status || "ACTIVE").toUpperCase());
-
-    // ✅ image (optional)
-    if (imageFile) {
-      formData.append("image", imageFile);
-    }
-
-    // 🔍 DEBUG (VERY IMPORTANT)
-    for (let pair of formData.entries()) {
-      console.log(pair[0], pair[1]);
-    }
-
-    const res = await fetch("http://localhost:8080/api/products", {
-      method: "POST",
-      body: formData,
-    });
-
-    if (!res.ok) {
-      const errorText = await res.text();
-      console.error("Backend Error:", errorText);
-      throw new Error(errorText || "Error");
-    }
-
-    alert("✅ Product added");
-    navigate("/products");
-
-  } catch (err) {
-    console.error("Upload Error:", err);
-    alert("❌ Upload failed");
-  }
-};
+  };
   useEffect(() => {
-    fetch("http://localhost:8080/api/categories")
+    authFetch("http://localhost:8080/api/categories")
       .then((res) => res.json())
       .then((data) => {
         setCategories(data);
@@ -122,38 +150,38 @@ function AddProduct() {
     <div className={`bg-gray-100 min-h-screen font-sans flex overflow-y-auto`}>
       {/* SIDEBAR (UNCHANGED) */}
       <aside
-              className={`bg-orange-400 w-70 h-screen fixed shadow-lg z-20 ${
-                sidebaropen ? "translate-x-0" : "-translate-x-64"
-              } lg:translate-x-0 lg:static transition-all flex flex-col`}
+        className={`bg-gray-900 w-70 h-screen fixed shadow-lg z-20 ${
+          sidebaropen ? "translate-x-0" : "-translate-x-64"
+        } lg:translate-x-0 lg:static transition-all flex flex-col`}
+      >
+        <div className="flex items-center gap-2 p-4 border-b border-white">
+          <img src="/images/leemalogo.jpg" className="h-6 w-18" />
+          <span className="font-bold text-white ">Seller Dashboard</span>
+        </div>
+
+        <nav className="flex-1 mt-6">
+          {sideBarItems.map((item) => (
+            <Link
+              key={item.name}
+              to={item.path!}
+              className="flex items-center gap-3 px-4 py-3 hover:bg-yellow-500 hover:rounded-md"
             >
-              <div className="flex items-center gap-2 p-4 border-b border-white">
-                <img src="/images/leemalogo.jpg" className="h-6 w-18" />
-                <span className="font-bold text-gray-700 ">Seller Dashboard</span>
-              </div>
-      
-              <nav className="flex-1 mt-6">
-                {sideBarItems.map((item) => (
-                  <Link
-                    key={item.name}
-                    to={item.path!}
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-white hover:rounded-md"
-                  >
-                    <img src={item.icon} className="w-6 h-6" />
-                    <span className="text-gray-900 font-medium">{item.name}</span>
-                  </Link>
-                ))}
-              </nav>
-      
-              <div className="p-4 border-t border-white">
-                <button className="w-full bg-red-500 text-white py-2 rounded">
-                  Logout
-                </button>
-              </div>
-            </aside>
+              <img src={item.icon} className="w-6 h-6" />
+              <span className="text-white font-medium">{item.name}</span>
+            </Link>
+          ))}
+        </nav>
+
+        <div className="p-4 border-t border-white">
+          <button className="w-full bg-red-500 text-white py-2 rounded">
+            Logout
+          </button>
+        </div>
+      </aside>
 
       {/* MAIN */}
       <main
-        className="flex-1 h-screen pl-40 bg-gray-50 p-30 flex items-center justify-center 
+        className="w-full h-screen pl-40 bg-gray-50 p-30 flex items-center justify-center 
       "
       >
         <form
@@ -207,7 +235,59 @@ function AddProduct() {
             onChange={handleChange}
             className="w-full border p-2 mb-3 rounded text-gray-700 border-gray-300"
           />
+          {/* DISCOUNT TYPE */}
+          <h3 className="font-bold mt-3 mb-2 text-gray-700">
+            Discount (Optional)
+          </h3>
+          <label className="block text-sm font-medium mb-1 text-gray-700">
+            Discount Type
+          </label>
+          <select
+            name="discountType"
+            value={form.discountType}
+            onChange={handleChange}
+            className="w-full border p-2 mb-3 rounded text-gray-700"
+          >
+            <option value="">No Discount</option>
+            <option value="PERCENTAGE">Percentage (%)</option>
+            <option value="FIXED">Fixed (Rs)</option>
+          </select>
 
+          {/* DISCOUNT VALUE */}
+          <label className="block text-sm font-medium mb-1 text-gray-700">
+            Discount Value
+          </label>
+          <input
+            type="number"
+            name="discountValue"
+            value={form.discountValue}
+            onChange={handleChange}
+            placeholder="Enter discount"
+            className="w-full border p-2 mb-3 rounded text-gray-700"
+          />
+          {/* START DATE */}
+          <label className="block text-sm font-medium mb-1 text-gray-700">
+            Start Date
+          </label>
+          <input
+            type="datetime-local"
+            name="startDate"
+            value={form.startDate}
+            onChange={handleChange}
+            className="w-full border p-2 mb-3 rounded text-gray-700"
+          />
+
+          {/* END DATE */}
+          <label className="block text-sm font-medium mb-1 text-gray-700">
+            End Date
+          </label>
+          <input
+            type="datetime-local"
+            name="endDate"
+            value={form.endDate}
+            onChange={handleChange}
+            className="w-full border p-2 mb-3 rounded text-gray-700"
+          />
           {/* STOCK */}
           <label className="block text-sm font-medium mb-1 text-gray-700">
             Stock Quantity

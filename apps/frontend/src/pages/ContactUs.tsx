@@ -51,14 +51,14 @@ const ContactUs: React.FC = () => {
                 <Mail size={24} className="text-amber-500 flex-shrink-0 mt-1" />
                 <div>
                   <h3 className="font-semibold text-stone-900">Email</h3>
-                  <p className="text-stone-600">contact@leema.com</p>
+                  <p className="text-stone-600">leemakegalle@gmail.com </p>
                 </div>
               </div>
               <div className="flex gap-4">
                 <MapPin size={24} className="text-amber-500 flex-shrink-0 mt-1" />
                 <div>
                   <h3 className="font-semibold text-stone-900">Address</h3>
-                  <p className="text-stone-600">123 Furniture Street, Colombo, Sri Lanka</p>
+                  <p className="text-stone-600">123/A Main Street, Kegalle, Sri Lanka</p>
                 </div>
               </div>
             </div>

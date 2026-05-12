@@ -28,7 +28,7 @@ const AboutUs: React.FC = () => {
               Our mission is to make quality furniture accessible to everyone, ensuring every home is furnished with elegance and comfort.
             </p>
           </div>
-          <img src="/images/about.jpg" alt="About Us" className="rounded-xl shadow-lg w-full h-96 object-cover" />
+          <img src="/images/services.jpg" alt="About Us" className="rounded-xl shadow-lg w-full h-96 object-cover" />
         </div>
 
         {/* CTA */}

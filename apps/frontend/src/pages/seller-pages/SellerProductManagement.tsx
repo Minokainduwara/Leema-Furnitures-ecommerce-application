@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, type ChangeEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
-
+import { authFetch } from "../../utils/api";
 const EditIcon = () => (
   <svg
     className="w-5 h-5 text-blue-500"
@@ -51,6 +51,7 @@ function SellerProductManagement() {
     { name: "Category", icon: "/images/products.png", path: "/category" },
     { name: "Repair", icon: "/images/products.png", path: "/repairs" },
     { name: "Orders", icon: "/images/orders.png", path: "/orders" },
+    { name: "Inventory", icon: "/images/products.png", path: "/inventory" },
     {
       name: "Customer Details",
       icon: "/images/Details.png",
@@ -63,21 +64,34 @@ function SellerProductManagement() {
 
   // ✅ LOAD PRODUCTS FROM BACKEND
   useEffect(() => {
-    fetch("http://localhost:8080/api/products")
-      .then((res) => res.json())
-      .then((data) => {
+    const loadProducts = async () => {
+      try {
+        const res = await authFetch("http://localhost:8080/api/products");
+
+        if (!res.ok) throw new Error("Failed to fetch");
+
+        const data = await res.json();
         setProducts(data);
+      } catch (err) {
+        console.error(err);
+        alert("Failed to load products");
+      } finally {
         setLoading(false);
-      })
-      .catch(() => setLoading(false));
+      }
+    };
+
+    loadProducts();
   }, []);
 
   // ✅ DELETE PRODUCT
   const handleDelete = async () => {
     try {
-      await fetch(`http://localhost:8080/api/products/${showDelete.id}`, {
-        method: "DELETE",
-      });
+      const res = await authFetch(
+        `http://localhost:8080/api/products/${showDelete.id}`,
+        { method: "DELETE" },
+      );
+
+      if (!res.ok) throw new Error("Delete failed");
 
       setProducts((prev) => prev.filter((p) => p.id !== showDelete.id));
 
@@ -163,6 +177,8 @@ function SellerProductManagement() {
                 <th className="p-3">Category</th>
                 <th className="p-3">Price</th>
                 <th className="p-3">Image</th>
+                <th className="p-3">Discount</th>
+                <th className="p-3">Final Price</th>
                 <th className="p-3">Actions</th>
               </tr>
             </thead>
@@ -170,7 +186,7 @@ function SellerProductManagement() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="text-center p-5">
+                  <td colSpan={9} className="text-center p-5">
                     Loading...
                   </td>
                 </tr>
@@ -198,8 +214,8 @@ function SellerProductManagement() {
                           {p.sku}
                         </td>
 
-                        <td className="p-3  font-medium text-gray-700">
-                          {p.categoryName || "N/A"}
+                        <td className="p-3 font-medium text-gray-700">
+                          {p.category?.name || "N/A"}
                         </td>
 
                         <td className="p-3 text-green-600 font-semibold">
@@ -215,6 +231,17 @@ function SellerProductManagement() {
                           ) : (
                             <span className="text-gray-400">No image</span>
                           )}
+                        </td>
+                        <td className="p-3 text-orange-600 font-semibold">
+                          {p.discountType
+                            ? p.discountType === "PERCENTAGE"
+                              ? `${p.discountValue}% OFF`
+                              : `Rs ${p.discountValue} OFF`
+                            : "No Discount"}
+                        </td>
+
+                        <td className="p-3 text-green-600 font-bold">
+                          Rs {p.finalPrice ?? p.price}
                         </td>
 
                         <td className="p-3 flex gap-2">

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu as MenuIcon, X } from "lucide-react";
-import logo from "/images/logo.png";
+import logo from "/images/leemalogo.jpg";
 import Menu from "./Menu";
 
 const Navbar: React.FC = () => {
@@ -12,7 +12,7 @@ const Navbar: React.FC = () => {
 
       {/* Logo */}
       <Link to="/" className="flex items-center gap-3">
-        <img src={logo} alt="logo" className="w-16 md:w-20" />
+        <img src={logo} alt="leemalogo" className="w-16 md:w-20 h-8 md:h-10 rounded-md shadow-lg" />
         <span className="hidden sm:block text-white font-bold text-lg tracking-wide">
           Leema
         </span>
@@ -22,8 +22,8 @@ const Navbar: React.FC = () => {
       <div className="hidden lg:flex items-center gap-8 text-white">
         <Menu linkname="Home" url="/" />
         <Menu linkname="Products" url="/products" />
-        <Menu linkname="About" url="/about" />
-        <Menu linkname="Contact" url="/contact" />
+        <Menu linkname="About Us" url="/aboutus" />
+        <Menu linkname="Contact Us" url="/contactus" />
       </div>
 
       {/* Desktop Auth */}

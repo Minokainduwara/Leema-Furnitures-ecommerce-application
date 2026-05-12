@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { authFetch } from "../../utils/api";
 
 type Notification = {
   id: number;
@@ -49,7 +50,7 @@ function SellerMessage() {
 
   const fetchMessages = async () => {
     try {
-      const res = await fetch("http://localhost:8080/api/notifications");
+      const res = await authFetch("http://localhost:8080/api/notifications");
       const data = await res.json();
       setMessages(data);
     } catch (err) {
@@ -63,7 +64,7 @@ function SellerMessage() {
 
     if (!msg.read) {
       try {
-        await fetch(`http://localhost:8080/api/notifications/${msg.id}/read`, {
+        await authFetch(`http://localhost:8080/api/notifications/${msg.id}/read`, {
           method: "PATCH",
         });
 
@@ -89,7 +90,7 @@ function SellerMessage() {
             >
               <div className="flex items-center gap-2 p-4 border-b border-white">
                 <img src="/images/leemalogo.jpg" className="h-6 w-18" />
-                <span className="font-bold text-gray-700 ">Seller Dashboard</span>
+                <span className="font-bold text-white ">Seller Dashboard</span>
               </div>
       
               <nav className="flex-1 mt-6">
