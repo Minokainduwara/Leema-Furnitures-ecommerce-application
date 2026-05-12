@@ -4,10 +4,10 @@ import React, { useState } from "react";
 // import OrdersPanel from "../components/OrdersPanel";
 // import ServicePanel from "../components/ServicePanel";
 
-import Sidebar from "@/components/User_Dashboard-Component/Sidebar";
-import DetailsPanel from "@/components/User_Dashboard-Component/DetailsPanel";
-import OrdersPanel from "@/components/User_Dashboard-Component/OrdersPanel";
-import ServicePanel from "@/components/User_Dashboard-Component/ServicePanel";
+import Sidebar from "@/components/User-Components/User_Dashboard-Component/Sidebar";
+import DetailsPanel from "@/components/User-Components/User_Dashboard-Component/DetailsPanel";
+import OrdersPanel from "@/components/User-Components/User_Dashboard-Component/OrdersPanel";
+import ServicePanel from "@/components/User-Components/User_Dashboard-Component/ServicePanel";
 import type { UserProfile, ActivePanel, Order, WishlistItem, ServiceRequest } from "@/types/dashboard.types";
 
 const mockUser: UserProfile = {

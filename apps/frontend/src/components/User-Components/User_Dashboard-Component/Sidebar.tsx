@@ -8,7 +8,7 @@
 //   onLogout    - callback for logout
 // ============================================================
 import React from "react";
-import type { ActivePanel, UserProfile } from "../../types/dashboard.types";
+import type { ActivePanel, UserProfile } from "../../../types/dashboard.types";
 
 interface SidebarProps {
   user: UserProfile;
