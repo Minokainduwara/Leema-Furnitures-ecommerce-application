@@ -36,7 +36,7 @@ const AppRoutes: React.FC = () => (
   <Routes>
     {/* Public Routes */}
     <Route path="/login" element={S(<LoginPage />)} />
-    <Route path="/" element={S(<CategoryPage/>)} />
+    <Route path="/" element={S(<UserDashboard/>)} />
     <Route path="/product/:id" element={S(<ProductDetail/>)} />
 
     {/* Admin Routes with Layout */}

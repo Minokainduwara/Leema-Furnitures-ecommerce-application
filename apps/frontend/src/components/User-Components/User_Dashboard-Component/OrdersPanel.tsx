@@ -1,22 +1,45 @@
-import React, { useState } from "react";
-import type { Order, WishlistItem } from "../../../types/dashboard.types";
+import React, { useEffect, useState } from "react";
+import type { WishlistItem } from "../../../types/dashboard.types";
+
+interface OrderItem {
+  productName: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
+}
+
+interface Order {
+  id: number;
+  orderNumber: string;
+  orderDate: string;
+  status: string;
+  paymentStatus: string;
+  totalAmount: number;
+  orderItems: OrderItem[];
+}
 
 interface OrdersPanelProps {
-  orders: Order[];
   wishlist: WishlistItem[];
 }
 
 const fmt = (n: number) => `LKR ${n.toLocaleString("en-LK")}.00`;
 
-const StatusBadge: React.FC<{ status: Order["status"] }> = ({ status }) => {
-  const map = {
+const normalizeStatus = (status: string) => status.toLowerCase();
+
+const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
+  const map: Record<string, { label: string; color: string }> = {
     delivered: { label: "Delivered", color: "#22c55e" },
-    "on-deliver": { label: "On Deliver", color: "#eab308" },
+    shipped: { label: "Shipped", color: "#3b82f6" },
+    processing: { label: "Processing", color: "#eab308" },
     pending: { label: "Pending", color: "#f97316" },
     cancelled: { label: "Cancelled", color: "#ef4444" },
-  } as const;
+    confirmed: { label: "Confirmed", color: "#8b5cf6" },
+  };
 
-  const s = map[status];
+  const s = map[status] ?? {
+    label: status,
+    color: "#6b7280",
+  };
 
   return (
     <span className="text-xs font-bold" style={{ color: s.color }}>
@@ -25,64 +48,123 @@ const StatusBadge: React.FC<{ status: Order["status"] }> = ({ status }) => {
   );
 };
 
-const OrderCard: React.FC<{ order: Order }> = ({ order }) => (
-  <div className="flex items-center gap-4 p-4 rounded-xl mb-3 bg-white border border-gray-200 shadow-sm">
+const OrderCard: React.FC<{ order: Order }> = ({ order }) => {
+  const firstItem = order.orderItems?.[0];
 
-    {/* Product Image */}
-    <img
-      src={order.productImage}
-      alt={order.productName}
-      className="object-cover rounded-lg shrink-0"
-      style={{ width: 100, height: 72 }}
-    />
+  return (
+    <div className="flex items-center gap-4 p-4 rounded-xl mb-3 bg-white border border-gray-200 shadow-sm">
 
-    {/* Order Details */}
-    <div className="flex-1 min-w-0">
-      <p className="text-gray-800 text-xs leading-relaxed">
-        <span className="text-gray-500 font-medium">Order ID:</span>{" "}
-        {order.id}
-      </p>
+      {/* Product Image */}
+      <img
+        src="https://via.placeholder.com/100"
+        alt={firstItem?.productName || "Product"}
+        className="object-cover rounded-lg shrink-0"
+        style={{ width: 100, height: 72 }}
+      />
 
-      <p className="text-gray-800 text-xs">
-        <span className="text-gray-500 font-medium">Order Date:</span>{" "}
-        {order.orderDate}
-      </p>
+      {/* Order Details */}
+      <div className="flex-1 min-w-0">
+        <p className="text-gray-800 text-xs leading-relaxed">
+          <span className="text-gray-500 font-medium">
+            Order ID:
+          </span>{" "}
+          {order.orderNumber}
+        </p>
 
-      <p className="text-gray-800 text-xs">
-        <span className="text-gray-500 font-medium">Payment Method:</span>{" "}
-        {order.paymentMethod}
-      </p>
+        <p className="text-gray-800 text-xs">
+          <span className="text-gray-500 font-medium">
+            Order Date:
+          </span>{" "}
+          {order.orderDate?.split("T")[0]}
+        </p>
 
-      <p className="text-gray-800 text-xs">
-        <span className="text-gray-500 font-medium">Delivery Charge:</span>{" "}
-        {order.deliveryCharge}
-      </p>
+        <p className="text-gray-800 text-xs">
+          <span className="text-gray-500 font-medium">
+            Payment Status:
+          </span>{" "}
+          {order.paymentStatus}
+        </p>
 
-      <p className="text-gray-900 font-bold text-sm mt-2">
-        Price: {fmt(order.price)}
-      </p>
+        {firstItem && (
+          <p className="text-gray-800 text-xs">
+            <span className="text-gray-500 font-medium">
+              Product:
+            </span>{" "}
+            {firstItem.productName}
+          </p>
+        )}
+
+        <p className="text-gray-900 font-bold text-sm mt-2">
+          Price: {fmt(order.totalAmount)}
+        </p>
+      </div>
+
+      {/* Divider */}
+      <div className="w-px self-stretch bg-gray-200 mx-2" />
+
+      {/* Status */}
+      <div className="shrink-0 w-36 text-right">
+        <p className="text-gray-500 text-xs mb-1">
+          Delivery Status:
+        </p>
+
+        <StatusBadge status={normalizeStatus(order.status)} />
+      </div>
     </div>
-
-    {/* Divider */}
-    <div className="w-px self-stretch bg-gray-200 mx-2" />
-
-    {/* Status */}
-    <div className="shrink-0 w-36 text-right">
-      <p className="text-gray-500 text-xs mb-1">
-        Delivery Status:
-      </p>
-
-      <StatusBadge status={order.status} />
-    </div>
-  </div>
-);
+  );
+};
 
 const OrdersPanel: React.FC<OrdersPanelProps> = ({
-  orders,
   wishlist,
 }) => {
-  const [showAllOrders, setShowAllOrders] = useState(false);
-  const [showAllWishlist, setShowAllWishlist] = useState(false);
+
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const [showAllOrders, setShowAllOrders] =
+    useState(false);
+
+  const [showAllWishlist, setShowAllWishlist] =
+    useState(false);
+
+  // FETCH ORDERS
+  useEffect(() => {
+
+    const fetchOrders = async () => {
+      try {
+
+        const userId =
+          localStorage.getItem("userId") || "1";
+
+        const response = await fetch(
+          `http://localhost:8080/api/orders?userId=${userId}`
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch orders");
+        }
+
+        const data = await response.json();
+
+        setOrders(data);
+
+      } catch (error) {
+
+        console.error("Error loading orders:", error);
+
+      } finally {
+
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
+
+  }, []);
+
+  const visibleOrders = showAllOrders
+    ? orders
+    : orders.slice(0, 5);
 
   const visibleWishlist = showAllWishlist
     ? wishlist
@@ -95,17 +177,40 @@ const OrdersPanel: React.FC<OrdersPanelProps> = ({
       <div
         className="rounded-xl p-4 mb-4 overflow-y-auto bg-white border border-gray-200 shadow-sm"
         style={{
-          maxHeight: showAllOrders ? undefined : 340,
+          maxHeight: showAllOrders
+            ? undefined
+            : 340,
         }}
       >
-        {orders.map((order) => (
-          <OrderCard key={order.id} order={order} />
-        ))}
+
+        {loading ? (
+
+          <p className="text-sm text-gray-500">
+            Loading orders...
+          </p>
+
+        ) : visibleOrders.length === 0 ? (
+
+          <p className="text-sm text-gray-500">
+            No orders found
+          </p>
+
+        ) : (
+
+          visibleOrders.map((order) => (
+            <OrderCard
+              key={order.id}
+              order={order}
+            />
+          ))
+        )}
 
         {orders.length > 5 && (
           <div className="flex justify-center mt-2">
             <button
-              onClick={() => setShowAllOrders((s) => !s)}
+              onClick={() =>
+                setShowAllOrders((s) => !s)
+              }
               className="text-xs font-semibold py-2 px-4 rounded-lg bg-green-500 text-white hover:bg-green-600 transition"
             >
               {showAllOrders
@@ -124,11 +229,14 @@ const OrdersPanel: React.FC<OrdersPanelProps> = ({
         </h3>
 
         <div className="grid grid-cols-4 gap-4">
+
           {visibleWishlist.map((item) => (
+
             <div
               key={item.id}
               className="rounded-xl overflow-hidden bg-white border border-gray-200 shadow-sm"
             >
+
               {/* Image */}
               <div className="h-24 overflow-hidden">
                 <img
@@ -146,6 +254,7 @@ const OrdersPanel: React.FC<OrdersPanelProps> = ({
                   View Product
                 </button>
               </div>
+
             </div>
           ))}
         </div>
@@ -154,7 +263,9 @@ const OrdersPanel: React.FC<OrdersPanelProps> = ({
         {wishlist.length > 4 && (
           <div className="flex justify-center mt-4">
             <button
-              onClick={() => setShowAllWishlist((s) => !s)}
+              onClick={() =>
+                setShowAllWishlist((s) => !s)
+              }
               className="text-xs font-semibold py-2 px-4 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition"
             >
               {showAllWishlist
