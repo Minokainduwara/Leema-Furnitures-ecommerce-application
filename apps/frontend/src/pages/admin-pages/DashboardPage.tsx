@@ -41,7 +41,7 @@ const RecentOrdersTable: React.FC = () => (
             <tr key={o.id} className="border-b border-stone-50 hover:bg-stone-50 transition-colors">
               <td className="py-2.5 pr-4 font-mono text-xs text-stone-500">{o.id}</td>
               <td className="py-2.5 pr-4 text-stone-700 font-medium">{o.customer}</td>
-              <td className="py-2.5 pr-4 text-stone-500 max-w-[140px] truncate">{o.product}</td>
+              <td className="py-2.5 pr-4 text-stone-500 max-w-35 truncate">{o.product}</td>
               <td className="py-2.5 pr-4 font-semibold text-stone-800">${o.amount.toLocaleString()}</td>
               <td className="py-2.5">
                 <Badge variant={ORDER_STATUS_VARIANT[o.status]}>{o.status}</Badge>

@@ -1,0 +1,178 @@
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
+
+function AdminEditCategory() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [sidebaropen, setsidebar] = useState<boolean>(false);
+  const sideBarItems = [
+    { name: "Dashboard", icon: "/images/dashboard.png", path: "/dashboard" },
+    { name: "Products", icon: "/images/products.png", path: "/products" },
+    { name: "Category", icon: "/images/products.png", path: "/category" },
+
+    { name: "Orders", icon: "/images/orders.png", path: "/orders" },
+    { name: "Repair", icon: "/images/products.png", path: "/repairs" },
+    {
+      name: "Customer Details",
+      icon: "/images/Details.png",
+      path: "/customers",
+    },
+    { name: "Promotions", icon: "/images/promotion.png", path: "/promotions" },
+    { name: "Messages", icon: "/images/msg.png", path: "/messages" },
+    { name: "Profile", icon: "/images/profile.png", path: "/profile" },
+  ];
+
+  const [form, setForm] = useState({
+    name: "",
+    slug: "",
+    description: "",
+    isActive: true,
+  });
+
+  // LOAD CATEGORY
+  useEffect(() => {
+    fetch(`http://localhost:8080/api/categories/${id}`)
+      .then((res) => res.json())
+      .then((data) => setForm(data))
+      .catch((err) => console.log("Error loading category:", err));
+  }, [id]);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    await fetch(`http://localhost:8080/api/categories/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(form),
+    });
+
+    alert("Category updated successfully");
+    navigate("/category");
+  };
+
+  return (
+    <div className="bg-gray-100 min-h-screen flex font-sans">
+      {/* SIDEBAR (UNCHANGED STYLE) */}
+      <aside
+        className={`bg-orange-400 w-70 h-screen fixed shadow-lg z-20 ${
+          sidebaropen ? "translate-x-0" : "-translate-x-64"
+        } lg:translate-x-0 lg:static transition-all flex flex-col`}
+      >
+        <div className="flex items-center gap-2 p-4 border-b border-white">
+          <img src="/images/leemalogo.jpg" className="h-6 w-18" />
+          <span className="font-bold text-gray-700 ">Seller Dashboard</span>
+        </div>
+
+        <nav className="flex-1 mt-6">
+          {sideBarItems.map((item) => (
+            <Link
+              key={item.name}
+              to={item.path!}
+              className="flex items-center gap-3 px-4 py-3 hover:bg-white hover:rounded-md"
+            >
+              <img src={item.icon} className="w-6 h-6" />
+              <span className="text-gray-900 font-medium">{item.name}</span>
+            </Link>
+          ))}
+        </nav>
+
+        <div className="p-4 border-t border-white">
+          <button className="w-full bg-red-500 text-white py-2 rounded">
+            Logout
+          </button>
+        </div>
+      </aside>
+
+      {/* MAIN CONTENT */}
+      <main className="flex-1 ml-64 flex items-center justify-center p-6">
+        <form
+          onSubmit={handleUpdate}
+          className="bg-white w-full max-w-md p-6 rounded-xl shadow-md"
+        >
+          <h2 className="text-2xl font-bold mb-6 text-gray-800">
+            Edit Category #{id}
+          </h2>
+
+          {/* NAME */}
+          <label className="text-sm font-medium text-gray-700">
+            Category Name
+          </label>
+          <input
+            name="name"
+            value={form.name}
+            onChange={handleChange}
+            className="w-full border px-3 py-2 rounded mb-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+          />
+
+          {/* SLUG */}
+          <label className="text-sm font-medium text-gray-700">Slug</label>
+          <input
+            name="slug"
+            value={form.slug}
+            onChange={handleChange}
+            className="w-full border px-3 py-2 rounded mb-4  text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+          />
+
+          {/* DESCRIPTION */}
+          <label className="text-sm font-medium text-gray-700">
+            Description
+          </label>
+          <textarea
+            name="description"
+            value={form.description}
+            onChange={handleChange}
+            className="w-full border px-3 py-2 rounded mb-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+          />
+
+          {/* STATUS */}
+          <label className="text-sm font-medium text-gray-700">Status</label>
+
+          <select
+            name="isActive"
+            value={form.isActive ? "true" : "false"}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                isActive: e.target.value === "true",
+              })
+            }
+            className="w-full border px-3 py-2 rounded mb-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+          >
+            <option value="true">Active</option>
+            <option value="false">Inactive</option>
+          </select>
+          {/* BUTTONS */}
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded w-full"
+            >
+              Update
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate("/category")}
+              className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded w-full"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </main>
+    </div>
+  );
+}
+
+export default AdminEditCategory;
