@@ -35,7 +35,7 @@ function AddCategory() {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
 
-    await authFetch("http://localhost:8080/api/categories", {
+    await authFetch("http://localhost:8080/api/categories/add", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
