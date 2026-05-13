@@ -27,6 +27,8 @@ import UserDashboard from "./pages/User-pages/UserDashboard";
 import Category from "./pages/User-pages/Category";
 import ProductDetails from "./pages/User-pages/ProductDetails";
 import AddToCart from "./pages/userOrders/AddToCart";
+import CheckoutPage from "./pages/userOrders/CheckoutPage";
+import OrderSuccess from "./pages/userOrders/OrderSuccess";
 const container = document.getElementById("root")!;
 const root = createRoot(container);
 
@@ -38,8 +40,9 @@ root.render(
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+           <Route path="/ordersuccess/:id" element={<OrderSuccess />} />
            <Route path="/addtocart" element={<AddToCart/>} />
-          
+          <Route path="/checkout" element={<CheckoutPage/>} />
           <Route path="/product/details/:id" element={<ProductDetails />} />
           <Route path="/user/dashboard" element={<UserDashboard />} />
           <Route path="/user/category" element={<Category />} />

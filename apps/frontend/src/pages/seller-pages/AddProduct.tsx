@@ -84,7 +84,7 @@ function AddProduct() {
       }
 
       // 👉 STEP 1: CREATE PRODUCT FIRST
-      const res = await authFetch("http://localhost:8080/api/products", {
+      const res = await authFetch("http://localhost:8080/api/products/add", {
         method: "POST",
         body: formData,
       });
