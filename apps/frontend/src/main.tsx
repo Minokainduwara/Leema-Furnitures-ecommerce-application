@@ -38,8 +38,8 @@ root.render(
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
-           <Route path="/addtocart" element={<AddToCart/>} />
-          
+           <Route path="/addtocart/:id" element={<AddToCart/>} />
+
           <Route path="/product/details/:id" element={<ProductDetails />} />
           <Route path="/user/dashboard" element={<UserDashboard />} />
           <Route path="/user/category" element={<Category />} />

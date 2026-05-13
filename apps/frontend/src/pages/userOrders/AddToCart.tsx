@@ -10,12 +10,19 @@ type Product = {
   originalPrice: number;
   sku?: string;
 };
+type CartItem = {
+  id: number;
+  name: string;
+  price: number;
+  image: string;
+  qty: number;
+};
 const AddToCart = () => {
   const { id } = useParams();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [qty, setQty] = useState(1);
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState<CartItem[]>([]);
 
   // ================= FETCH PRODUCT =================
   useEffect(() => {
@@ -36,6 +43,8 @@ const AddToCart = () => {
       })
       .catch((err) => console.error(err));
   }, [id]);
+
+  console.log("ID from URL:", id);
 
   // ================= ADD TO LOCAL CART =================
   const handleAddToCart = () => {
