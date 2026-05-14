@@ -49,23 +49,34 @@ const SignupPage: React.FC = () => {
     }
 
     try {
-      await signup(form.email, form.password, form.name);
-      navigate("/admin/dashboard");
-    } catch (err) {
+      const user = await signup(
+      form.email,
+      form.password,
+      form.name
+      );
+
+      if (user.role === "ADMIN") {
+        navigate("/admin/dashboard");
+      } else if (user.role === "SELLER") {
+        navigate("/seller/dashboard");
+      } else {
+        navigate("/user/dashboard");
+      }
+        } catch {
       setError(authError || "Signup failed. Please try again.");
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-amber-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-stone-50 via-white to-amber-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-linear-to-br from-amber-400 to-amber-600 rounded-2xl mb-4">
             <UserPlus size={32} className="text-white" />
           </div>
           <h1 className="text-3xl font-bold text-stone-900 mb-2">Create Account</h1>
-          <p className="text-stone-500">Join Leema admin dashboard</p>
+          <p className="text-stone-500">Join With Leema Furinitures</p>
         </div>
 
         {/* Card */}
@@ -87,7 +98,7 @@ const SignupPage: React.FC = () => {
                   value={form.name}
                   onChange={handleChange}
                   placeholder="John Doe"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                  className="w-full pl-10 pr-10 py-2.5 rounded-lg border border-stone-200 text-stone-900 placeholder:text-stone-400 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                 />
               </div>
             </div>
@@ -108,7 +119,7 @@ const SignupPage: React.FC = () => {
                   value={form.email}
                   onChange={handleChange}
                   placeholder="admin@leema.com"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-stone-200 text-stone-900 placeholder:text-stone-400 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                 />
               </div>
             </div>
@@ -129,7 +140,7 @@ const SignupPage: React.FC = () => {
                   value={form.password}
                   onChange={handleChange}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-10 py-2.5 rounded-lg border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                  className="w-full pl-10 pr-10 py-2.5 rounded-lg border border-stone-200 text-stone-900 placeholder:text-stone-400 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                 />
                 <button
                   type="button"
@@ -157,7 +168,7 @@ const SignupPage: React.FC = () => {
                   value={form.confirmPassword}
                   onChange={handleChange}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-10 py-2.5 rounded-lg border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                  className="w-full pl-10 pr-10 py-2.5 rounded-lg border border-stone-200 text-stone-900 placeholder:text-stone-400 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                 />
                 <button
                   type="button"
@@ -186,7 +197,7 @@ const SignupPage: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 disabled:from-stone-400 disabled:to-stone-500 text-white font-semibold py-2.5 rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
+              className="w-full bg-linear-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 disabled:from-stone-400 disabled:to-stone-500 text-white font-semibold py-2.5 rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>
