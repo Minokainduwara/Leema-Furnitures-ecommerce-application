@@ -35,14 +35,20 @@ function AddCategory() {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
 
-    await authFetch("http://localhost:8080/api/categories", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-
-    alert("Category added successfully");
-    navigate("/category");
+    try {
+      const res = await authFetch("http://localhost:8080/api/categories", {
+        method: "POST",
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(errText || `HTTP ${res.status}`);
+      }
+      alert("Category added successfully");
+      navigate("/category");
+    } catch (err: any) {
+      alert(`Failed to add category: ${err.message || err}`);
+    }
   };
 
   return (

@@ -1,21 +1,35 @@
 import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
-  LayoutDashboard, Package, Users, Wrench,
-  BarChart3, User, LogOut,
+  LayoutDashboard,
+  Package,
+  Users,
+  Wrench,
+  BarChart3,
+  User,
+  LogOut,
+  Tags,
+  ShoppingBag,
+  Megaphone,
 } from "lucide-react";
-import { useAuth } from "../../hooks/Authcontext";
-import type { RouteMeta } from "../../types";
+import { getCurrentUser, logout as doLogout } from "../../utils/api";
 
-// ─── Nav routes ───────────────────────────────────────────────────────────────
+type NavRoute = {
+  path: string;
+  label: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+};
 
-export const NAV_ROUTES: RouteMeta[] = [
-  { path: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { path: "/admin/products",  label: "Products",  icon: Package },
-  { path: "/admin/users",     label: "Users",     icon: Users,    requiredRole: ["superadmin", "admin"] },
-  { path: "/admin/services",  label: "Services",  icon: Wrench },
-  { path: "/analytics", label: "Analytics", icon: BarChart3, requiredRole: ["superadmin", "admin"] },
-  { path: "/admin/profile",   label: "My Profile",icon: User },
+export const NAV_ROUTES: NavRoute[] = [
+  { path: "/admin/dashboard",     label: "Dashboard",     icon: LayoutDashboard },
+  { path: "/admin/users",         label: "Users",         icon: Users },
+  { path: "/admin/products",      label: "Products",      icon: Package },
+  { path: "/admin/categories",    label: "Categories",    icon: Tags },
+  { path: "/admin/orders",        label: "Orders",        icon: ShoppingBag },
+  { path: "/admin/services",      label: "Services",      icon: Wrench },
+  { path: "/admin/announcements", label: "Announcements", icon: Megaphone },
+  { path: "/admin/analytics",     label: "Analytics",     icon: BarChart3 },
+  { path: "/admin/profile",       label: "My Profile",    icon: User },
 ];
 
 interface SidebarProps {
@@ -24,19 +38,13 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
-  const auth = useAuth();
-  const user = (auth as any).user;
-  const logout = typeof (auth as any).logout === "function" ? (auth as any).logout : () => {};
-  const navigate          = useNavigate();
+  const user = getCurrentUser();
+  const navigate = useNavigate();
 
   const handleLogout = (): void => {
-    logout();
+    doLogout();
     navigate("/login", { replace: true });
   };
-
-  const visibleRoutes = NAV_ROUTES.filter((r) =>
-    !r.requiredRole || (user && r.requiredRole.includes(user.role))
-  );
 
   return (
     <>
@@ -59,11 +67,12 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
         </div>
 
         <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-          {visibleRoutes.map((item) => (
+          {NAV_ROUTES.map((item) => (
             <NavLink
               key={item.path}
               to={item.path}
               onClick={onClose}
+              end={item.path === "/admin/dashboard"}
               className={({ isActive }) =>
                 `w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
                 ${isActive
@@ -82,11 +91,11 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
           {user && (
             <div className="flex items-center gap-2.5 px-3 py-2">
               <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                {user.avatar}
+                {(user.email || "A").charAt(0).toUpperCase()}
               </div>
               <div className="min-w-0">
-                <div className="text-xs font-medium text-stone-300 truncate">{user.name}</div>
-                <div className="text-[10px] text-stone-500 capitalize">{user.role}</div>
+                <div className="text-xs font-medium text-stone-300 truncate">{user.email || "Admin"}</div>
+                <div className="text-[10px] text-stone-500 capitalize">{user.role.toLowerCase()}</div>
               </div>
             </div>
           )}

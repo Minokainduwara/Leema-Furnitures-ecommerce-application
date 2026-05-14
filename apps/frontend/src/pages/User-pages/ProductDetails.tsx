@@ -1,13 +1,33 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { authFetch } from "../../utils/api";
+import { addToCart as cartAdd } from "../../utils/cart";
 
 const ProductDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const [product, setProduct] = useState<any>(null);
   const [related, setRelated] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const handleAddToCart = () => {
+    if (!product) return;
+    cartAdd(
+      {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+      },
+      1
+    );
+  };
+
+  const handleBuyNow = () => {
+    handleAddToCart();
+    navigate("/addtocart");
+  };
 
   // 🔥 safe image builder
   const getImage = (img?: string) =>
@@ -118,11 +138,17 @@ const ProductDetail = () => {
               LKR {product.price}
             </p>
 
-            <button className="mt-6 w-full bg-black text-white py-3 rounded-xl hover:bg-gray-800 transition">
+            <button
+              onClick={handleAddToCart}
+              className="mt-6 w-full bg-white text-stone-900 border-2 border-stone-900 font-semibold py-3 rounded-xl hover:bg-stone-100 transition"
+            >
               Add to Cart
             </button>
 
-            <button className="mt-3 w-full border border-black py-3 rounded-xl hover:bg-black hover:text-white transition">
+            <button
+              onClick={handleBuyNow}
+              className="mt-3 w-full bg-amber-500 text-white font-bold py-3 rounded-xl hover:bg-amber-600 transition shadow-md shadow-amber-500/30"
+            >
               Buy Now
             </button>
           </div>

@@ -176,14 +176,25 @@ export default function UserDashboard() {
         </div>
 
         {/* ================= QUICK ACTIONS ================= */}
-        <div className="flex gap-3">
-          <button onClick={() => navigate("/user/category")} className="bg-black text-white px-4 py-2 rounded-lg">
-            Browse Products
+        <div className="flex flex-wrap gap-3">
+          <button
+            onClick={() => navigate("/user/category")}
+            className="bg-amber-500 hover:bg-amber-600 text-white font-semibold px-5 py-2.5 rounded-lg shadow-md shadow-amber-500/30"
+          >
+            🛍️ Browse Products
           </button>
-          <button className="bg-gray-200 px-4 py-2 rounded-lg">
-            View Orders
+          <button
+            onClick={() => navigate("/addtocart")}
+            className="bg-stone-900 hover:bg-stone-800 text-white font-semibold px-5 py-2.5 rounded-lg"
+          >
+            View Cart
           </button>
-          <button className="bg-gray-200 px-4 py-2 rounded-lg">Support</button>
+          <button
+            onClick={() => setPanel("orders")}
+            className="bg-stone-200 hover:bg-stone-300 px-5 py-2.5 rounded-lg"
+          >
+            My Orders
+          </button>
         </div>
       </div>
     );
@@ -237,14 +248,14 @@ export default function UserDashboard() {
             <Item
               icon={<PackageSearch size={18} />}
               label="Browse Products"
-              active={panel === "products"}
-              onClick={() => setPanel("products")}
+              active={false}
+              onClick={() => navigate("/user/category")}
             />
             <Item
               icon={<Tags size={18} />}
-              label="Categories"
-              active={panel === "categories"}
-              onClick={() => setPanel("categories")}
+              label="Cart"
+              active={false}
+              onClick={() => navigate("/addtocart")}
             />
           </Section>
 

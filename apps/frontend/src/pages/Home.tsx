@@ -2,8 +2,11 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import { api, isLoggedIn } from "../utils/api";
-import type { Product, ToastState } from "../types";
+import { api, productImageUrl, type ApiProduct } from "../utils/api";
+import { addToCart as cartAdd } from "../utils/cart";
+
+type Product = ApiProduct & { brand?: string; category?: string; imageUrl?: string };
+type ToastState = { message: string; type: "success" | "error" };
 
 // ── Toast ─────────────────────────────────────────────────────────────────────
 
@@ -33,6 +36,7 @@ interface ProductCardProps {
 
 function ProductCard({ item, onAddToCart }: ProductCardProps): React.ReactElement {
   const [adding, setAdding] = useState<boolean>(false);
+  const nav = useNavigate();
 
   const handleAdd = async (e: React.MouseEvent<HTMLButtonElement>): Promise<void> => {
     e.stopPropagation();
@@ -42,7 +46,9 @@ function ProductCard({ item, onAddToCart }: ProductCardProps): React.ReactElemen
   };
 
   return (
-    <div className="group relative bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 flex flex-col">
+    <div
+      onClick={() => nav(`/product/details/${item.id}`)}
+      className="group relative bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 flex flex-col cursor-pointer">
       {item.brand && (
         <span className="absolute top-3 left-3 z-10 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full">
           {item.brand}
@@ -51,7 +57,7 @@ function ProductCard({ item, onAddToCart }: ProductCardProps): React.ReactElemen
 
       <div className="overflow-hidden h-52 bg-amber-50 flex items-center justify-center">
         <img
-          src={item.imageUrl || "/images/placeholder.jpg"}
+          src={productImageUrl(item.image)}
           alt={item.name}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
         />
@@ -59,7 +65,7 @@ function ProductCard({ item, onAddToCart }: ProductCardProps): React.ReactElemen
 
       <div className="p-5 flex flex-col gap-2 flex-1">
         <span className="text-xs font-semibold text-amber-600 uppercase tracking-wider">
-          {item.category}
+          {item.categoryName || item.category || "Furniture"}
         </span>
         <h4 className="text-gray-800 font-bold text-base leading-snug line-clamp-2">
           {item.name}
@@ -260,7 +266,7 @@ export default function Home(): React.ReactElement {
 
   useEffect(() => {
     api
-      .getRandomProducts(8)
+      .getFeaturedProducts(8)
       .then(setProducts)
       .catch(() => showToast("Failed to load products", "error"))
       .finally(() => setLoading(false));
@@ -268,19 +274,23 @@ export default function Home(): React.ReactElement {
 
   const handleAddToCart = useCallback(
     async (product: Product): Promise<void> => {
-      if (!isLoggedIn()) {
-        navigate("/login");
-        return;
-      }
       try {
-        await api.addToCart(product.id, 1);
-        showToast(`"${product.name}" added to cart! 🛒`);
+        cartAdd(
+          {
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            image: productImageUrl(product.image),
+          },
+          1
+        );
+        showToast(`"${product.name}" added to cart`);
       } catch (err) {
         const message = err instanceof Error ? err.message : "Failed to add to cart";
         showToast(message, "error");
       }
     },
-    [navigate]
+    []
   );
 
   return (

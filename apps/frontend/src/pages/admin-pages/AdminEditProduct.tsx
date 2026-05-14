@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { authFetch, API_BASE, productImageUrl } from "../../utils/api";
 
 function AdminEditProduct() {
   const { id } = useParams();
@@ -39,7 +40,7 @@ function AdminEditProduct() {
 
     const fetchProduct = async () => {
       try {
-        const res = await fetch(`http://localhost:8080/api/products/${id}`);
+        const res = await authFetch(`${API_BASE}/api/products/${id}`);
         if (!res.ok) throw new Error("Failed to fetch product");
 
         const data = await res.json();
@@ -63,7 +64,7 @@ function AdminEditProduct() {
 
     const fetchCategories = async () => {
       try {
-        const res = await fetch("http://localhost:8080/api/categories");
+        const res = await authFetch(`${API_BASE}/api/categories`);
         if (!res.ok) throw new Error("Failed to load categories");
 
         const data = await res.json();
@@ -121,8 +122,8 @@ function AdminEditProduct() {
         formData.append("image", imageFile);
       }
 
-      const res = await fetch(
-        `http://localhost:8080/api/products/${id}`,
+      const res = await authFetch(
+        `${API_BASE}/api/products/${id}`,
         {
           method: "PUT",
           body: formData,
@@ -142,10 +143,7 @@ function AdminEditProduct() {
     }
   };
 
-  const getImageUrl = (path: string) => {
-    if (!path) return "";
-    return `http://localhost:8080${path}`;
-  };
+  const getImageUrl = (path: string) => productImageUrl(path);
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900 flex items-center justify-center p-6">

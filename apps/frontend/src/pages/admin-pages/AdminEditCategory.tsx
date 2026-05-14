@@ -1,26 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { authFetch, API_BASE } from "../../utils/api";
 
 function AdminEditCategory() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [sidebaropen, setsidebar] = useState<boolean>(false);
-  const sideBarItems = [
-    { name: "Dashboard", icon: "/images/dashboard.png", path: "/dashboard" },
-    { name: "Products", icon: "/images/products.png", path: "/products" },
-    { name: "Category", icon: "/images/products.png", path: "/category" },
-
-    { name: "Orders", icon: "/images/orders.png", path: "/orders" },
-    { name: "Repair", icon: "/images/products.png", path: "/repairs" },
-    {
-      name: "Customer Details",
-      icon: "/images/Details.png",
-      path: "/customers",
-    },
-    { name: "Promotions", icon: "/images/promotion.png", path: "/promotions" },
-    { name: "Messages", icon: "/images/msg.png", path: "/messages" },
-    { name: "Profile", icon: "/images/profile.png", path: "/profile" },
-  ];
 
   const [form, setForm] = useState({
     name: "",
@@ -28,149 +12,133 @@ function AdminEditCategory() {
     description: "",
     isActive: true,
   });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // LOAD CATEGORY
   useEffect(() => {
-    fetch(`http://localhost:8080/api/categories/${id}`)
-      .then((res) => res.json())
-      .then((data) => setForm(data))
-      .catch((err) => console.log("Error loading category:", err));
+    authFetch(`${API_BASE}/api/categories/${id}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to load category");
+        return res.json();
+      })
+      .then((data) => setForm({
+        name: data.name ?? "",
+        slug: data.slug ?? "",
+        description: data.description ?? "",
+        isActive: data.isActive ?? true,
+      }))
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
   }, [id]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+    setSaving(true);
 
-    await fetch(`http://localhost:8080/api/categories/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(form),
-    });
-
-    alert("Category updated successfully");
-    navigate("/category");
+    try {
+      const res = await authFetch(`${API_BASE}/api/categories/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) throw new Error(await res.text() || "Update failed");
+      navigate("/admin/categories");
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
   };
 
+  if (loading) {
+    return <p className="text-stone-500">Loading category…</p>;
+  }
+
   return (
-    <div className="bg-gray-100 min-h-screen flex font-sans">
-      {/* SIDEBAR (UNCHANGED STYLE) */}
-      <aside
-        className={`bg-orange-400 w-70 h-screen fixed shadow-lg z-20 ${
-          sidebaropen ? "translate-x-0" : "-translate-x-64"
-        } lg:translate-x-0 lg:static transition-all flex flex-col`}
+    <div className="max-w-2xl">
+      <h1 className="text-2xl font-bold text-stone-900 mb-6">Edit Category #{id}</h1>
+
+      <form
+        onSubmit={handleUpdate}
+        className="bg-white border border-stone-100 rounded-2xl p-6 space-y-4 shadow-sm"
       >
-        <div className="flex items-center gap-2 p-4 border-b border-white">
-          <img src="/images/leemalogo.jpg" className="h-6 w-18" />
-          <span className="font-bold text-gray-700 ">Seller Dashboard</span>
-        </div>
-
-        <nav className="flex-1 mt-6">
-          {sideBarItems.map((item) => (
-            <Link
-              key={item.name}
-              to={item.path!}
-              className="flex items-center gap-3 px-4 py-3 hover:bg-white hover:rounded-md"
-            >
-              <img src={item.icon} className="w-6 h-6" />
-              <span className="text-gray-900 font-medium">{item.name}</span>
-            </Link>
-          ))}
-        </nav>
-
-        <div className="p-4 border-t border-white">
-          <button className="w-full bg-red-500 text-white py-2 rounded">
-            Logout
-          </button>
-        </div>
-      </aside>
-
-      {/* MAIN CONTENT */}
-      <main className="flex-1 ml-64 flex items-center justify-center p-6">
-        <form
-          onSubmit={handleUpdate}
-          className="bg-white w-full max-w-md p-6 rounded-xl shadow-md"
-        >
-          <h2 className="text-2xl font-bold mb-6 text-gray-800">
-            Edit Category #{id}
-          </h2>
-
-          {/* NAME */}
-          <label className="text-sm font-medium text-gray-700">
-            Category Name
-          </label>
+        <div>
+          <label className="block text-sm font-medium text-stone-700 mb-1">Name</label>
           <input
             name="name"
             value={form.name}
             onChange={handleChange}
-            className="w-full border px-3 py-2 rounded mb-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            className="w-full border border-stone-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+            required
           />
+        </div>
 
-          {/* SLUG */}
-          <label className="text-sm font-medium text-gray-700">Slug</label>
+        <div>
+          <label className="block text-sm font-medium text-stone-700 mb-1">Slug</label>
           <input
             name="slug"
             value={form.slug}
             onChange={handleChange}
-            className="w-full border px-3 py-2 rounded mb-4  text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            className="w-full border border-stone-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
           />
+        </div>
 
-          {/* DESCRIPTION */}
-          <label className="text-sm font-medium text-gray-700">
-            Description
-          </label>
+        <div>
+          <label className="block text-sm font-medium text-stone-700 mb-1">Description</label>
           <textarea
             name="description"
             value={form.description}
             onChange={handleChange}
-            className="w-full border px-3 py-2 rounded mb-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            rows={3}
+            className="w-full border border-stone-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
           />
+        </div>
 
-          {/* STATUS */}
-          <label className="text-sm font-medium text-gray-700">Status</label>
-
+        <div>
+          <label className="block text-sm font-medium text-stone-700 mb-1">Status</label>
           <select
             name="isActive"
             value={form.isActive ? "true" : "false"}
             onChange={(e) =>
-              setForm({
-                ...form,
-                isActive: e.target.value === "true",
-              })
+              setForm({ ...form, isActive: e.target.value === "true" })
             }
-            className="w-full border px-3 py-2 rounded mb-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            className="w-full border border-stone-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
           >
             <option value="true">Active</option>
             <option value="false">Inactive</option>
           </select>
-          {/* BUTTONS */}
-          <div className="flex gap-2">
-            <button
-              type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded w-full"
-            >
-              Update
-            </button>
+        </div>
 
-            <button
-              type="button"
-              onClick={() => navigate("/category")}
-              className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded w-full"
-            >
-              Cancel
-            </button>
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-3 py-2 text-sm">
+            {error}
           </div>
-        </form>
-      </main>
+        )}
+
+        <div className="flex gap-2 pt-2">
+          <button
+            type="submit"
+            disabled={saving}
+            className="bg-amber-500 hover:bg-amber-600 text-white font-semibold px-5 py-2.5 rounded-lg disabled:opacity-60"
+          >
+            {saving ? "Saving…" : "Update"}
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate("/admin/categories")}
+            className="bg-stone-200 hover:bg-stone-300 text-stone-800 px-5 py-2.5 rounded-lg"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
     </div>
   );
 }

@@ -1,176 +1,142 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { authFetch } from "../../utils/api";
-type Product = {
-  id: number;
-  name: string;
-  price: number;
-  image: string;
-  description?: string;
-  originalPrice: number;
-  sku?: string;
-};
+import { Link, useNavigate } from "react-router-dom";
+import { Trash2, Minus, Plus, ShoppingBag } from "lucide-react";
+import {
+  getCart,
+  removeFromCart,
+  updateQty,
+  subscribeCart,
+  type CartItem,
+} from "../../utils/cart";
+import { isLoggedIn } from "../../utils/api";
+
 const AddToCart = () => {
-  const { id } = useParams();
+  const navigate = useNavigate();
+  const [items, setItems] = useState<CartItem[]>(getCart());
 
-  const [product, setProduct] = useState<Product | null>(null);
-  const [qty, setQty] = useState(1);
-  const [cart, setCart] = useState([]);
-
-  // ================= FETCH PRODUCT =================
   useEffect(() => {
-    authFetch(`http://localhost:8080/api/products/${id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setProduct({
-          id: data.id,
-          name: data.name,
-          price: data.finalPrice ?? data.price,
-          originalPrice: data.price,
-          description: data.description,
-          sku: data.sku,
-          image: data.image
-            ? `http://localhost:8080/uploads/${data.image}`
-            : "/placeholder.png",
-        });
-      })
-      .catch((err) => console.error(err));
-  }, [id]);
+    const unsub = subscribeCart(() => setItems(getCart()));
+    return () => unsub();
+  }, []);
 
-  // ================= ADD TO LOCAL CART =================
-  const handleAddToCart = () => {
-    if (!product) return;
+  const total = items.reduce((s, it) => s + it.price * it.qty, 0);
 
-    const item = {
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.image,
-      qty: qty,
-    };
-
-    setCart((prev) => {
-      const exists = prev.find((p) => p.id === item.id);
-
-      if (exists) {
-        return prev.map((p) =>
-          p.id === item.id ? { ...p, qty: p.qty + qty } : p
-        );
-      }
-
-      return [...prev, item];
-    });
-
-    alert("Added to cart!");
+  const handleCheckout = () => {
+    if (items.length === 0) return;
+    if (!isLoggedIn()) {
+      navigate("/login?redirect=/checkout");
+      return;
+    }
+    navigate("/checkout");
   };
 
-  // ================= LOADING =================
-  if (!product) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-gray-500">
-        Loading product...
-      </div>
-    );
-  }
-
-  // ================= UI =================
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-5xl mx-auto grid lg:grid-cols-2 gap-8">
+      <div className="max-w-5xl mx-auto">
+        <h1 className="text-3xl font-bold text-stone-900 mb-6">Your Cart</h1>
 
-        {/* PRODUCT IMAGE */}
-        <div className="bg-white border rounded-xl p-4">
-          <img
-            src={product.image}
-            className="w-full h-[400px] object-cover rounded-xl"
-            alt={product.name}
-          />
-        </div>
-
-        {/* PRODUCT DETAILS */}
-        <div className="bg-white border rounded-xl p-6">
-
-          <h1 className="text-3xl font-bold">{product.name}</h1>
-
-          <p className="text-gray-500 text-sm mt-2">
-            SKU: {product.sku}
-          </p>
-
-          <p className="mt-4 text-gray-600">
-            {product.description}
-          </p>
-
-          {/* PRICE */}
-          <div className="mt-6">
-            <p className="line-through text-gray-400">
-              LKR {product.originalPrice}
-            </p>
-
-            <p className="text-2xl font-bold text-green-600">
-              LKR {product.price}
-            </p>
-          </div>
-
-          {/* QTY */}
-          <div className="flex items-center gap-4 mt-5">
-            <button
-              onClick={() => setQty((q) => Math.max(1, q - 1))}
-              className="px-3 py-1 bg-gray-200 rounded"
+        {items.length === 0 ? (
+          <div className="bg-white border rounded-2xl p-12 text-center">
+            <ShoppingBag size={48} className="mx-auto text-stone-300" />
+            <p className="text-stone-500 mt-4 mb-6">Your cart is empty.</p>
+            <Link
+              to="/user/category"
+              className="inline-block bg-amber-500 text-white font-semibold px-6 py-3 rounded-xl hover:bg-amber-600 transition"
             >
-              -
-            </button>
-
-            <span className="text-lg">{qty}</span>
-
-            <button
-              onClick={() => setQty((q) => q + 1)}
-              className="px-3 py-1 bg-gray-200 rounded"
-            >
-              +
-            </button>
+              Browse products
+            </Link>
           </div>
-
-          {/* BUTTON */}
-          <button
-            onClick={handleAddToCart}
-            className="w-full mt-6 bg-black text-white py-3 rounded-xl hover:bg-gray-800 transition"
-          >
-            Add to Cart
-          </button>
-        </div>
-      </div>
-
-      {/* LOCAL CART PREVIEW */}
-      <div className="max-w-5xl mx-auto mt-10">
-        <h2 className="text-xl font-bold mb-4">Cart Preview (Frontend Only)</h2>
-
-        {cart.length === 0 ? (
-          <p className="text-gray-500">Cart is empty</p>
         ) : (
-          <div className="space-y-3">
-            {cart.map((item) => (
-              <div
-                key={item.id}
-                className="flex items-center justify-between bg-white border p-4 rounded-xl"
-              >
-                <div className="flex items-center gap-3">
+          <div className="grid lg:grid-cols-3 gap-6">
+            {/* Items */}
+            <div className="lg:col-span-2 space-y-4">
+              {items.map((item) => (
+                <div
+                  key={item.id}
+                  className="bg-white border rounded-2xl p-4 flex items-center gap-4"
+                >
                   <img
                     src={item.image}
-                    className="w-14 h-14 object-cover rounded"
+                    alt={item.name}
+                    className="w-24 h-24 object-cover rounded-xl bg-amber-50"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "/images/placeholder.jpg";
+                    }}
                   />
-                  <div>
-                    <p className="font-semibold">{item.name}</p>
-                    <p className="text-sm text-gray-500">
-                      Qty: {item.qty}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-stone-800 truncate">{item.name}</p>
+                    <p className="text-sm text-stone-500">
+                      LKR {item.price.toLocaleString()}
                     </p>
+
+                    <div className="flex items-center gap-2 mt-3">
+                      <button
+                        onClick={() => updateQty(item.id, item.qty - 1)}
+                        className="w-9 h-9 flex items-center justify-center rounded-full bg-stone-800 text-white hover:bg-black transition shadow-sm"
+                        aria-label="Decrease"
+                      >
+                        <Minus size={16} strokeWidth={2.5} />
+                      </button>
+                      <span className="w-10 text-center font-bold text-stone-900 text-lg">
+                        {item.qty}
+                      </span>
+                      <button
+                        onClick={() => updateQty(item.id, item.qty + 1)}
+                        className="w-9 h-9 flex items-center justify-center rounded-full bg-stone-800 text-white hover:bg-black transition shadow-sm"
+                        aria-label="Increase"
+                      >
+                        <Plus size={16} strokeWidth={2.5} />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="text-right flex flex-col items-end gap-3">
+                    <p className="font-bold text-green-600">
+                      LKR {(item.price * item.qty).toLocaleString()}
+                    </p>
+                    <button
+                      onClick={() => removeFromCart(item.id)}
+                      className="text-red-500 hover:text-red-700"
+                      aria-label="Remove"
+                    >
+                      <Trash2 size={18} />
+                    </button>
                   </div>
                 </div>
+              ))}
+            </div>
 
-                <p className="font-bold text-green-600">
-                  LKR {item.price * item.qty}
-                </p>
+            {/* Summary */}
+            <div className="bg-white border rounded-2xl p-6 h-fit lg:sticky lg:top-6">
+              <h2 className="text-lg font-bold text-stone-800 mb-4">Order Summary</h2>
+              <div className="flex justify-between text-sm text-stone-600 mb-2">
+                <span>Subtotal</span>
+                <span>LKR {total.toLocaleString()}</span>
               </div>
-            ))}
+              <div className="flex justify-between text-sm text-stone-600 mb-2">
+                <span>Shipping</span>
+                <span>Calculated at checkout</span>
+              </div>
+              <div className="border-t my-4" />
+              <div className="flex justify-between font-bold text-stone-900 text-lg">
+                <span>Total</span>
+                <span>LKR {total.toLocaleString()}</span>
+              </div>
+
+              <button
+                onClick={handleCheckout}
+                className="w-full mt-6 bg-black text-white font-semibold py-3 rounded-xl hover:bg-stone-800 transition"
+              >
+                Proceed to Checkout
+              </button>
+
+              <Link
+                to="/user/category"
+                className="block text-center text-sm text-stone-500 hover:text-stone-700 mt-4"
+              >
+                Continue shopping
+              </Link>
+            </div>
           </div>
         )}
       </div>

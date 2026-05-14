@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Mail, Lock, User, Eye, EyeOff, UserPlus, Phone } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import { notifyAuthChanged } from "../utils/api";
 
 interface SignupForm {
   name: string;
@@ -70,9 +71,12 @@ const SignupPage: React.FC = () => {
       if (response?.accessToken) {
         localStorage.setItem("token", response.accessToken);
         localStorage.setItem("role", response.role);
+        if (response.userId) localStorage.setItem("userId", String(response.userId));
+        if (response.email) localStorage.setItem("email", response.email);
+        notifyAuthChanged();
       }
 
-      navigate("/login");
+      navigate("/user/dashboard");
     } catch (err: any) {
       setError(authError || "Signup failed. Please try again.");
     }

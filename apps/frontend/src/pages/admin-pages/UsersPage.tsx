@@ -77,7 +77,10 @@ const ViewIcon = () => (
 const BASE = "http://localhost:8080/api/admin/users";
 
 function authHeaders(): Record<string, string> {
-  return { "Content-Type": "application/json" };
+  const token = localStorage.getItem("token");
+  const h: Record<string, string> = { "Content-Type": "application/json" };
+  if (token) h.Authorization = `Bearer ${token}`;
+  return h;
 }
 
 async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {

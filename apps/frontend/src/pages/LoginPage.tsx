@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Mail, Lock, Eye, EyeOff, LogIn } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { notifyAuthChanged } from "../utils/api";
 
 interface LoginForm {
   email: string;
@@ -54,6 +55,8 @@ const LoginPage: React.FC = () => {
       localStorage.setItem("token", data.accessToken);
       localStorage.setItem("role", data.role);
       localStorage.setItem("userId", data.userId);
+      if (data.email) localStorage.setItem("email", data.email);
+      notifyAuthChanged();
 
       // 🔥 ROLE BASED REDIRECT
       if (data.role === "SELLER") {

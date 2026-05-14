@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import Navbar from "./Navbar";
 import WebGLSlider from "./WebGSlider";
 
@@ -26,19 +27,19 @@ const Header: React.FC = () => {
             </p>
 
             <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <a
-                href="/products"
+              <Link
+                to="/user/category"
                 className="bg-orange-500 px-8 py-3 rounded-xl font-bold hover:bg-orange-600 transition"
               >
                 Shop Now
-              </a>
+              </Link>
 
-              <a
-                href="/about"
+              <Link
+                to="/aboutus"
                 className="bg-white/20 px-8 py-3 rounded-xl backdrop-blur border border-white/30"
               >
                 Learn More
-              </a>
+              </Link>
             </div>
           </div>
 
