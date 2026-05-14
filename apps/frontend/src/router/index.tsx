@@ -2,7 +2,8 @@ import React, { lazy, Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 import ForbiddenPage from "../pages/ForbiddenPage";
 import AdminLayout from "../pages/admin-pages/AdminLayout";
-import ProtectedRoute from "../components/ProtectedRoute";
+import RequireAuth from "../guards/RequireAuth";
+
 
 // ─── Lazy page chunks ─────────────────────────────────────────────────────────
 
@@ -12,12 +13,30 @@ const UsersPage     = lazy(() => import("../pages/admin-pages/UsersPage"));
 const ServicesPage  = lazy(() => import("../pages/admin-pages/ServicesPage"));
 const AnalyticsPage = lazy(() => import("../pages/admin-pages/AnalyticsPage"));
 const ProfilePage   = lazy(() => import("../pages/admin-pages/ProfilePage"));
+
 const LoginPage     = lazy(() => import("../pages/LoginPage"));
 const SignupPage = lazy(() => import("../pages/SignupPage"));
 const Home          = lazy(() => import("../pages/Home"));
 const AboutUs = lazy(() => import("../pages/AboutUs"));
 const Products = lazy(() => import("../pages/Products"));
 const ContactUs = lazy(() => import("../pages/ContactUs"));
+
+const UserDashboard = lazy(() => import("../pages/user-pages/UserDashboard"));
+const UserLayout = lazy(() => import("../pages/user-pages/userLayout"));
+const UserDetailsPage = lazy(() => import("../pages/user-pages/UserDetailsPage"));
+const UserOrdersPage = lazy(() => import("../pages/user-pages/UserOrdersPage"));
+const UserServicesPage = lazy(() => import("../pages/user-pages/UserServicesPage"));
+const CheckoutPage = lazy(() => import("../pages/CheckoutPage"));
+const OrderSuccessPage = lazy(() => import("../pages/OrderSuccessPage"));
+const OrderTrackingPage = lazy(() => import("../pages/OrderTrackingPage"));
+
+const SellerDashboard = lazy(() => import("../pages/SellerDashboard"));
+const SellerProductManagement = lazy(() => import("../pages/seller-pages/SellerProductManagement"));
+const SellerOrderManagement = lazy(() => import("../pages/seller-pages/SellerOrderManagement"));
+const SellerCustomerDetails = lazy(() => import("../pages/seller-pages/SellerCustomerDetails"));
+const SellerPromotions = lazy(() => import("../pages/seller-pages/SellerPromotions"));
+const SellerMessages = lazy(() => import("../pages/seller-pages/SellerMessage"));
+const SellerProfile = lazy(() => import("../pages/seller-pages/SellerProfile"));
 
 // ─── Spinner ──────────────────────────────────────────────────────────────────
 
@@ -47,11 +66,13 @@ const AppRoutes: React.FC = () => (
     <Route
       path="/admin"
       element={
-        <ProtectedRoute requireAdmin>
+        <RequireAuth allowedRoles={["ADMIN"]}>
           <AdminLayout />
-        </ProtectedRoute>
+        </RequireAuth>
       }
     >
+      <Route index element={S(<DashboardPage />)} />
+      
       <Route path="dashboard" element={S(<DashboardPage />)} />
       <Route path="products" element={S(<ProductsPage />)} />
       <Route path="users" element={S(<UsersPage />)} />
@@ -60,10 +81,50 @@ const AppRoutes: React.FC = () => (
       <Route path="profile" element={S(<ProfilePage />)} />
     </Route>
 
+    {/* User Routes */}
+    <Route
+      path="/user"
+      element={
+        <RequireAuth allowedRoles={["USER"]}>
+          <UserLayout />
+        </RequireAuth>
+      }
+    >
+      <Route index element={S(<UserDashboard />)} />
+      <Route path="dashboard" element={S(<UserDashboard />)} />
+      <Route path="details" element={S(<UserDetailsPage />)} />
+      <Route path="orders" element={S(<UserOrdersPage />)} />
+      <Route path="services" element={S(<UserServicesPage />)} />
+      <Route path="checkout" element={S(<CheckoutPage />)} />
+      <Route path="order-success/:orderNumber" element={S(<OrderSuccessPage />)} />
+      <Route path="tracking/:id" element={S(<OrderTrackingPage />)} />
+    </Route>
+
+    {/* Seller Routes */}
+    <Route
+      path="/seller"
+      element={
+        <RequireAuth allowedRoles={["SELLER"]}>
+          <SellerDashboard />
+        </RequireAuth>
+      }
+    >
+      <Route index element={S(<SellerDashboard />)} />
+      <Route path="dashboard" element={S(<SellerDashboard />)} />
+      <Route path="products" element={S(<SellerProductManagement />)} />
+      <Route path="orders" element={S(<SellerOrderManagement />)} />
+      <Route path="customers" element={S(<SellerCustomerDetails />)} />
+      <Route path="promotions" element={S(<SellerPromotions />)} />
+      <Route  path="messages" element={S(<SellerMessages />)} />
+      <Route path="profile" element={S(<SellerProfile />)} />
+    </Route>
+
     {/* Error Routes */}
     <Route path="/forbidden" element={<ForbiddenPage />} />
     <Route path="*" element={<div className="p-8 text-center">404 - Page Not Found</div>} />
   </Routes>
+
+
 );
 
 export default AppRoutes;
