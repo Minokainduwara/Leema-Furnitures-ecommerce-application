@@ -10,12 +10,12 @@ import type { RouteMeta } from "../../types";
 // ─── Nav routes ───────────────────────────────────────────────────────────────
 
 export const NAV_ROUTES: RouteMeta[] = [
-  { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { path: "/products",  label: "Products",  icon: Package },
-  { path: "/users",     label: "Users",     icon: Users,    requiredRole: ["superadmin", "admin"] },
-  { path: "/services",  label: "Services",  icon: Wrench },
+  { path: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { path: "/admin/products",  label: "Products",  icon: Package },
+  { path: "/admin/users",     label: "Users",     icon: Users,    requiredRole: ["superadmin", "admin"] },
+  { path: "/admin/services",  label: "Services",  icon: Wrench },
   { path: "/analytics", label: "Analytics", icon: BarChart3, requiredRole: ["superadmin", "admin"] },
-  { path: "/profile",   label: "My Profile",icon: User },
+  { path: "/admin/profile",   label: "My Profile",icon: User },
 ];
 
 interface SidebarProps {
@@ -24,7 +24,9 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
-  const { user, logout } = useAuth();
+  const auth = useAuth();
+  const user = (auth as any).user;
+  const logout = typeof (auth as any).logout === "function" ? (auth as any).logout : () => {};
   const navigate          = useNavigate();
 
   const handleLogout = (): void => {

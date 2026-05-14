@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./hooks/Authcontext";
-import AppRoutes from "./router";
+import AppRoutes from "./router/AppRoutes";
 
 const App: React.FC = () => {
   useEffect(() => {

@@ -10,7 +10,8 @@ interface TopbarProps {
 }
 
 const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
-  const { user } = useAuth();
+  const auth = useAuth();
+  const user = (auth as any).user;
   const location  = useLocation();
 
   const current = NAV_ROUTES.find((r) => location.pathname.startsWith(r.path));
