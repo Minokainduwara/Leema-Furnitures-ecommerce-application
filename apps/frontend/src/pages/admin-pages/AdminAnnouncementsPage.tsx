@@ -66,7 +66,7 @@ const AdminAnnouncementsPage = () => {
           <select
             value={audience}
             onChange={(e) => setAudience(e.target.value as Audience)}
-            className="w-full rounded-lg border border-stone-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+            className="w-full rounded-lg border border-stone-200 px-3 py-2 text-sm text-stone-900 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
           >
             <option value="ALL">All users</option>
             <option value="CUSTOMERS">Customers only</option>
@@ -82,7 +82,7 @@ const AdminAnnouncementsPage = () => {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="e.g. Holiday discount weekend"
-            className="w-full rounded-lg border border-stone-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+            className="w-full rounded-lg border border-stone-200 px-3 py-2 text-sm text-stone-900 placeholder-stone-400 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
             maxLength={140}
           />
         </div>
@@ -96,7 +96,7 @@ const AdminAnnouncementsPage = () => {
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Write the announcement body…"
             rows={6}
-            className="w-full rounded-lg border border-stone-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+            className="w-full rounded-lg border border-stone-200 px-3 py-2 text-sm text-stone-900 placeholder-stone-400 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
             maxLength={1000}
           />
           <p className="text-xs text-stone-400 mt-1">

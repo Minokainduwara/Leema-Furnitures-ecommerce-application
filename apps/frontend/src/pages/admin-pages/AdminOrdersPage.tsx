@@ -113,7 +113,7 @@ const AdminOrdersPage = () => {
         </div>
         <button
           onClick={load}
-          className="flex items-center gap-2 px-3 py-2 text-sm bg-white border border-stone-200 rounded-lg hover:bg-stone-50"
+          className="flex items-center gap-2 px-3 py-2 text-sm text-stone-700 bg-white border border-stone-200 rounded-lg hover:bg-stone-50"
         >
           <RefreshCw size={14} />
           Refresh
@@ -127,13 +127,13 @@ const AdminOrdersPage = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by order # or customer name"
-            className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+            className="w-full pl-9 pr-3 py-2 text-sm text-stone-900 placeholder-stone-400 rounded-lg border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
           />
         </div>
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-3 py-2 text-sm rounded-lg border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+          className="px-3 py-2 text-sm text-stone-900 rounded-lg border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
         >
           <option value="All">All statuses</option>
           {ORDER_STATUSES.map((s) => (
@@ -197,7 +197,7 @@ const AdminOrdersPage = () => {
                         <select
                           value={o.status}
                           onChange={(e) => updateStatus(o.id, e.target.value)}
-                          className="text-xs border border-stone-200 rounded px-2 py-1 bg-white"
+                          className="text-xs text-stone-900 border border-stone-200 rounded px-2 py-1 bg-white"
                         >
                           {ORDER_STATUSES.map((s) => (
                             <option key={s} value={s}>{s}</option>
@@ -213,7 +213,7 @@ const AdminOrdersPage = () => {
                         <select
                           value={o.paymentStatus}
                           onChange={(e) => updatePaymentStatus(o.id, e.target.value)}
-                          className="text-xs border border-stone-200 rounded px-2 py-1 bg-white"
+                          className="text-xs text-stone-900 border border-stone-200 rounded px-2 py-1 bg-white"
                         >
                           {PAYMENT_STATUSES.map((s) => (
                             <option key={s} value={s}>{s}</option>
