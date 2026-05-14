@@ -1,27 +1,24 @@
 import React, { useState } from "react";
-import { Mail, Lock, User, Eye, EyeOff, UserPlus, Phone } from "lucide-react";
+import { Mail, Lock, User, Eye, EyeOff, UserPlus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../hooks/useAuth";
-import { notifyAuthChanged } from "../utils/api";
+import { useAuth } from "../hooks/Authcontext";
 
 interface SignupForm {
   name: string;
   email: string;
   password: string;
   confirmPassword: string;
-  phoneNumber: string;
 }
 
 const SignupPage: React.FC = () => {
   const navigate = useNavigate();
-  const { signup, isLoading, error: authError } = useAuth();
+  const { signup, isLoading } = useAuth();
 
   const [form, setForm] = useState<SignupForm>({
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
-    phoneNumber: "",
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -29,8 +26,7 @@ const SignupPage: React.FC = () => {
   const [error, setError] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm({ ...form, [e.target.name]: e.target.value });
     setError("");
   };
 
@@ -38,8 +34,7 @@ const SignupPage: React.FC = () => {
     e.preventDefault();
     setError("");
 
-    // validation
-    if (!form.name || !form.email || !form.password || !form.confirmPassword || !form.phoneNumber) {
+    if (!form.name || !form.email || !form.password || !form.confirmPassword) {
       setError("Please fill in all fields");
       return;
     }
@@ -49,123 +44,96 @@ const SignupPage: React.FC = () => {
       return;
     }
 
-    // IMPORTANT: must match backend regex rule
-    const passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&+=!]).{6,128}$/;
-
-    if (!passwordRegex.test(form.password)) {
-      setError("Password must contain upper, lower, number, special character");
+    if (form.password.length < 6) {
+      setError("Password must be at least 6 characters");
       return;
     }
 
     try {
-      // send exactly what backend expects
-      const response = await signup({
-        name: form.name,
-        email: form.email,
-        password: form.password,
-        phoneNumber: form.phoneNumber,
-      });
+      const user = await signup(
+      form.email,
+      form.password,
+      form.name
+      );
 
-      // store token if returned
-      if (response?.accessToken) {
-        localStorage.setItem("token", response.accessToken);
-        localStorage.setItem("role", response.role);
-        if (response.userId) localStorage.setItem("userId", String(response.userId));
-        if (response.email) localStorage.setItem("email", response.email);
-        notifyAuthChanged();
+      if (user.role === "ADMIN") {
+        navigate("/admin/dashboard");
+      } else if (user.role === "SELLER") {
+        navigate("/seller/dashboard");
+      } else {
+        navigate("/user/dashboard");
       }
-
-      navigate("/user/dashboard");
     } catch (err: any) {
-      setError(authError || "Signup failed. Please try again.");
+      setError(err?.message || "Signup failed. Please try again.");
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-amber-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-stone-50 via-white to-amber-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
 
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-linear-to-br from-amber-400 to-amber-600 rounded-2xl mb-4">
             <UserPlus size={32} className="text-white" />
           </div>
           <h1 className="text-3xl font-bold text-stone-900 mb-2">Create Account</h1>
-          <p className="text-stone-500">Join Leema dashboard</p>
+          <p className="text-stone-500">Join With Leema Furinitures</p>
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-lg border border-stone-100 p-8">
+        <div className="bg-white p-8 rounded-2xl shadow-lg border border-stone-100">
+
           <form onSubmit={handleSubmit} className="space-y-5">
 
             {/* Name */}
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-2">
-                Full Name
-              </label>
-              <div className="relative">
-                <User size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
+              <label className="text-sm font-medium text-stone-700">Full Name</label>
+              <div className="relative mt-1">
+                <User className="absolute left-3 top-3 text-stone-400" size={18} />
                 <input
-                  type="text"
                   name="name"
                   value={form.name}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-stone-200 text-gray-700"
+                  placeholder="John Doe"
+                  className="w-full pl-10 pr-10 py-2.5 rounded-lg border border-stone-200 text-stone-900 placeholder:text-stone-400 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                 />
               </div>
             </div>
 
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-2">
-                Email Address
-              </label>
-              <div className="relative">
-                <Mail size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
+              <label className="text-sm font-medium text-stone-700">Email</label>
+              <div className="relative mt-1">
+                <Mail className="absolute left-3 top-3 text-stone-400" size={18} />
                 <input
-                  type="email"
                   name="email"
                   value={form.email}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-stone-200 text-gray-700"
-                />
-              </div>
-            </div>
-
-            {/* Phone */}
-            <div>
-              <label className="block text-sm font-medium text-stone-700 mb-2">
-                Phone Number
-              </label>
-              <div className="relative">
-                <Phone size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
-                <input
-                  type="text"
-                  name="phoneNumber"
-                  value={form.phoneNumber}
-                  onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-stone-200 text-gray-700"
+                  placeholder="admin@leema.com"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-stone-200 text-stone-900 placeholder:text-stone-400 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                 />
               </div>
             </div>
 
             {/* Password */}
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
+              <label className="text-sm font-medium text-stone-700">Password</label>
+              <div className="relative mt-1">
+                <Lock className="absolute left-3 top-3 text-stone-400" size={18} />
                 <input
                   type={showPassword ? "text" : "password"}
                   name="password"
                   value={form.password}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-10 py-2.5 rounded-lg border border-stone-200 text-gray-700"
+                  placeholder="••••••••"
+                  className="w-full pl-10 pr-10 py-2.5 rounded-lg border border-stone-200 text-stone-900 placeholder:text-stone-400 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                 />
-                <button type="button" onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-700">
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3 text-stone-400 hover:text-stone-600"
+                >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
@@ -173,20 +141,22 @@ const SignupPage: React.FC = () => {
 
             {/* Confirm Password */}
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-2">
-                Confirm Password
-              </label>
-              <div className="relative">
-                <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
+              <label className="text-sm font-medium text-stone-700">Confirm Password</label>
+              <div className="relative mt-1">
+                <Lock className="absolute left-3 top-3 text-stone-400" size={18} />
                 <input
                   type={showConfirm ? "text" : "password"}
                   name="confirmPassword"
                   value={form.confirmPassword}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-10 py-2.5 rounded-lg border border-stone-200 text-gray-700"
+                  placeholder="••••••••"
+                  className="w-full pl-10 pr-10 py-2.5 rounded-lg border border-stone-200 text-stone-900 placeholder:text-stone-400 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                 />
-                <button type="button" onClick={() => setShowConfirm(!showConfirm)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-700">
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm(!showConfirm)}
+                  className="absolute right-3 top-3 text-stone-400 hover:text-stone-600"
+                >
                   {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
@@ -194,8 +164,8 @@ const SignupPage: React.FC = () => {
 
             {/* Error */}
             {error && (
-              <div className="bg-red-50 border border-red-200 p-3 rounded-lg">
-                <p className="text-sm text-red-600">{error}</p>
+              <div className="text-red-600 bg-red-50 p-3 rounded-lg text-sm">
+                {error}
               </div>
             )}
 
@@ -203,17 +173,21 @@ const SignupPage: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-amber-500 to-amber-600 text-white py-2.5 rounded-lg"
+              className="w-full bg-linear-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 disabled:from-stone-400 disabled:to-stone-500 text-white font-semibold py-2.5 rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
             >
-              {isLoading ? "Creating account..." : "Create Account"}
+              {isLoading ? "Creating..." : "Create Account"}
             </button>
 
           </form>
 
-          <p className="text-center text-sm mt-6">
+          {/* Login link */}
+          <p className="text-center text-sm mt-6 text-stone-600">
             Already have an account?{" "}
-            <a href="/login" className="text-amber-600">Sign in</a>
+            <a href="/login" className="text-amber-600 font-semibold hover:text-amber-700">
+              Sign in
+            </a>
           </p>
+
         </div>
       </div>
     </div>

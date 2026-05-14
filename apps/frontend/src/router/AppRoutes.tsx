@@ -14,9 +14,10 @@ const ContactUs = lazy(() => import("../pages/ContactUs"));
 const UserDashboard = lazy(() => import("../pages/User-pages/UserDashboard"));
 const Category = lazy(() => import("../pages/User-pages/Category"));
 const ProductDetails = lazy(() => import("../pages/User-pages/ProductDetails"));
-const AddToCart = lazy(() => import("../pages/userOrders/AddToCart"));
-const Checkout = lazy(() => import("../pages/Checkout"));
-const PaymentSuccess = lazy(() => import("../pages/PaymentSuccess"));
+const Cart = lazy(() => import("../pages/Cart"));
+const CheckoutPage = lazy(() => import("../pages/CheckoutPage"));
+const OrderSuccessPage = lazy(() => import("../pages/OrderSuccessPage"));
+const OrderTrackingPage = lazy(() => import("../pages/OrderTrackingPage"));
 const PaymentCancel = lazy(() => import("../pages/PaymentCancel"));
 
 // ─── Seller Pages ────────────────────────────────────────────
@@ -88,9 +89,11 @@ const AppRoutes: React.FC = () => {
         <Route path="/user/dashboard" element={S(<UserDashboard />)} />
         <Route path="/user/category" element={S(<Category />)} />
         <Route path="/product/details/:id" element={S(<ProductDetails />)} />
-        <Route path="/addtocart" element={S(<AddToCart />)} />
-        <Route path="/checkout" element={S(<Checkout />)} />
-        <Route path="/payment/success" element={S(<PaymentSuccess />)} />
+        <Route path="/addtocart" element={S(<Cart />)} />
+        <Route path="/cart" element={S(<Cart />)} />
+        <Route path="/checkout" element={S(<CheckoutPage />)} />
+        <Route path="/user/order-success/:orderNumber" element={S(<OrderSuccessPage />)} />
+        <Route path="/order/tracking/:id" element={S(<OrderTrackingPage />)} />
         <Route path="/payment/cancel" element={S(<PaymentCancel />)} />
       </Route>
 

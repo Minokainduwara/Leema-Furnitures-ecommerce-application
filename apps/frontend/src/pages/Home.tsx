@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { api, productImageUrl, type ApiProduct } from "../utils/api";
-import { addToCart as cartAdd } from "../utils/cart";
+import { useCart } from "../hooks/CartContext";
+import { useAuth } from "../hooks/Authcontext";
 
 type Product = ApiProduct & { brand?: string; category?: string; imageUrl?: string };
 type ToastState = { message: string; type: "success" | "error" };
@@ -272,25 +273,24 @@ export default function Home(): React.ReactElement {
       .finally(() => setLoading(false));
   }, []);
 
+  const { addToCart } = useCart();
+  const { user } = useAuth();
+
   const handleAddToCart = useCallback(
     async (product: Product): Promise<void> => {
+      if (!user) {
+        navigate("/login");
+        return;
+      }
       try {
-        cartAdd(
-          {
-            id: product.id,
-            name: product.name,
-            price: product.price,
-            image: productImageUrl(product.image),
-          },
-          1
-        );
+        await addToCart(product.id, 1);
         showToast(`"${product.name}" added to cart`);
       } catch (err) {
         const message = err instanceof Error ? err.message : "Failed to add to cart";
         showToast(message, "error");
       }
     },
-    []
+    [addToCart, navigate, user]
   );
 
   return (

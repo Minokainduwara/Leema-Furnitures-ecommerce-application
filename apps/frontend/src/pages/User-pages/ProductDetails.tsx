@@ -1,32 +1,37 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import { authFetch } from "../../utils/api";
-import { addToCart as cartAdd } from "../../utils/cart";
+import { useCart } from "../../hooks/CartContext";
+import { useAuth } from "../../hooks/Authcontext";
 
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { addToCart } = useCart();
+  const { user } = useAuth();
 
   const [product, setProduct] = useState<any>(null);
   const [related, setRelated] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!product) return;
-    cartAdd(
-      {
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        image: product.image,
-      },
-      1
-    );
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    try {
+      await addToCart(product.id, 1);
+      toast.success(`"${product.name}" added to cart`);
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to add to cart");
+    }
   };
 
-  const handleBuyNow = () => {
-    handleAddToCart();
-    navigate("/addtocart");
+  const handleBuyNow = async () => {
+    await handleAddToCart();
+    navigate("/cart");
   };
 
   // 🔥 safe image builder

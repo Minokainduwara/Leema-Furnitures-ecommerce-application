@@ -3,28 +3,18 @@ import { Link, useNavigate } from "react-router-dom";
 import { Menu as MenuIcon, X, ShoppingCart, LogOut, LayoutDashboard } from "lucide-react";
 import logo from "/images/leemalogo.jpg";
 import Menu from "./Menu";
-import {
-  getCurrentUser,
-  subscribeAuth,
-  logout as doLogout,
-  dashboardPath,
-} from "../utils/api";
-import { getCartCount, subscribeCart } from "../utils/cart";
+import { dashboardPath } from "../utils/api";
+import { useAuth } from "../hooks/Authcontext";
+import { useCart } from "../hooks/CartContext";
 
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-  const [user, setUser] = useState(getCurrentUser());
-  const [cartCount, setCartCount] = useState(getCartCount());
+  const { user, logout: doLogout } = useAuth();
+  const { count: cartCount } = useCart();
 
-  useEffect(() => {
-    const unsubAuth = subscribeAuth(() => setUser(getCurrentUser()));
-    const unsubCart = subscribeCart(() => setCartCount(getCartCount()));
-    return () => {
-      unsubAuth();
-      unsubCart();
-    };
-  }, []);
+  // useEffect kept for compatibility — auth/cart state already reactive via contexts.
+  useEffect(() => {}, []);
 
   const handleLogout = () => {
     doLogout();
