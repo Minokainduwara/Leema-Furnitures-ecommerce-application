@@ -356,7 +356,7 @@ function Hero(): React.ReactElement {
             }}
           >
             <button
-              onClick={() => navigate("/category")}
+              onClick={() => navigate("/user/category")}
               className="relative overflow-hidden bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-900 font-black px-8 py-4 rounded-2xl text-base transition-all duration-300 hover:scale-105 group"
               style={{ boxShadow: "0 8px 32px rgba(245,158,11,0.4)" }}
             >
@@ -364,7 +364,7 @@ function Hero(): React.ReactElement {
               <span className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
             </button>
             <button
-              onClick={() => navigate("/category")}
+              onClick={() => navigate("/user/category")}
               className="border border-stone-600 hover:border-amber-400 text-stone-300 hover:text-amber-300 font-semibold px-8 py-4 rounded-2xl text-base transition-all duration-300 backdrop-blur-sm hover:bg-white/5"
             >
               Browse All
