@@ -1,3 +1,5 @@
+import React from "react";
+
 export default function MyDetails() {
   return (
     <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-xl p-10">

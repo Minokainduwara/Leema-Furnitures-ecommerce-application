@@ -12,7 +12,7 @@ CREATE TABLE users (
   name VARCHAR(255) NOT NULL,
   phone_number VARCHAR(20),
   profile_picture VARCHAR(500),
-  role ENUM('admin', 'user', 'guest') DEFAULT 'user',
+  role ENUM('admin', 'user', 'seller') DEFAULT 'user',
   status ENUM('active', 'inactive', 'suspended', 'deleted') DEFAULT 'active',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

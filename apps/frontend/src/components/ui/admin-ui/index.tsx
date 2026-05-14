@@ -204,7 +204,7 @@ const AVATAR_SIZES: Record<AvatarSize, string> = {
 
 export const Avatar: React.FC<AvatarProps> = ({ initials, size = "md", className = "" }) => (
   <div
-    className={`rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center
+    className={`rounded-xl bg-linear-to-br from-amber-400 to-amber-600 flex items-center justify-center
       text-white font-bold shadow-md ${AVATAR_SIZES[size]} ${className}`}
   >
     {initials}

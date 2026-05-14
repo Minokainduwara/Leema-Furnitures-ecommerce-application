@@ -136,7 +136,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
       }
     } catch (err) {
-      console.error("Logout error:", err);
+      setError("Signup failed");
+      throw err;
     } finally {
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");

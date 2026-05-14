@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { LayoutDashboard, Package, Users, Settings, BarChart3, LogOut } from "lucide-react";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuth } from "../../hooks/Authcontext";
+import React from "react";
 
 export default function Sidebar() {
   const { logout } = useAuth();
@@ -12,10 +13,10 @@ export default function Sidebar() {
   };
 
   return (
-    <div className="w-72 min-h-screen bg-gradient-to-b from-stone-900 to-stone-800 text-white p-6 border-r border-stone-700">
+    <div className="w-72 min-h-screen bg-linear-to-b from-stone-900 to-stone-800 text-white p-6 border-r border-stone-700">
       {/* Logo */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-400 to-amber-600 bg-clip-text text-transparent">
+        <h1 className="text-2xl font-bold bg-linear-to-r from-amber-400 to-amber-600 bg-clip-text text-transparent">
           LEEMA
         </h1>
         <p className="text-xs text-stone-400 mt-1">Admin Dashboard</p>
@@ -50,6 +51,20 @@ export default function Sidebar() {
         >
           <Package size={20} />
           Products
+        </NavLink>
+
+        <NavLink
+          to="/admin/Categories"
+          className={({ isActive }) =>
+            `flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+              isActive
+                ? "bg-amber-500 text-white"
+                : "text-stone-300 hover:bg-stone-700"
+            }`
+          }
+        >
+          <Package size={20} />
+          Categories
         </NavLink>
 
         <NavLink

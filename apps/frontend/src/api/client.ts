@@ -5,6 +5,7 @@ const api = ky.create({
   headers: {
     "Content-Type": "application/json",
   },
+
   hooks: {
     beforeRequest: [
       (request) => {
@@ -13,6 +14,8 @@ const api = ky.create({
         if (token) {
           request.headers.set("Authorization", `Bearer ${token}`);
         }
+
+        return response;
       },
     ],
   },
