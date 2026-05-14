@@ -45,24 +45,31 @@ function SellerProductManagement() {
   const [showDelete, setShowDelete] = useState({ show: false, id: null });
 
   const sideBarItems = [
-    { name: "Dashboard", icon: "/images/dashboard.png", path: "/dashboard" },
+    {
+      name: "Dashboard",
+      icon: "/images/dashboard.png",
+      path: "/seller/dashboard",
+    },
     { name: "Products", icon: "/images/products.png", path: "/products" },
+    { name: "Category", icon: "/images/category.png", path: "/category" },
 
-    { name: "Category", icon: "/images/products.png", path: "/category" },
-    { name: "Repair", icon: "/images/products.png", path: "/repairs" },
     { name: "Orders", icon: "/images/orders.png", path: "/orders" },
-    { name: "Inventory", icon: "/images/products.png", path: "/inventory" },
+    { name: "Repair", icon: "/images/service.png", path: "/repairs" },
     {
       name: "Customer Details",
       icon: "/images/Details.png",
       path: "/customers",
     },
-    { name: "Promotions", icon: "/images/promotion.png", path: "/promotions" },
-    { name: "Messages", icon: "/images/msg.png", path: "/messages" },
+
+    { name: "notification", icon: "/images/msg.png", path: "/messages" },
     { name: "Profile", icon: "/images/profile.png", path: "/profile" },
   ];
-
-  // ✅ LOAD PRODUCTS FROM BACKEND
+  const handleLogout = () => {
+    if (window.confirm("Are you sure you want to logout?")) {
+      localStorage.removeItem("token");
+      navigate("/login");
+    }
+  };
   useEffect(() => {
     const loadProducts = async () => {
       try {
@@ -83,7 +90,6 @@ function SellerProductManagement() {
     loadProducts();
   }, []);
 
-  // ✅ DELETE PRODUCT
   const handleDelete = async () => {
     try {
       const res = await authFetch(
@@ -110,7 +116,6 @@ function SellerProductManagement() {
 
   return (
     <div className={`bg-gray-100 min-h-screen flex `}>
-      {/* SIDEBAR (UNCHANGED) */}
       <aside
         className={`bg-gray-900 w-70 h-screen fixed shadow-lg z-20 ${
           sidebaropen ? "translate-x-0" : "-translate-x-64"
@@ -135,7 +140,10 @@ function SellerProductManagement() {
         </nav>
 
         <div className="p-4 border-t border-white">
-          <button className="w-full bg-red-500 text-white py-2 rounded">
+          <button
+            onClick={handleLogout}
+            className="w-full bg-red-500 text-white py-2 rounded"
+          >
             Logout
           </button>
         </div>

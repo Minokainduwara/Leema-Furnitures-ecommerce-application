@@ -59,7 +59,7 @@ const LoginPage: React.FC = () => {
       if (data.role === "SELLER") {
         navigate("/seller/dashboard");
       } else if (data.role === "ADMIN") {
-        navigate("/admin/dashboard");
+        navigate("/adminlayout");
       } else {
         navigate("/user/dashboard");
       }

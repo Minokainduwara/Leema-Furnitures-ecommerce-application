@@ -22,8 +22,8 @@ type Panel =
   | "wishlist"
   | "services"
   | "products"
-  | "categories"
-  | "messages"
+  // | "categories"
+  // | "messages"
   | "notifications";
 
 type ServiceRequest = {
@@ -44,10 +44,25 @@ type WishlistItem = {
   id: number;
   productName?: string;
 };
-
+type Repair = {
+  id: number;
+  issueDescription: string;
+  estimatedCost?: number;
+  status: string;
+  product?: { name?: string };
+  order?: { id?: number };
+};
+type Notification = {
+  id: number;
+  title: string;
+  message: string;
+  type: string;
+  read: boolean;
+  userId: number;
+};
 export default function UserDashboard() {
   const [panel, setPanel] = useState<Panel>("overview");
-  const navigate=useNavigate();
+  const navigate = useNavigate();
   function Overview() {
     const [stats, setStats] = React.useState([
       { label: "Total Orders", value: 0 },
@@ -177,7 +192,10 @@ export default function UserDashboard() {
 
         {/* ================= QUICK ACTIONS ================= */}
         <div className="flex gap-3">
-          <button onClick={() => navigate("/user/category")} className="bg-black text-white px-4 py-2 rounded-lg">
+          <button
+            onClick={() => navigate("/user/category")}
+            className="bg-black text-white px-4 py-2 rounded-lg"
+          >
             Browse Products
           </button>
           <button className="bg-gray-200 px-4 py-2 rounded-lg">
@@ -188,6 +206,419 @@ export default function UserDashboard() {
       </div>
     );
   }
+  function Profile() {
+    const [form, setForm] = React.useState({
+      name: "",
+      email: "",
+      phone: "",
+    });
+
+    const [passwordData, setPasswordData] = React.useState({
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    });
+
+    React.useEffect(() => {
+      loadProfile();
+    }, []);
+
+    const loadProfile = async () => {
+      try {
+        const res = await authFetch("http://localhost:8080/api/users/me");
+        const data = await res.json();
+
+        console.log("PROFILE DATA:", data);
+
+        // ✅ FIX: backend may return different field names
+        setForm({
+          name: data.name || data.fullName || "",
+          email: data.email || "",
+          phone: data.phone || data.phoneNumber || "",
+        });
+      } catch (err) {
+        console.error("Profile load error", err);
+      }
+    };
+
+    const handleChange = (e: any) => {
+      setForm({
+        ...form,
+        [e.target.name]: e.target.value,
+      });
+    };
+
+    const handleUpdate = async () => {
+      try {
+        const res = await authFetch("http://localhost:8080/api/users/me", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json", // ✅ FIX (THIS WAS MISSING)
+          },
+          body: JSON.stringify({
+            name: form.name,
+            email: form.email,
+            phone: form.phone,
+          }),
+        });
+
+        if (!res.ok) {
+          throw new Error("Profile update failed");
+        }
+
+        alert("Profile updated!");
+      } catch (err) {
+        console.error(err);
+        alert("Profile update failed");
+      }
+    };
+
+    const handlePasswordChange = (e: any) => {
+      setPasswordData({
+        ...passwordData,
+        [e.target.name]: e.target.value,
+      });
+    };
+
+    const handlePasswordUpdate = async () => {
+      if (passwordData.newPassword !== passwordData.confirmPassword) {
+        alert("Passwords do not match");
+        return;
+      }
+
+      try {
+        const res = await authFetch(
+          "http://localhost:8080/api/users/change-password", // ✅ FIXED ENDPOINT
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              currentPassword: passwordData.currentPassword,
+              newPassword: passwordData.newPassword,
+            }),
+          },
+        );
+
+        if (!res.ok) {
+          throw new Error("Password update failed");
+        }
+
+        alert("Password updated!");
+
+        setPasswordData({
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
+      } catch (err) {
+        console.error(err);
+        alert("Password update failed");
+      }
+    };
+
+    return (
+      <div className="space-y-6">
+        {/* PROFILE INFO */}
+        <div>
+          <h2 className="font-semibold mb-3">Profile Info</h2>
+
+          <div className="grid grid-cols-2 gap-4">
+            {/* NAME */}
+            <div>
+              <label className="block text-sm text-gray-500 mb-1">Name</label>
+              <input
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                className="w-full p-3 border rounded-lg"
+              />
+            </div>
+
+            {/* EMAIL */}
+            <div>
+              <label className="block text-sm text-gray-500 mb-1">Email</label>
+              <input
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                className="w-full p-3 border rounded-lg"
+              />
+            </div>
+
+            {/* PHONE */}
+            <div className="col-span-2">
+              <label className="block text-sm text-gray-500 mb-1">
+                Phone Number
+              </label>
+              <input
+                name="phone"
+                value={form.phone}
+                onChange={handleChange}
+                className="w-full p-3 border rounded-lg"
+              />
+            </div>
+          </div>
+
+          <button
+            onClick={handleUpdate}
+            className="mt-4 bg-yellow-500 px-6 py-2 rounded-lg"
+          >
+            Update Profile
+          </button>
+        </div>
+
+        {/* PASSWORD SECTION */}
+        <div>
+          <h2 className="font-semibold mb-3">Change Password</h2>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="col-span-2">
+              <input
+                type="password"
+                name="currentPassword"
+                placeholder="Current Password"
+                value={passwordData.currentPassword}
+                onChange={handlePasswordChange}
+                className="p-3 border rounded-lg w-full"
+              />
+            </div>
+
+            <input
+              type="password"
+              name="newPassword"
+              placeholder="New Password"
+              value={passwordData.newPassword}
+              onChange={handlePasswordChange}
+              className="p-3 border rounded-lg"
+            />
+
+            <input
+              type="password"
+              name="confirmPassword"
+              placeholder="Confirm Password"
+              value={passwordData.confirmPassword}
+              onChange={handlePasswordChange}
+              className="p-3 border rounded-lg"
+            />
+          </div>
+
+          <button
+            onClick={handlePasswordUpdate}
+            className="mt-4 bg-red-500 text-white px-6 py-2 rounded-lg"
+          >
+            Update Password
+          </button>
+        </div>
+      </div>
+    );
+  }
+  function Services() {
+    const [repairs, setRepairs] = React.useState<Repair[]>([]);
+
+    React.useEffect(() => {
+      loadRepairs();
+    }, []);
+
+    const loadRepairs = async () => {
+      try {
+        // 1. get current user
+        const userRes = await authFetch("http://localhost:8080/api/users/me");
+        const user = await userRes.json();
+
+        // 2. fetch repairs for user
+        const res = await authFetch(
+          `http://localhost:8080/api/repairs/user/${user.id}`,
+        );
+
+        const data = await res.json();
+        setRepairs(data || []);
+      } catch (err) {
+        console.error("Repair load error:", err);
+      }
+    };
+
+    return (
+      <div className="space-y-4">
+        <h2 className="text-lg font-semibold">My Repair Requests</h2>
+
+        {repairs.length === 0 && (
+          <p className="text-gray-500">No repair requests found</p>
+        )}
+
+        {repairs.map((r) => (
+          <div
+            key={r.id}
+            className="bg-white border rounded-lg p-4 flex justify-between items-center"
+          >
+            <div>
+              <p className="font-medium">{r.issueDescription}</p>
+              <p className="text-sm text-gray-500">
+                Estimated: LKR {r.estimatedCost || 0}
+              </p>
+            </div>
+
+            <span
+              className={`px-3 py-1 rounded-full text-sm ${
+                r.status === "REQUESTED"
+                  ? "bg-yellow-100 text-yellow-600"
+                  : r.status === "APPROVED"
+                    ? "bg-green-100 text-green-600"
+                    : "bg-gray-200"
+              }`}
+            >
+              {r.status}
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+  function NotificationsPanel() {
+    const [notifications, setNotifications] = React.useState<Notification[]>(
+      [],
+    );
+    const [unreadCount, setUnreadCount] = React.useState(0);
+
+    React.useEffect(() => {
+      loadNotifications();
+    }, []);
+
+    const loadNotifications = async () => {
+      try {
+        // get current user
+        const userRes = await authFetch("http://localhost:8080/api/users/me");
+        const user = await userRes.json();
+
+        // notifications
+        const res = await authFetch("http://localhost:8080/api/notifications");
+        const data = await res.json();
+
+        // filter only logged user notifications
+        const userNotifications = data.filter(
+          (n: Notification) => n.userId === user.id,
+        );
+
+        setNotifications(userNotifications);
+
+        // unread count
+        const countRes = await authFetch(
+          `http://localhost:8080/api/notifications/unread-count?userId=${user.id}`,
+        );
+        const count = await countRes.json();
+
+        setUnreadCount(count);
+      } catch (err) {
+        console.error("Notification load error:", err);
+      }
+    };
+
+    const markAsRead = async (id: number) => {
+      try {
+        await authFetch(`http://localhost:8080/api/notifications/${id}/read`, {
+          method: "PATCH",
+        });
+
+        loadNotifications();
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    return (
+      <div className="space-y-4">
+        {/* HEADER */}
+        <div className="flex justify-between items-center">
+          <h2 className="text-lg font-semibold">Notifications</h2>
+
+          <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm">
+            Unread: {unreadCount}
+          </span>
+        </div>
+
+        {/* LIST */}
+        {notifications.length === 0 && (
+          <p className="text-gray-500">No notifications</p>
+        )}
+
+        {notifications.map((n) => (
+          <div
+            key={n.id}
+            className={`p-4 border rounded-lg flex justify-between items-center ${
+              n.read ? "bg-gray-100" : "bg-white"
+            }`}
+          >
+            <div>
+              <p className="font-semibold">{n.title}</p>
+              <p className="text-sm text-gray-500">{n.message}</p>
+            </div>
+
+            {!n.read && (
+              <button
+                onClick={() => markAsRead(n.id)}
+                className="text-sm bg-green-500 text-white px-3 py-1 rounded"
+              >
+                Mark as read
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  }
+  function Orders() {
+  type OrderHistory = {
+    id: number;
+    status: string;
+    message: string;
+    changedBy: string;
+    createdAt: string;
+  };
+
+  // ✅ FIX HERE
+  const [history, setHistory] = React.useState<OrderHistory[]>([]);
+
+  React.useEffect(() => {
+    loadHistory();
+  }, []);
+
+  const loadHistory = async () => {
+    try {
+      const userRes = await authFetch("http://localhost:8080/api/users/me");
+      const user = await userRes.json();
+
+      const res = await authFetch(
+        `http://localhost:8080/api/orders/user/${user.id}/history`
+      );
+
+      if (!res.ok) {
+        setHistory([]);
+        return;
+      }
+
+      const data: unknown = await res.json();
+
+      if (Array.isArray(data)) {
+        setHistory(data as OrderHistory[]);
+      } else {
+        setHistory([]);
+      }
+
+    } catch (err) {
+      console.error(err);
+      setHistory([]);
+    }
+  };
+
+  return (
+    <div>
+      {history.map((h) => (
+        <div key={h.id}>{h.status}</div>
+      ))}
+    </div>
+  );
+}
   return (
     <div className="flex h-screen bg-gray-50">
       {/* ================= SIDEBAR ================= */}
@@ -240,22 +671,22 @@ export default function UserDashboard() {
               active={panel === "products"}
               onClick={() => setPanel("products")}
             />
-            <Item
+            {/* <Item
               icon={<Tags size={18} />}
               label="Categories"
               active={panel === "categories"}
               onClick={() => setPanel("categories")}
-            />
+            /> */}
           </Section>
 
           {/* SUPPORT */}
           <Section title="SUPPORT">
-            <Item
+            {/* <Item
               icon={<MessageCircle size={18} />}
               label="Messages"
               active={panel === "messages"}
               onClick={() => setPanel("messages")}
-            />
+            /> */}
             <Item
               icon={<Bell size={18} />}
               label="Notifications"
@@ -289,27 +720,32 @@ export default function UserDashboard() {
         {/* CONTENT AREA */}
         <div className="bg-gray-50 rounded-xl shadow p-6 border text-gray-700">
           {panel === "overview" && <Overview />}
-          {panel === "profile" && <p>User profile settings</p>}
-          {panel === "orders" && <p>Order history list</p>}
+          {panel === "profile" && <Profile />}
+          {panel === "orders" && <Orders />}
           {panel === "wishlist" && <p>Saved products</p>}
-          {panel === "services" && <p>Service requests</p>}
+          {panel === "services" && <Services />}
 
           {panel === "products" && (
             <div>
               <h2 className="text-lg font-semibold mb-3">Browse Products</h2>
-              <p>Product grid + search + filters will be here</p>
+              <button
+                onClick={() => navigate("/user/category")}
+                className="bg-black text-white px-4 py-2 rounded-lg"
+              >
+                Go to Category Page
+              </button>
             </div>
           )}
 
-          {panel === "categories" && (
+          {/* {panel === "categories" && (
             <div>
               <h2 className="text-lg font-semibold mb-3">Categories</h2>
               <p>Filter products by category (Sofas, Chairs, etc.)</p>
             </div>
-          )}
+          )} */}
 
-          {panel === "messages" && <p>Chat with support/seller</p>}
-          {panel === "notifications" && <p>System notifications</p>}
+          {/* {panel === "messages" && <p>Chat with support/seller</p>} */}
+          {panel === "notifications" && <NotificationsPanel />}
         </div>
       </main>
     </div>

@@ -4,22 +4,25 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 function EditPromotions() {
   const sideBarItems = [
-    { name: "Dashboard", icon: "/images/dashboard.png", path: "/dashboard" },
+    {
+      name: "Dashboard",
+      icon: "/images/dashboard.png",
+      path: "/seller/dashboard",
+    },
     { name: "Products", icon: "/images/products.png", path: "/products" },
-    { name: "Category", icon: "/images/products.png", path: "/category" },
+    { name: "Category", icon: "/images/category.png", path: "/category" },
 
     { name: "Orders", icon: "/images/orders.png", path: "/orders" },
-    { name: "Repair", icon: "/images/products.png", path: "/repairs" },
+    { name: "Repair", icon: "/images/service.png", path: "/repairs" },
     {
       name: "Customer Details",
       icon: "/images/Details.png",
       path: "/customers",
     },
-    { name: "Promotions", icon: "/images/promotion.png", path: "/promotions" },
-    { name: "Messages", icon: "/images/msg.png", path: "/messages" },
+    
+    { name: "notification", icon: "/images/msg.png", path: "/messages" },
     { name: "Profile", icon: "/images/profile.png", path: "/profile" },
   ];
-
   const [sidebaropen, setsidebar] = useState<boolean>(false);
   const [darkmode, setdarkmode] = useState<boolean>(false);
   const navigate = useNavigate();

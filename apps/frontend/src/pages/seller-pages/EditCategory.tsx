@@ -7,36 +7,44 @@ function EditCategory() {
   const [sidebaropen, setsidebar] = useState<boolean>(false);
 
   const sideBarItems = [
-    { name: "Dashboard", icon: "/images/dashboard.png", path: "/dashboard" },
+    {
+      name: "Dashboard",
+      icon: "/images/dashboard.png",
+      path: "/seller/dashboard",
+    },
     { name: "Products", icon: "/images/products.png", path: "/products" },
-    { name: "Category", icon: "/images/products.png", path: "/category" },
+    { name: "Category", icon: "/images/category.png", path: "/category" },
+
     { name: "Orders", icon: "/images/orders.png", path: "/orders" },
-    { name: "Repair", icon: "/images/products.png", path: "/repairs" },
+    { name: "Repair", icon: "/images/service.png", path: "/repairs" },
     {
       name: "Customer Details",
       icon: "/images/Details.png",
       path: "/customers",
     },
-    { name: "Promotions", icon: "/images/promotion.png", path: "/promotions" },
-    { name: "Messages", icon: "/images/msg.png", path: "/messages" },
+
+    { name: "notification", icon: "/images/msg.png", path: "/messages" },
     { name: "Profile", icon: "/images/profile.png", path: "/profile" },
   ];
 
   const [form, setForm] = useState({
-  name: "",
-  slug: "",
-  description: "",
-  isActive: true,
-  discountType: "",
-  discountValue: "",
-  startDate: "",
-  endDate: "",
-  categoryDiscountId: null as any,
-});
+    name: "",
+    slug: "",
+    description: "",
+    isActive: true,
+    discountType: "",
+    discountValue: "",
+    startDate: "",
+    endDate: "",
+    categoryDiscountId: null as any,
+  });
 
-  // =========================
-  // LOAD CATEGORY + DISCOUNT
-  // =========================
+  const handleLogout = () => {
+    if (window.confirm("Are you sure you want to logout?")) {
+      localStorage.removeItem("token");
+      navigate("/login");
+    }
+  };
   useEffect(() => {
     // CATEGORY
     authFetch(`http://localhost:8080/api/categories/${id}`)
@@ -53,26 +61,23 @@ function EditCategory() {
 
     // CATEGORY DISCOUNT
     authFetch("http://localhost:8080/api/seller/category-discounts")
-  .then((res) => res.json())
-  .then((list) => {
-    const discount = list.find((d: any) => d.category.id == id);
+      .then((res) => res.json())
+      .then((list) => {
+        const discount = list.find((d: any) => d.category.id == id);
 
-    if (discount) {
-      setForm((prev) => ({
-        ...prev,
-        categoryDiscountId: discount.id,
-        discountType: discount.discountType || "",
-        discountValue: discount.value || "",
-        startDate: discount.startDate?.slice(0, 16) || "",
-        endDate: discount.endDate?.slice(0, 16) || "",
-      }));
-    }
-  });
+        if (discount) {
+          setForm((prev) => ({
+            ...prev,
+            categoryDiscountId: discount.id,
+            discountType: discount.discountType || "",
+            discountValue: discount.value || "",
+            startDate: discount.startDate?.slice(0, 16) || "",
+            endDate: discount.endDate?.slice(0, 16) || "",
+          }));
+        }
+      });
   }, [id]);
 
-  // =========================
-  // HANDLE CHANGE
-  // =========================
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -86,13 +91,9 @@ function EditCategory() {
     }));
   };
 
-  // =========================
-  // UPDATE CATEGORY + DISCOUNT
-  // =========================
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 1. UPDATE CATEGORY
     await authFetch(`http://localhost:8080/api/categories/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -100,37 +101,35 @@ function EditCategory() {
         name: form.name,
         slug: form.slug,
         description: form.description,
-        isActive: form.isActive 
+        isActive: form.isActive,
       }),
     });
 
-    // 2. SAVE CATEGORY DISCOUNT
     if (form.discountType && form.discountValue) {
-  const method = form.categoryDiscountId ? "PUT" : "POST";
+      const method = form.categoryDiscountId ? "PUT" : "POST";
 
-  const url = form.categoryDiscountId
-    ? `http://localhost:8080/api/seller/category-discounts/${form.categoryDiscountId}`
-    : "http://localhost:8080/api/seller/category-discounts";
+      const url = form.categoryDiscountId
+        ? `http://localhost:8080/api/seller/category-discounts/${form.categoryDiscountId}`
+        : "http://localhost:8080/api/seller/category-discounts";
 
-  await authFetch(url, {
-    method,
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      categoryId: id,
-      discountType: form.discountType,
-      value: Number(form.discountValue),
-      startDate: form.startDate,
-      endDate: form.endDate,
-    }),
-  });
-}
+      await authFetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          categoryId: id,
+          discountType: form.discountType,
+          value: Number(form.discountValue),
+          startDate: form.startDate,
+          endDate: form.endDate,
+        }),
+      });
+    }
     alert("Category updated successfully");
     navigate("/category");
   };
 
   return (
     <div className="bg-gray-100 min-h-screen flex font-sans">
-      {/* ===== SIDEBAR (UNCHANGED) ===== */}
       <aside
         className={`bg-gray-900 w-70 h-screen fixed shadow-lg z-20 ${
           sidebaropen ? "translate-x-0" : "-translate-x-64"
@@ -155,13 +154,15 @@ function EditCategory() {
         </nav>
 
         <div className="p-4 border-t border-white">
-          <button className="w-full bg-red-500 text-white py-2 rounded">
+          <button
+            onClick={handleLogout}
+            className="w-full bg-red-500 text-white py-2 rounded"
+          >
             Logout
           </button>
         </div>
       </aside>
 
-      {/* ===== MAIN UI (UNCHANGED) ===== */}
       <main className="w-full flex items-center justify-center p-6">
         <form
           onSubmit={handleUpdate}

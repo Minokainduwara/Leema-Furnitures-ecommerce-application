@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { authFetch } from "../../utils/api";
 function InventoryDashboard() {
   const [products, setProducts] = useState<any[]>([]);
@@ -8,25 +8,40 @@ function InventoryDashboard() {
   const [search, setSearch] = useState("");
 
   const [sidebaropen] = useState(false);
-
+  const navigate = useNavigate();
   const sideBarItems = [
-    { name: "Dashboard", icon: "/images/dashboard.png", path: "/dashboard" },
+    {
+      name: "Dashboard",
+      icon: "/images/dashboard.png",
+      path: "/seller/dashboard",
+    },
     { name: "Products", icon: "/images/products.png", path: "/products" },
-    { name: "Category", icon: "/images/products.png", path: "/category" },
+    { name: "Category", icon: "/images/category.png", path: "/category" },
+
     { name: "Orders", icon: "/images/orders.png", path: "/orders" },
-    { name: "Inventory", icon: "/images/products.png", path: "/inventory" },
-    { name: "Repair", icon: "/images/products.png", path: "/repairs" },
-    { name: "Customer Details", icon: "/images/Details.png", path: "/customers" },
-    { name: "Promotions", icon: "/images/promotion.png", path: "/promotions" },
-    { name: "Messages", icon: "/images/msg.png", path: "/messages" },
+    { name: "Repair", icon: "/images/service.png", path: "/repairs" },
+    {
+      name: "Customer Details",
+      icon: "/images/Details.png",
+      path: "/customers",
+    },
+
+    { name: "notification", icon: "/images/msg.png", path: "/messages" },
     { name: "Profile", icon: "/images/profile.png", path: "/profile" },
   ];
-
+  const handleLogout = () => {
+    if (window.confirm("Are you sure you want to logout?")) {
+      localStorage.removeItem("token");
+      navigate("/login");
+    }
+  };
   // LOAD DATA
   useEffect(() => {
     Promise.all([
       authFetch("http://localhost:8080/api/products").then((res) => res.json()),
-      authFetch("http://localhost:8080/api/inventory-logs").then((res) => res.json()),
+      authFetch("http://localhost:8080/api/inventory-logs").then((res) =>
+        res.json(),
+      ),
     ])
       .then(([productsData, logsData]) => {
         setProducts(productsData || []);
@@ -40,12 +55,11 @@ function InventoryDashboard() {
   }, []);
 
   const filteredProducts = products.filter((p) =>
-    (p?.name || "").toLowerCase().includes(search.toLowerCase())
+    (p?.name || "").toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
     <div className="bg-gray-100 min-h-screen font-sans flex text-gray-800">
-
       {/* ================= SIDEBAR ================= */}
       <aside
         className={`bg-gray-900 w-70 h-screen fixed shadow-lg z-20 ${
@@ -71,7 +85,10 @@ function InventoryDashboard() {
         </nav>
 
         <div className="p-4 border-t border-white">
-          <button className="w-full bg-red-500 text-white py-2 rounded">
+          <button
+            onClick={handleLogout}
+            className="w-full bg-red-500 text-white py-2 rounded"
+          >
             Logout
           </button>
         </div>
@@ -79,7 +96,6 @@ function InventoryDashboard() {
 
       {/* ================= MAIN ================= */}
       <main className="w-full p-6">
-
         {/* HEADER */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-900">
@@ -173,9 +189,7 @@ function InventoryDashboard() {
 
                 <div
                   className={`font-bold ${
-                    log.quantityChange > 0
-                      ? "text-green-600"
-                      : "text-red-600"
+                    log.quantityChange > 0 ? "text-green-600" : "text-red-600"
                   }`}
                 >
                   {log.quantityChange > 0 ? "+" : ""}
@@ -185,7 +199,6 @@ function InventoryDashboard() {
             ))}
           </div>
         </div>
-
       </main>
     </div>
   );
