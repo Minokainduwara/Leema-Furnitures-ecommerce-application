@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link,useNavigate } from "react-router-dom";
 import { authFetch } from "../../utils/api";
 
 function SellerProfile() {
@@ -16,6 +16,8 @@ function SellerProfile() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  const navigate = useNavigate();
+
   const sideBarItems = [
     {
       name: "Dashboard",
@@ -23,20 +25,26 @@ function SellerProfile() {
       path: "/seller/dashboard",
     },
     { name: "Products", icon: "/images/products.png", path: "/products" },
-    { name: "Category", icon: "/images/products.png", path: "/category" },
+    { name: "Category", icon: "/images/category.png", path: "/category" },
+
     { name: "Orders", icon: "/images/orders.png", path: "/orders" },
-    { name: "Repair", icon: "/images/products.png", path: "/repairs" },
+    { name: "Repair", icon: "/images/service.png", path: "/repairs" },
     {
       name: "Customer Details",
       icon: "/images/Details.png",
       path: "/customers",
     },
-    { name: "Promotions", icon: "/images/promotion.png", path: "/promotions" },
-    { name: "Messages", icon: "/images/msg.png", path: "/messages" },
+    
+    { name: "notification", icon: "/images/msg.png", path: "/messages" },
     { name: "Profile", icon: "/images/profile.png", path: "/profile" },
   ];
 
-  // ================= LOAD PROFILE =================
+  const handleLogout = () => {
+    if (window.confirm("Are you sure you want to logout?")) {
+      localStorage.removeItem("token");
+      navigate("/login");
+    }
+  };
   useEffect(() => {
     loadProfile();
   }, []);
@@ -59,7 +67,7 @@ function SellerProfile() {
       console.error("Profile load error", err);
     }
   };
-  // ================= UPDATE PROFILE =================
+  
   const updateProfile = async () => {
     try {
       await authFetch("http://localhost:8080/api/users/me", {
@@ -79,7 +87,6 @@ function SellerProfile() {
     }
   };
 
-  // ================= CHANGE PASSWORD =================
   const changePassword = async () => {
     if (newPassword !== confirmPassword) {
       alert("Passwords do not match");
@@ -107,7 +114,7 @@ function SellerProfile() {
     }
   };
 
-  // ================= UI =================
+  
   return (
     <div className={`flex min-h-screen ${darkmode ? "dark" : ""}`}>
       {/* SIDEBAR */}
@@ -130,9 +137,12 @@ function SellerProfile() {
           ))}
         </nav>
 
-        <button className="m-4 bg-red-500 text-white py-2 rounded">
-          Logout
-        </button>
+       <button
+  onClick={handleLogout}
+  className="w-full bg-red-500 text-white py-2 rounded"
+>
+  Logout
+</button>
       </aside>
 
       {/* MAIN */}

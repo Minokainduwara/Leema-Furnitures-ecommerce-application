@@ -4,19 +4,23 @@ import { authFetch } from "../../utils/api";
 
 function AddProduct() {
   const sideBarItems = [
-    { name: "Dashboard", icon: "/images/dashboard.png", path: "/dashboard" },
+    {
+      name: "Dashboard",
+      icon: "/images/dashboard.png",
+      path: "/seller/dashboard",
+    },
     { name: "Products", icon: "/images/products.png", path: "/products" },
-    { name: "Category", icon: "/images/products.png", path: "/category" },
+    { name: "Category", icon: "/images/category.png", path: "/category" },
 
     { name: "Orders", icon: "/images/orders.png", path: "/orders" },
-    { name: "Repair", icon: "/images/products.png", path: "/repairs" },
+    { name: "Repair", icon: "/images/service.png", path: "/repairs" },
     {
       name: "Customer Details",
       icon: "/images/Details.png",
       path: "/customers",
     },
-    { name: "Promotions", icon: "/images/promotion.png", path: "/promotions" },
-    { name: "Messages", icon: "/images/msg.png", path: "/messages" },
+
+    { name: "notification", icon: "/images/msg.png", path: "/messages" },
     { name: "Profile", icon: "/images/profile.png", path: "/profile" },
   ];
 
@@ -83,7 +87,6 @@ function AddProduct() {
         formData.append("image", imageFile);
       }
 
-      // 👉 STEP 1: CREATE PRODUCT FIRST
       const res = await authFetch("http://localhost:8080/api/products/add", {
         method: "POST",
         body: formData,
@@ -96,7 +99,6 @@ function AddProduct() {
 
       const productId = await res.json();
 
-      // 👉 STEP 2: HANDLE DISCOUNT ONLY IF EXISTS
       const hasDiscount =
         form.discountType &&
         form.discountType !== "" &&
@@ -145,10 +147,14 @@ function AddProduct() {
         setLoadingCategories(false);
       });
   }, []);
-
+  const handleLogout = () => {
+    if (window.confirm("Are you sure you want to logout?")) {
+      localStorage.removeItem("token");
+      navigate("/login");
+    }
+  };
   return (
     <div className={`bg-gray-100 min-h-screen font-sans flex overflow-y-auto`}>
-      {/* SIDEBAR (UNCHANGED) */}
       <aside
         className={`bg-gray-900 w-70 h-screen fixed shadow-lg z-20 ${
           sidebaropen ? "translate-x-0" : "-translate-x-64"
@@ -173,7 +179,10 @@ function AddProduct() {
         </nav>
 
         <div className="p-4 border-t border-white">
-          <button className="w-full bg-red-500 text-white py-2 rounded">
+          <button
+            onClick={handleLogout}
+            className="w-full bg-red-500 text-white py-2 rounded"
+          >
             Logout
           </button>
         </div>

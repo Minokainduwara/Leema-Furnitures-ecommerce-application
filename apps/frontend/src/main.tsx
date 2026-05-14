@@ -6,6 +6,7 @@ import "./index.css";
 import { AuthProvider } from "./hooks/Authcontext";
 import Home from "./pages/Home";
 import SellerDashboard from "./pages/SellerDashboard";
+import DashboardPage from "./pages/admin-pages/DashboardPage";
 import SellerProductManagement from "./pages/seller-pages/SellerProductManagement";
 import SellerOrderManagement from "./pages/seller-pages/SellerOrderManagement";
 import SellerCustomerDetails from "./pages/seller-pages/SellerCustomerDetails";
@@ -29,6 +30,10 @@ import ProductDetails from "./pages/User-pages/ProductDetails";
 import AddToCart from "./pages/userOrders/AddToCart";
 import CheckoutPage from "./pages/userOrders/CheckoutPage";
 import OrderSuccess from "./pages/userOrders/OrderSuccess";
+import AdminLayout from "./pages/admin-pages/AdminLayout";
+import ProductsPage from "./pages/admin-pages/ProductsPage";
+import AdminAddProduct from "./pages/admin-pages/AdminAddProducts";
+import AdminEditProducts from "./pages/admin-pages/AdminEditProducts";
 const container = document.getElementById("root")!;
 const root = createRoot(container);
 
@@ -38,6 +43,11 @@ root.render(
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/admin/dashboard" element={<DashboardPage />} />
+          <Route path="/adminlayout" element={<AdminLayout />} />
+          <Route path="/admin/products" element={<ProductsPage/>} />
+          <Route path="/admin/products/add" element={<AdminAddProduct/>} />
+          <Route path="/admin/products/edit/:id" element={<AdminEditProducts/>} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
            <Route path="/ordersuccess/:id" element={<OrderSuccess />} />

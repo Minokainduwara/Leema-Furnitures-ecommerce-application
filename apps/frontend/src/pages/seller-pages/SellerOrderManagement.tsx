@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { authFetch } from "../../utils/api";
 /* ================= TYPES ================= */
 
@@ -32,6 +32,7 @@ function SellerOrderManagement() {
 
   const [issue, setIssue] = useState("");
   const [estimatedCost, setEstimatedCost] = useState("");
+  const navigate = useNavigate();
 
   const sideBarItems = [
     {
@@ -40,21 +41,26 @@ function SellerOrderManagement() {
       path: "/seller/dashboard",
     },
     { name: "Products", icon: "/images/products.png", path: "/products" },
-    { name: "Category", icon: "/images/products.png", path: "/category" },
+    { name: "Category", icon: "/images/category.png", path: "/category" },
 
     { name: "Orders", icon: "/images/orders.png", path: "/orders" },
-    { name: "Repair", icon: "/images/products.png", path: "/repairs" },
+    { name: "Repair", icon: "/images/service.png", path: "/repairs" },
     {
       name: "Customer Details",
       icon: "/images/Details.png",
       path: "/customers",
     },
-    { name: "Promotions", icon: "/images/promotion.png", path: "/promotions" },
-    { name: "Messages", icon: "/images/msg.png", path: "/messages" },
+
+    { name: "notification", icon: "/images/msg.png", path: "/messages" },
     { name: "Profile", icon: "/images/profile.png", path: "/profile" },
   ];
 
-  /* ================= LOAD ALL ================= */
+  const handleLogout = () => {
+    if (window.confirm("Are you sure you want to logout?")) {
+      localStorage.removeItem("token");
+      navigate("/login");
+    }
+  };
 
   useEffect(() => {
     loadOrders();
@@ -69,8 +75,6 @@ function SellerOrderManagement() {
       console.error("Error loading orders:", err);
     }
   };
-
-  /* ================= SEARCH (BACKEND) ================= */
 
   const searchOrders = async (query: string) => {
     setSearch(query);
@@ -92,8 +96,6 @@ function SellerOrderManagement() {
     }
   };
 
-  /* ================= STATUS FILTER ================= */
-
   const filterByStatus = async (status: string) => {
     const res = await authFetch(
       `http://localhost:8080/api/orders/status?status=${status}`,
@@ -103,8 +105,6 @@ function SellerOrderManagement() {
     setOrders(Array.isArray(data) ? data : []);
   };
 
-  /* ================= DATE FILTER ================= */
-
   const filterByDate = async (type: string) => {
     const res = await authFetch(
       `http://localhost:8080/api/orders/filter?type=${type}`,
@@ -113,8 +113,6 @@ function SellerOrderManagement() {
     const data = await res.json();
     setOrders(Array.isArray(data) ? data : []);
   };
-
-  /* ================= STATUS STYLE ================= */
 
   const getStatusStyle = (status: string) => {
     switch (status) {
@@ -146,7 +144,6 @@ function SellerOrderManagement() {
         return "bg-gray-100 text-gray-700";
     }
   };
-  /* ================= UPDATE STATUS ================= */
 
   const updateStatus = async (id: number, status: string) => {
     await authFetch(`http://localhost:8080/api/orders/${id}/status`, {
@@ -174,7 +171,7 @@ function SellerOrderManagement() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          userId: orders.find(o => o.id === selectedOrderId)?.userId,
+          userId: orders.find((o) => o.id === selectedOrderId)?.userId,
           orderId: selectedOrderId,
           productId: selectedProductId,
           issueDescription: issue,
@@ -198,11 +195,8 @@ function SellerOrderManagement() {
     setShowRepairForm(true);
   };
 
-  /* ================= UI ================= */
-
   return (
     <div className="min-h-screen flex bg-white">
-      {/* SIDEBAR (unchanged) */}
       <aside
         className={`bg-gray-900 w-70 h-screen fixed shadow-lg z-20 ${
           sidebaropen ? "translate-x-0" : "-translate-x-64"
@@ -227,7 +221,10 @@ function SellerOrderManagement() {
         </nav>
 
         <div className="p-4 border-t border-white">
-          <button className="w-full bg-red-500 text-white py-2 rounded">
+          <button
+            onClick={handleLogout}
+            className="w-full bg-red-500 text-white py-2 rounded"
+          >
             Logout
           </button>
         </div>

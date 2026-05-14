@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { authFetch } from "../utils/api"; 
+import { getUserName } from "../utils/jwt";
 
 const SalesIcon = () => (
   <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -35,23 +36,50 @@ function SellerDashboard() {
   });
 
   const [loading, setLoading] = useState(true);
+  const [name, setName] = useState("");
+const [recentOrders, setRecentOrders] = useState([]);
+  useEffect(() => {
+    const userName = getUserName();
+    setName(userName);
+  }, []);
+  useEffect(() => {
+  const loadRecentOrders = async () => {
+    try {
+      const res = await authFetch("http://localhost:8080/api/orders/recent");
+
+      if (!res.ok) throw new Error("Failed to load recent orders");
+
+      const data = await res.json();
+      setRecentOrders(data);
+    } catch (err) {
+      console.error("Recent orders error:", err);
+    }
+  };
+
+  loadRecentOrders();
+}, []);
   const sideBarItems = [
-    { name: "Dashboard", icon: "/images/dashboard.png", path: "/dashboard" },
+    {
+      name: "Dashboard",
+      icon: "/images/dashboard.png",
+      path: "/seller/dashboard",
+    },
     { name: "Products", icon: "/images/products.png", path: "/products" },
-    { name: "Category", icon: "/images/products.png", path: "/category" },
+    { name: "Category", icon: "/images/category.png", path: "/category" },
+
     { name: "Orders", icon: "/images/orders.png", path: "/orders" },
-    { name: "Repair", icon: "/images/products.png", path: "/repairs" },
+    { name: "Repair", icon: "/images/service.png", path: "/repairs" },
     {
       name: "Customer Details",
       icon: "/images/Details.png",
       path: "/customers",
     },
-    { name: "Promotions", icon: "/images/promotion.png", path: "/promotions" },
-    { name: "Messages", icon: "/images/msg.png", path: "/messages" },
+    
+    { name: "notification", icon: "/images/msg.png", path: "/messages" },
     { name: "Profile", icon: "/images/profile.png", path: "/profile" },
   ];
 
-  // ✅ SINGLE API CALL (YOUR BACKEND)
+  
   useEffect(() => {
     const loadDashboard = async () => {
       try {
@@ -77,6 +105,12 @@ function SellerDashboard() {
     loadDashboard();
   }, []);
 
+  const handleLogout = () => {
+  if (window.confirm("Are you sure you want to logout?")) {
+    localStorage.removeItem("token");
+    navigate("/login");
+  }
+};
   const cards = [
     {
       title: "Total Sales",
@@ -107,7 +141,7 @@ function SellerDashboard() {
   return (
     <div className="min-h-screen flex bg-white">
 
-      {/* ✅ YOUR SIDEBAR (UNCHANGED 100%) */}
+    
       <aside
               className={`bg-gray-900 w-70 h-screen fixed shadow-lg z-20 ${
                 sidebaropen ? "translate-x-0" : "-translate-x-64"
@@ -141,7 +175,19 @@ function SellerDashboard() {
       {/* MAIN */}
       <main className="w-full min-h-screen p-6">
 
-        <h1 className="text-2xl font-bold mb-6 text-gray-700">Dashboard</h1>
+        <div className="flex justify-between items-center p-4 shadow shadow-xl mb-6">
+      
+      <h1 className="text-xl font-bold text-gray-700">
+        Dashboard
+      </h1>
+
+      {/* TOP RIGHT USER NAME */}
+      <div className="text-right">
+        <p className="text-gray-600 text-sm">Welcome,</p>
+        <p className="font-semibold text-gray-500">{name}</p>
+      </div>
+
+    </div>
 
         {/* CARDS */}
         <section className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -160,6 +206,35 @@ function SellerDashboard() {
             </div>
           ))}
         </section>
+        <section className="mt-8 bg-white shadow rounded-xl p-6">
+  <h2 className="text-lg font-bold text-gray-700 mb-4">
+    Recent Orders
+  </h2>
+
+  <table className="w-full border-collapse">
+    <thead>
+      <tr className="text-left border-b">
+        <th className="py-2 text-gray-500">Order No</th>
+        <th className="text-gray-500">Status</th>
+        <th className="text-gray-500">Amount</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {recentOrders.map((order: any) => (
+        <tr key={order.id} className="border-b hover:bg-gray-50">
+          <td className="py-2">{order.orderNumber}</td>
+          <td>
+            <span className="px-2 py-1 text-xs rounded bg-blue-100 text-blue-600">
+              {order.status}
+            </span>
+          </td>
+          <td>Rs {order.totalAmount}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</section>
       </main>
     </div>
   );
