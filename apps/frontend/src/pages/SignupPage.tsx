@@ -50,6 +50,23 @@ const SignupPage: React.FC = () => {
     }
   
     try {
+<<<<<<< ishana
+      const user = await signup(
+      form.email,
+      form.password,
+      form.name
+      );
+
+      if (user.role === "ADMIN") {
+        navigate("/admin/dashboard");
+      } else if (user.role === "SELLER") {
+        navigate("/seller/dashboard");
+      } else {
+        navigate("/user/dashboard");
+      }
+        } catch {
+      setError(authError || "Signup failed. Please try again.");
+=======
       await signup(form.email, form.password, form.name);
   
       // ✅ get saved user from context/localStorage (safe source)
@@ -69,20 +86,33 @@ const SignupPage: React.FC = () => {
       }
     } catch (err) {
       setError("Signup failed. Please try again.");
+>>>>>>> main
     }
   };
 
   return (
+<<<<<<< ishana
+    <div className="min-h-screen bg-linear-to-br from-stone-50 via-white to-amber-50 flex items-center justify-center p-4">
+=======
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-stone-50 to-amber-50 p-4">
+>>>>>>> main
       <div className="w-full max-w-md">
 
         {/* Header */}
         <div className="text-center mb-8">
+<<<<<<< ishana
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-linear-to-br from-amber-400 to-amber-600 rounded-2xl mb-4">
+            <UserPlus size={32} className="text-white" />
+          </div>
+          <h1 className="text-3xl font-bold text-stone-900 mb-2">Create Account</h1>
+          <p className="text-stone-500">Join With Leema Furinitures</p>
+=======
           <div className="w-16 h-16 bg-amber-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <UserPlus className="text-white" />
           </div>
           <h1 className="text-3xl font-bold text-stone-900">Create Account</h1>
           <p className="text-stone-500">Join Leema Furniture</p>
+>>>>>>> main
         </div>
 
         {/* Card */}
@@ -101,6 +131,10 @@ const SignupPage: React.FC = () => {
                   onChange={handleChange}
                   className="w-full pl-10 py-2.5 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-stone-900 placeholder-stone-400"
                   placeholder="John Doe"
+<<<<<<< ishana
+                  className="w-full pl-10 pr-10 py-2.5 rounded-lg border border-stone-200 text-stone-900 placeholder:text-stone-400 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+=======
+>>>>>>> main
                 />
               </div>
             </div>
@@ -114,8 +148,13 @@ const SignupPage: React.FC = () => {
                   name="email"
                   value={form.email}
                   onChange={handleChange}
+<<<<<<< ishana
+                  placeholder="admin@leema.com"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-stone-200 text-stone-900 placeholder:text-stone-400 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+=======
                   className="w-full pl-10 py-2.5 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-stone-900 placeholder-stone-400"
                   placeholder="john@leema.com"
+>>>>>>> main
                 />
               </div>
             </div>
@@ -132,6 +171,10 @@ const SignupPage: React.FC = () => {
                   onChange={handleChange}
                   className="w-full pl-10 pr-10 py-2.5 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-stone-900 placeholder-stone-400"
                   placeholder="••••••••"
+<<<<<<< ishana
+                  className="w-full pl-10 pr-10 py-2.5 rounded-lg border border-stone-200 text-stone-900 placeholder:text-stone-400 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+=======
+>>>>>>> main
                 />
                 <button
                   type="button"
@@ -155,6 +198,10 @@ const SignupPage: React.FC = () => {
                   onChange={handleChange}
                   className="w-full pl-10 pr-10 py-2.5 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-stone-900 placeholder-stone-400"
                   placeholder="••••••••"
+<<<<<<< ishana
+                  className="w-full pl-10 pr-10 py-2.5 rounded-lg border border-stone-200 text-stone-900 placeholder:text-stone-400 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+=======
+>>>>>>> main
                 />
                 <button
                   type="button"
@@ -177,7 +224,11 @@ const SignupPage: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading}
+<<<<<<< ishana
+              className="w-full bg-linear-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 disabled:from-stone-400 disabled:to-stone-500 text-white font-semibold py-2.5 rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
+=======
               className="w-full bg-amber-500 hover:bg-amber-600 text-white py-2.5 rounded-lg transition-colors disabled:opacity-60"
+>>>>>>> main
             >
               {isLoading ? "Creating..." : "Create Account"}
             </button>
