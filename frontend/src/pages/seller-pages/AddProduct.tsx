@@ -1,0 +1,414 @@
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { authFetch } from "../../utils/api";
+
+function AddProduct() {
+  const sideBarItems = [
+    {
+      name: "Dashboard",
+      icon: "/images/dashboard.png",
+      path: "/seller/dashboard",
+    },
+    { name: "Products", icon: "/images/products.png", path: "/products" },
+    { name: "Category", icon: "/images/category.png", path: "/category" },
+
+    { name: "Orders", icon: "/images/orders.png", path: "/orders" },
+    { name: "Repair", icon: "/images/service.png", path: "/repairs" },
+    {
+      name: "Customer Details",
+      icon: "/images/Details.png",
+      path: "/customers",
+    },
+
+    { name: "notification", icon: "/images/msg.png", path: "/messages" },
+    { name: "Profile", icon: "/images/profile.png", path: "/profile" },
+  ];
+
+  const navigate = useNavigate();
+
+  const [sidebaropen, setsidebar] = useState<boolean>(false);
+  const [darkmode, setdarkmode] = useState<boolean>(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+
+  const [form, setForm] = useState({
+    name: "",
+    code: "",
+    price: "",
+    cost: "",
+    stock: "",
+    category: "",
+    description: "",
+    longDescription: "",
+    image: "",
+    status: "ACTIVE",
+    discountType: "",
+    discountValue: "",
+    startDate: "",
+    endDate: "",
+  });
+
+  // ✅ Handle input change
+  const handleChange = (e: any) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
+  };
+  const formatDate = (date: string) => {
+    if (!date) return null;
+    return date.includes(":") ? date : date + ":00";
+  };
+  // ✅ Submit form
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+
+    try {
+      if (!form.name || !form.code || !form.price || !form.category) {
+        alert("Please fill all required fields");
+        return;
+      }
+
+      const formData = new FormData();
+
+      formData.append("name", form.name);
+      formData.append("sku", form.code);
+      formData.append("description", form.description || "");
+      formData.append("longDescription", form.longDescription || "");
+
+      formData.append("price", String(Number(form.price)));
+      formData.append("cost", String(Number(form.cost || 0)));
+      formData.append("stock", String(Number(form.stock || 0)));
+      formData.append("categoryId", String(Number(form.category)));
+      formData.append("status", (form.status || "ACTIVE").toUpperCase());
+
+      if (imageFile) {
+        formData.append("image", imageFile);
+      }
+
+      const res = await authFetch("http://localhost:8080/api/products/add", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const err = await res.text();
+        throw new Error(err);
+      }
+
+      const productId = await res.json();
+
+      const hasDiscount =
+        form.discountType &&
+        form.discountType !== "" &&
+        form.discountValue &&
+        Number(form.discountValue) > 0;
+
+      if (hasDiscount) {
+        const disres = await authFetch(
+          "http://localhost:8080/api/product-discounts",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              productId: productId,
+              discountType: form.discountType,
+              value: Number(form.discountValue),
+              startDate: formatDate(form.startDate),
+              endDate: formatDate(form.endDate),
+            }),
+          },
+        );
+
+        if (!disres.ok) {
+          console.warn("Discount not saved, but product created");
+        }
+      }
+
+      alert("✅ Product added successfully");
+      navigate("/products");
+    } catch (err) {
+      console.error(err);
+      alert("❌ Failed to add product");
+    }
+  };
+  useEffect(() => {
+    authFetch("http://localhost:8080/api/categories")
+      .then((res) => res.json())
+      .then((data) => {
+        setCategories(data);
+        setLoadingCategories(false);
+      })
+      .catch((err) => {
+        console.error("Failed to load categories", err);
+        setLoadingCategories(false);
+      });
+  }, []);
+  const handleLogout = () => {
+    if (window.confirm("Are you sure you want to logout?")) {
+      localStorage.removeItem("token");
+      navigate("/login");
+    }
+  };
+  return (
+    <div className={`bg-gray-100 min-h-screen font-sans flex overflow-y-auto`}>
+      <aside
+        className={`bg-gray-900 w-70 h-screen fixed shadow-lg z-20 ${
+          sidebaropen ? "translate-x-0" : "-translate-x-64"
+        } lg:translate-x-0 lg:static transition-all flex flex-col`}
+      >
+        <div className="flex items-center gap-2 p-4 border-b border-white">
+          <img src="/images/leemalogo.jpg" className="h-6 w-18" />
+          <span className="font-bold text-white ">Seller Dashboard</span>
+        </div>
+
+        <nav className="flex-1 mt-6">
+          {sideBarItems.map((item) => (
+            <Link
+              key={item.name}
+              to={item.path!}
+              className="flex items-center gap-3 px-4 py-3 hover:bg-yellow-500 hover:rounded-md"
+            >
+              <img src={item.icon} className="w-6 h-6" />
+              <span className="text-white font-medium">{item.name}</span>
+            </Link>
+          ))}
+        </nav>
+
+        <div className="p-4 border-t border-white">
+          <button
+            onClick={handleLogout}
+            className="w-full bg-red-500 text-white py-2 rounded"
+          >
+            Logout
+          </button>
+        </div>
+      </aside>
+
+      {/* MAIN */}
+      <main
+        className="w-full h-screen pl-40 bg-gray-50 p-30 flex items-center justify-center 
+      "
+      >
+        <form
+          onSubmit={handleSubmit}
+          className="w-full max-w-xl bg-white p-6 rounded-xl shadow-lg max-h-[90vh] overflow-y-auto"
+        >
+          <h2 className="text-2xl font-bold mb-4 text-gray-800">Add Product</h2>
+
+          {/* PRODUCT NAME */}
+          <label className="block text-sm font-medium mb-1 text-gray-700">
+            Product Name
+          </label>
+          <input
+            name="name"
+            value={form.name}
+            onChange={handleChange}
+            className="w-full border p-2 mb-3 rounded text-gray-700 border-gray-300"
+          />
+
+          {/* PRODUCT CODE */}
+          <label className="block text-sm font-medium mb-1 text-gray-700">
+            Product Code (SKU)
+          </label>
+          <input
+            name="code"
+            value={form.code}
+            onChange={handleChange}
+            className="w-full border p-2 mb-3 rounded text-gray-700 border-gray-300"
+          />
+
+          {/* PRICE */}
+          <label className="block text-sm font-medium mb-1 text-gray-700">
+            Price
+          </label>
+          <input
+            type="number"
+            name="price"
+            value={form.price}
+            onChange={handleChange}
+            className="w-full border p-2 mb-3 rounded text-gray-700 border-gray-300"
+          />
+
+          {/* COST */}
+          <label className="block text-sm font-medium mb-1 text-gray-700">
+            Cost
+          </label>
+          <input
+            type="number"
+            name="cost"
+            value={form.cost}
+            onChange={handleChange}
+            className="w-full border p-2 mb-3 rounded text-gray-700 border-gray-300"
+          />
+          {/* DISCOUNT TYPE */}
+          <h3 className="font-bold mt-3 mb-2 text-gray-700">
+            Discount (Optional)
+          </h3>
+          <label className="block text-sm font-medium mb-1 text-gray-700">
+            Discount Type
+          </label>
+          <select
+            name="discountType"
+            value={form.discountType}
+            onChange={handleChange}
+            className="w-full border p-2 mb-3 rounded text-gray-700"
+          >
+            <option value="">No Discount</option>
+            <option value="PERCENTAGE">Percentage (%)</option>
+            <option value="FIXED">Fixed (Rs)</option>
+          </select>
+
+          {/* DISCOUNT VALUE */}
+          <label className="block text-sm font-medium mb-1 text-gray-700">
+            Discount Value
+          </label>
+          <input
+            type="number"
+            name="discountValue"
+            value={form.discountValue}
+            onChange={handleChange}
+            placeholder="Enter discount"
+            className="w-full border p-2 mb-3 rounded text-gray-700"
+          />
+          {/* START DATE */}
+          <label className="block text-sm font-medium mb-1 text-gray-700">
+            Start Date
+          </label>
+          <input
+            type="datetime-local"
+            name="startDate"
+            value={form.startDate}
+            onChange={handleChange}
+            className="w-full border p-2 mb-3 rounded text-gray-700"
+          />
+
+          {/* END DATE */}
+          <label className="block text-sm font-medium mb-1 text-gray-700">
+            End Date
+          </label>
+          <input
+            type="datetime-local"
+            name="endDate"
+            value={form.endDate}
+            onChange={handleChange}
+            className="w-full border p-2 mb-3 rounded text-gray-700"
+          />
+          {/* STOCK */}
+          <label className="block text-sm font-medium mb-1 text-gray-700">
+            Stock Quantity
+          </label>
+          <input
+            type="number"
+            name="stock"
+            value={form.stock}
+            onChange={handleChange}
+            className="w-full border p-2 mb-3 rounded text-gray-700 border-gray-300"
+          />
+
+          {/* CATEGORY */}
+          <label className="block text-sm font-medium mb-1 text-gray-700">
+            Category
+          </label>
+          <select
+            name="category"
+            value={form.category}
+            onChange={handleChange}
+            className="w-full border p-2 mb-3 rounded text-gray-700 border-gray-300"
+          >
+            <option value="">Select Category</option>
+
+            {loadingCategories ? (
+              <option>Loading...</option>
+            ) : (
+              categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
+              ))
+            )}
+          </select>
+
+          {/* STATUS */}
+          <label className="block text-sm font-medium mb-1 text-gray-700">
+            Status
+          </label>
+          <select
+            name="status"
+            value={form.status}
+            onChange={handleChange}
+            className="w-full border p-2 mb-3 rounded text-gray-700 border-gray-300"
+          >
+            <option value="ACTIVE">Active</option>
+            <option value="INACTIVE">Inactive</option>
+            <option value="DISCONTINUED">Discontinued</option>
+            <option value="DRAFT">Draft</option>
+          </select>
+
+          {/* IMAGE */}
+          <label className="block text-sm font-medium mb-1 text-gray-700 border-gray-300">
+            Product Image
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e: any) => setImageFile(e.target.files[0])}
+            className="w-full border p-2 mb-3 rounded text-gray-700 border-gray-300"
+          />
+
+          {imageFile && (
+            <img
+              src={URL.createObjectURL(imageFile)}
+              className="w-32 h-32 object-cover rounded mb-3"
+            />
+          )}
+
+          {/* SHORT DESCRIPTION */}
+          <label className="block text-sm font-medium mb-1 text-gray-700">
+            Short Description
+          </label>
+          <textarea
+            name="description"
+            value={form.description}
+            onChange={handleChange}
+            className="w-full border p-2 mb-3 rounded text-gray-700 border-gray-300"
+          />
+
+          {/* LONG DESCRIPTION */}
+          <label className="block text-sm font-medium mb-1 text-gray-700">
+            Long Description
+          </label>
+          <textarea
+            name="longDescription"
+            value={form.longDescription}
+            onChange={handleChange}
+            className="w-full border p-2 mb-3 rounded text-gray-700 border-gray-300"
+          />
+
+          {/* BUTTONS */}
+          <div className="flex gap-2 mt-2">
+            <button
+              type="submit"
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded w-full"
+            >
+              Save Product
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate("/products")}
+              className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded w-full"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </main>
+    </div>
+  );
+}
+
+export default AddProduct;
