@@ -14,10 +14,9 @@ const ProductDetail = () => {
 
   const [loading, setLoading] = useState(true);
 
-  // ✅ NEW
   const [quantity, setQuantity] = useState(1);
 
-  // 🔥 safe image builder
+  
   const getImage = (img?: string) =>
     img
       ? `http://localhost:8080/${img.replace(/^\/+/, "")}`
@@ -41,7 +40,7 @@ const ProductDetail = () => {
           body: JSON.stringify({
             productId: Number(product.id),
 
-            // ✅ UPDATED
+            
             quantity: quantity,
 
             addedPrice: Number(product.price),
@@ -74,7 +73,7 @@ const ProductDetail = () => {
 
       try {
 
-        // ================= MAIN PRODUCT =================
+       
 
         const res1 = await authFetch(
           `http://localhost:8080/api/products/${id}`
@@ -100,13 +99,13 @@ const ProductDetail = () => {
 
           sku: data.sku || "N/A",
 
-          // ✅ NEW
+         
           stock: data.stock,
 
           image: getImage(data.image),
         });
 
-        // ================= RELATED PRODUCTS =================
+        
 
         const res2 = await authFetch(
           `http://localhost:8080/api/products/${id}/related`
@@ -145,7 +144,7 @@ const ProductDetail = () => {
 
   }, [id]);
 
-  // ================= LOADING =================
+
 
   if (loading || !product) {
 

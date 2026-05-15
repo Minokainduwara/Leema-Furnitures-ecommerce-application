@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 
-export const CATEGORIES = [
-  "All",
-  "Living Room Furniture",
-  "Bedroom Furniture",
-  "Dining Room Furniture",
-] as const;
+// export const CATEGORIES = [
+//   "All",
+//   "Living Room Furniture",
+//   "Bedroom Furniture",
+//   "Dining Room Furniture",
+// ] as const;
 
 export const PRICE_RANGES = [
   { label: "All Prices", min: 0, max: Infinity },
@@ -27,6 +27,7 @@ type FilterBarProps = {
   setPriceIdx: Dispatch<SetStateAction<number>>;
   type: string;
   setType: Dispatch<SetStateAction<string>>;
+   categories: string[];
 };
 
 export default function FilterBar({
@@ -38,6 +39,7 @@ export default function FilterBar({
   setPriceIdx,
   type,
   setType,
+  categories,
 }: FilterBarProps) {
   const [catOpen, setCatOpen] = useState(false);
   const [priceOpen, setPriceOpen] = useState(false);
@@ -62,7 +64,7 @@ export default function FilterBar({
 
           {catOpen && (
             <div className="absolute mt-1 bg-white rounded shadow-lg w-48 z-50">
-              {CATEGORIES.map((c) => (
+              {categories.map((c) => (
                 <button
                   key={c}
                   onClick={() => {

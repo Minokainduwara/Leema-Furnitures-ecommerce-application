@@ -230,7 +230,7 @@ export default function UserDashboard() {
 
         console.log("PROFILE DATA:", data);
 
-        // ✅ FIX: backend may return different field names
+        
         setForm({
           name: data.name || data.fullName || "",
           email: data.email || "",
@@ -698,7 +698,7 @@ export default function UserDashboard() {
 
         {/* LOGOUT */}
         <div className="p-4 border-t border-gray-800">
-          <button className="flex items-center gap-2 w-full px-4 py-3 rounded-lg hover:bg-red-500 transition">
+          <button onClick={() => navigate("/login")} className="flex items-center gap-2 w-full px-4 py-3 rounded-lg hover:bg-red-500 transition">
             <LogOut size={18} />
             Logout
           </button>

@@ -73,7 +73,7 @@ function AddProduct() {
       const formData = new FormData();
 
       formData.append("name", form.name);
-      formData.append("sku", form.code);
+      formData.append("skuDigits", form.code);
       formData.append("description", form.description || "");
       formData.append("longDescription", form.longDescription || "");
 
@@ -136,7 +136,7 @@ function AddProduct() {
     }
   };
   useEffect(() => {
-    authFetch("http://localhost:8080/api/categories")
+    authFetch("http://localhost:8080/api/categories/active")
       .then((res) => res.json())
       .then((data) => {
         setCategories(data);
@@ -211,15 +211,32 @@ function AddProduct() {
           />
 
           {/* PRODUCT CODE */}
+          {/* PRODUCT CODE */}
           <label className="block text-sm font-medium mb-1 text-gray-700">
             Product Code (SKU)
           </label>
-          <input
-            name="code"
-            value={form.code}
-            onChange={handleChange}
-            className="w-full border p-2 mb-3 rounded text-gray-700 border-gray-300"
-          />
+
+          <div className="flex items-center mb-3">
+            {/* AD PREFIX */}
+            <span className="px-3 py-2 bg-gray-200 border border-gray-300 border-r-0 rounded-l text-gray-700">
+              AD
+            </span>
+
+            {/* USER INPUT (ONLY 4 DIGITS) */}
+            <input
+              name="code"
+              value={form.code}
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, ""); // only numbers
+                if (value.length <= 4) {
+                  setForm({ ...form, code: value });
+                }
+              }}
+              placeholder="1234"
+              maxLength={4}
+              className="w-full border p-2 rounded-r text-gray-700 border-gray-300"
+            />
+          </div>
 
           {/* PRICE */}
           <label className="block text-sm font-medium mb-1 text-gray-700">

@@ -68,6 +68,7 @@ const [recentOrders, setRecentOrders] = useState([]);
     { name: "Category", icon: "/images/category.png", path: "/category" },
 
     { name: "Orders", icon: "/images/orders.png", path: "/orders" },
+    { name: "Inventory", icon: "/images/orders.png", path: "/inventory" },
     { name: "Repair", icon: "/images/service.png", path: "/repairs" },
     {
       name: "Customer Details",
@@ -166,9 +167,12 @@ const [recentOrders, setRecentOrders] = useState([]);
               </nav>
       
               <div className="p-4 border-t border-white">
-                <button className="w-full bg-red-500 text-white py-2 rounded">
-                  Logout
-                </button>
+                <button
+            onClick={handleLogout}
+            className="w-full bg-red-500 text-white py-2 rounded"
+          >
+            Logout
+          </button>
               </div>
             </aside>
 

@@ -77,14 +77,17 @@ function RepairManagement() {
   /* ================= SEARCH ================= */
 
   const searchRepairs = (query: string) => {
-    setSearch(query);
+  setSearch(query);
 
-    const filtered = repairs.filter((r) =>
-      r.issueDescription?.toLowerCase().includes(query.toLowerCase()),
+  const filtered = repairs.filter((r) => {
+    return (
+      r.issueDescription?.toLowerCase().includes(query.toLowerCase()) ||
+      r.order?.orderNumber?.toLowerCase().includes(query.toLowerCase())
     );
+  });
 
-    setRepairs(filtered);
-  };
+  setRepairs(filtered);
+};
 
   /* ================= STATUS STYLE ================= */
 
@@ -161,7 +164,7 @@ function RepairManagement() {
 
           <input
             className="border px-3 py-2 rounded border-gray-300"
-            placeholder="Search issue..."
+            placeholder="Search by order ID"
             value={search}
             onChange={(e) => searchRepairs(e.target.value)}
           />

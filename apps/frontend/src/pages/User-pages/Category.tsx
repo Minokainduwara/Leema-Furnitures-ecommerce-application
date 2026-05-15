@@ -14,12 +14,10 @@ export default function CategoryPage() {
   const [type, setType] = useState<string>("All");
 
   const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<string[]>(["All"]); // ✅ NEW
+  const [categories, setCategories] = useState<string[]>(["All"]); 
   const [loading, setLoading] = useState<boolean>(true);
 
-  // =========================
-  // FETCH PRODUCTS
-  // =========================
+  
   useEffect(() => {
   const loadProducts = async () => {
     setLoading(true);
@@ -29,7 +27,7 @@ export default function CategoryPage() {
 
       console.log("STATUS:", res.status);
 
-      // ❗ handle 403 / 401 properly
+     
       if (!res.ok) {
         const errorText = await res.text();
         console.error("API ERROR RESPONSE:", errorText);
@@ -51,7 +49,7 @@ export default function CategoryPage() {
         category: item.category?.name || "Uncategorized",
         type: "All",
 
-        // ✅ FIXED IMAGE (no double /uploads issue)
+        
         img: item.image
           ? `http://localhost:8080/${item.image.replace(/^\/+/, "")}`
           : "/placeholder.png",
@@ -68,30 +66,26 @@ export default function CategoryPage() {
   loadProducts();
 }, []);
 
-  // =========================
-  // FETCH CATEGORIES (FROM BACKEND)
-  // =========================
- useEffect(() => {
+  
+useEffect(() => {
   authFetch("http://localhost:8080/api/categories")
     .then((res) => res.json())
     .then((data) => {
       console.log("CATEGORIES RAW:", data);
 
-      // ✅ SAFE NORMALIZATION
       const names = Array.isArray(data)
-        ? data.map((c: any) => String(c?.name ?? ""))
+        ? data
+            .map((c: any) => c?.name?.trim())   
+            .filter(Boolean)                   
         : [];
 
-      const clean = names.filter((n) => n !== "");
+      const unique = [...new Set(names)];       
 
-      setCategories(["All", ...clean]);
+      setCategories(["All", ...unique]);
     })
     .catch((err) => console.error("Category fetch error:", err));
 }, []);
-
-  // =========================
-  // FILTER PRODUCTS
-  // =========================
+  
   const filtered: Product[] = products.filter((p) => {
     const finalPrice = p.price;
 
@@ -140,7 +134,7 @@ export default function CategoryPage() {
             setPriceIdx={setPriceIdx}
             type={type}
             setType={setType}
-            categories={categories} // ✅ ONLY ADDITION
+            categories={categories} 
           />
         </div>
       </div>
@@ -176,7 +170,7 @@ export default function CategoryPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {filtered.map((product) => (
                 <Link to={`/product/details/${product.id}`} key={product.id}>
-                  <div className="bg-white rounded-xl shadow-sm hover:shadow-lg transition border">
+                  <div className="bg-white rounded-xl shadow-sm hover:shadow-lg transition border text-gray-700">
                     <ProductCard product={product} />
                   </div>
                 </Link>
