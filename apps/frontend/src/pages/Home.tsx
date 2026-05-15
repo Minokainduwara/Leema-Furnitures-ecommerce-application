@@ -1,12 +1,17 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import { api, productImageUrl, type ApiProduct } from "../utils/api";
+import { api, authFetch, productImageUrl, type ApiProduct } from "../utils/api";
 import { useCart } from "../hooks/CartContext";
 import { useAuth } from "../hooks/Authcontext";
 
-type Product = ApiProduct & { brand?: string; category?: string; imageUrl?: string };
+type Product = ApiProduct & {
+  brand?: string;
+  category?: string;
+  categoryName?: string;
+  imageUrl?: string;
+};
 type ToastState = { message: string; type: "success" | "error" };
 
 // ── Particle Canvas ───────────────────────────────────────────────────────────
@@ -425,6 +430,217 @@ function BrandsStrip(): React.ReactElement {
   );
 }
 
+// ── Category Sections (NEW) ───────────────────────────────────────────────────
+
+interface CategoryGroup {
+  id: number | string;
+  name: string;
+  items: Product[];
+}
+
+interface CategorySectionsProps {
+  onAddToCart: (item: Product) => Promise<void>;
+}
+
+const ITEMS_PER_CATEGORY = 4;          // products shown inline per category
+const MIN_ITEMS_TO_SHOW   = 1;          // hide categories with fewer than this
+
+function CategorySections({ onAddToCart }: CategorySectionsProps): React.ReactElement {
+  const navigate = useNavigate();
+  const [groups, setGroups]   = useState<CategoryGroup[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError]     = useState<string | null>(null);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [catsRes, prodsRes] = await Promise.all([
+          authFetch("http://localhost:8080/api/categories"),
+          authFetch("http://localhost:8080/api/products"),
+        ]);
+        if (!catsRes.ok || !prodsRes.ok) throw new Error("Failed to fetch");
+
+        const catsData  = await catsRes.json();
+        const prodsData = await prodsRes.json();
+
+        // Build category lookup
+        const catMap: Record<string | number, { id: string | number; name: string }> = {};
+        if (Array.isArray(catsData)) {
+          catsData.forEach((c: any) => {
+            const name = String(c?.name || c?.categoryName || "").trim();
+            if (name && c?.id != null) catMap[c.id] = { id: c.id, name };
+          });
+        }
+
+        // Resolve every product's category name (matches your CategoryPage logic)
+        const resolveCat = (item: any): { id: string | number | null; name: string } => {
+          if (item?.category?.name) return { id: item.category.id ?? null, name: String(item.category.name) };
+          if (typeof item?.category === "string") return { id: null, name: item.category };
+          if (item?.categoryId && catMap[item.categoryId]) return catMap[item.categoryId];
+          if (item?.category_id && catMap[item.category_id]) return catMap[item.category_id];
+          if (item?.category?.id && catMap[item.category.id]) return catMap[item.category.id];
+          return { id: null, name: "Uncategorized" };
+        };
+
+        // Bucket products by category
+        const bucket = new Map<string, CategoryGroup>();
+        (prodsData || []).forEach((item: any) => {
+          const { id, name } = resolveCat(item);
+          const key = String(id ?? name);
+          if (!bucket.has(key)) {
+            bucket.set(key, { id: id ?? name, name, items: [] });
+          }
+          bucket.get(key)!.items.push({
+            ...item,
+            category: name,
+            categoryName: name,
+          } as Product);
+        });
+
+        // Keep categories from the categories API in their original order,
+        // then append any leftover groups discovered only via product data.
+        const ordered: CategoryGroup[] = [];
+        Object.values(catMap).forEach((c) => {
+          const g = bucket.get(String(c.id));
+          if (g && g.items.length >= MIN_ITEMS_TO_SHOW) {
+            ordered.push(g);
+            bucket.delete(String(c.id));
+          }
+        });
+        bucket.forEach((g) => {
+          if (g.items.length >= MIN_ITEMS_TO_SHOW) ordered.push(g);
+        });
+
+        setGroups(ordered);
+      } catch (err) {
+        console.error("CategorySections load failed:", err);
+        setError("Couldn't load categories right now.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  // Skeleton while loading
+  if (loading) {
+    return (
+      <section className="py-20 px-6 bg-stone-50">
+        <div className="max-w-7xl mx-auto space-y-16">
+          {Array.from({ length: 2 }).map((_, k) => (
+            <div key={k}>
+              <div className="h-8 w-64 bg-stone-200 rounded-full animate-pulse mb-6" />
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="rounded-3xl bg-gradient-to-br from-stone-100 to-stone-200 animate-pulse h-80"
+                    style={{ animationDelay: `${i * 80}ms` }}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="py-20 px-6 bg-stone-50">
+        <p className="text-center text-stone-400 text-lg">{error}</p>
+      </section>
+    );
+  }
+
+  if (groups.length === 0) return <></>;
+
+  return (
+    <>
+      {groups.map((group, idx) => {
+        const isAlt = idx % 2 === 1;
+        const items = group.items.slice(0, ITEMS_PER_CATEGORY);
+        const number = String(idx + 1).padStart(2, "0");
+
+        return (
+          <section
+            key={`${group.id}-${group.name}`}
+            className={`relative py-24 px-6 overflow-hidden ${isAlt ? "bg-stone-50" : "bg-white"}`}
+          >
+            {/* Decorative blobs (alternating positions) */}
+            <div
+              className={`absolute w-80 h-80 rounded-full blur-3xl pointer-events-none ${
+                isAlt ? "bottom-10 right-10 bg-orange-200/20" : "top-10 left-10 bg-amber-200/25"
+              }`}
+            />
+
+            {/* Faint dotted background */}
+            <div
+              className="absolute inset-0 opacity-[0.02] pointer-events-none"
+              style={{
+                backgroundImage: "radial-gradient(circle, #78716c 1px, transparent 1px)",
+                backgroundSize: "28px 28px",
+              }}
+            />
+
+            <div className="relative z-10 max-w-7xl mx-auto">
+              {/* Section header — editorial layout */}
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-5 mb-12">
+                <div className="flex items-end gap-5">
+                  <span
+                    className="text-7xl md:text-8xl font-black leading-none text-transparent select-none"
+                    style={{
+                      WebkitTextStroke: "1.5px rgba(245,158,11,0.45)",
+                      letterSpacing: "-2px",
+                    }}
+                  >
+                    {number}
+                  </span>
+                  <div className="pb-2">
+                    <span className="text-amber-600 text-[11px] font-black uppercase tracking-[5px] flex items-center gap-2">
+                      <span className="h-px w-6 bg-amber-500" />
+                      Category
+                    </span>
+                    <h2 className="text-3xl md:text-5xl font-black text-stone-800 mt-2 leading-tight">
+                      {group.name}
+                    </h2>
+                    <p className="text-stone-500 text-sm mt-2">
+                      {group.items.length} {group.items.length === 1 ? "item" : "items"} available
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() =>
+                    navigate(`/user/category?category=${encodeURIComponent(group.name)}`)
+                  }
+                  className="group self-start md:self-end inline-flex items-center gap-2 text-amber-700 hover:text-amber-800 font-black text-sm transition-all duration-200"
+                >
+                  View all in {group.name}
+                  <span className="inline-block transition-transform duration-200 group-hover:translate-x-1.5">→</span>
+                </button>
+              </div>
+
+              {/* Products grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+                {items.map((item, i) => (
+                  <ProductCard
+                    key={`${group.id}-${item.id}`}
+                    item={item}
+                    onAddToCart={onAddToCart}
+                    index={i}
+                  />
+                ))}
+              </div>
+            </div>
+          </section>
+        );
+      })}
+    </>
+  );
+}
+
 // ── Services ──────────────────────────────────────────────────────────────────
 
 interface ServiceItem { icon: string; title: string; desc: string; color: string; }
@@ -622,6 +838,9 @@ export default function Home(): React.ReactElement {
           )}
         </div>
       </section>
+
+      {/* NEW — Category-by-category sections */}
+      <CategorySections onAddToCart={handleAddToCart} />
 
       <Services />
       <Footer />
