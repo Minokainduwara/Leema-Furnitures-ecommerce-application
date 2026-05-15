@@ -1,201 +1,145 @@
-import { 
-  createContext, 
-  useContext, 
-  useEffect, 
-  useState, 
-  type ReactNode, 
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
 } from "react";
-
-import { useAuth } from "./AuthContext";
 import api from "../api/client";
-
-// =====================================================
-// TYPES
-// =====================================================
 
 export interface CartItem {
   productId: number;
   productName: string;
-  productImage: string;
+  productImage?: string | null;
   quantity: number;
   price: number;
   lineTotal: number;
 }
 
 interface CartResponse {
-  cartId: number;
   items: CartItem[];
   total: number;
+  shippingCost: number;
+  grandTotal: number;
+  totalWeightKg: number;
 }
 
 interface CartContextType {
   items: CartItem[];
   total: number;
-  itemCount: number;
-  isLoading: boolean;
-
+  shippingCost: number;
+  grandTotal: number;
+  count: number;
+  loading: boolean;
   fetchCart: () => Promise<void>;
-
-  addToCart: (
-    productId: number,
-    quantity?: number
-  ) => Promise<void>;
-
-  updateQuantity: (
-    productId: number,
-    quantity: number
-  ) => Promise<void>;
-
-  removeItem: (
-    productId: number
-  ) => Promise<void>;
+  addToCart: (productId: number, quantity?: number) => Promise<void>;
+  updateItem: (productId: number, quantity: number) => Promise<void>;
+  removeItem: (productId: number) => Promise<void>;
+  clearLocal: () => void;
 }
 
-// =====================================================
-// CONTEXT
-// =====================================================
+const CartContext = createContext<CartContextType | null>(null);
 
-const CartContext = createContext<CartContextType | undefined>(
-  undefined
-);
+const isLoggedIn = () =>
+  Boolean(localStorage.getItem("token") || localStorage.getItem("accessToken"));
 
-// =====================================================
-// PROVIDER
-// =====================================================
-
-export const CartProvider = ({
-  children,
-}: {
-  children: ReactNode;
-}) => {
+export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [items, setItems] = useState<CartItem[]>([]);
   const [total, setTotal] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
-  const { user } = useAuth();
+  const [shippingCost, setShippingCost] = useState(0);
+  const [grandTotal, setGrandTotal] = useState(0);
+  const [loading, setLoading] = useState(false);
 
-  // =====================================================
-  // FETCH CART
-  // =====================================================
-
-  const fetchCart = async () => {
-    try {
-      setIsLoading(true);
-
-      const response = await api
-        .get("cart")
-        .json<CartResponse>();
-
-      setItems(response.items || []);
-      setTotal(response.total || 0);
-
-    } catch (error) {
-      console.error("Failed to fetch cart", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // =====================================================
-  // ADD TO CART
-  // =====================================================
-
-  const addToCart = async (
-    productId: number,
-    quantity = 1
-  ) => {
-    try {
-      await api.post("cart/add", {
-        json: {
-          productId,
-          quantity,
-        },
-      });
-
-      await fetchCart();
-
-    } catch (error) {
-      console.error("Failed to add to cart", error);
-    }
-  };
-
-  // =====================================================
-  // UPDATE QUANTITY
-  // =====================================================
-
-  const updateQuantity = async (
-    productId: number,
-    quantity: number
-  ) => {
-    try {
-      await api.put("cart/update", {
-        json: {
-          productId,
-          quantity,
-        },
-      });
-
-      await fetchCart();
-
-    } catch (error) {
-      console.error("Failed to update cart", error);
-    }
-  };
-
-  // =====================================================
-  // REMOVE ITEM
-  // =====================================================
-
-  const removeItem = async (
-    productId: number
-  ) => {
-    try {
-      await api.delete("cart/item", {
-        json: {
-          productId,
-        },
-      });
-
-      await fetchCart();
-
-    } catch (error) {
-      console.error("Failed to remove item", error);
-    }
-  };
-
-  // =====================================================
-  // INITIAL FETCH
-  // =====================================================
-
-  useEffect(() => {
-    if (user) {
-      fetchCart();
-    } else {
+  const fetchCart = useCallback(async () => {
+    if (!isLoggedIn()) {
       setItems([]);
       setTotal(0);
+      return;
     }
+    setLoading(true);
+    try {
+      const data = await api.get("cart").json<CartResponse>();
+      setItems(data.items || []);
+      setTotal(Number(data.total || 0));
+      setShippingCost(Number(data.shippingCost || 0));
+      setGrandTotal(Number(data.grandTotal || 0));
+      setShippingCost(Number(data.shippingCost || 0));
+      setGrandTotal(Number(data.grandTotal || 0));
+    } catch {
+      setItems([]);
+      setTotal(0);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  }, [user]);
-
-  // =====================================================
-  // ITEM COUNT
-  // =====================================================
-
-  const itemCount = items.reduce(
-    (sum, item) => sum + item.quantity,
-    0
+  const addToCart = useCallback(
+    async (productId: number, quantity: number = 1) => {
+      const data = await api
+        .post("cart/add", { json: { productId, quantity } })
+        .json<CartResponse>();
+      setItems(data.items || []);
+      setTotal(Number(data.total || 0));
+      setShippingCost(Number(data.shippingCost || 0));
+      setGrandTotal(Number(data.grandTotal || 0));
+    },
+    [],
   );
+
+  const updateItem = useCallback(
+    async (productId: number, quantity: number) => {
+      const data = await api
+        .put("cart/update", { json: { productId, quantity } })
+        .json<CartResponse>();
+      setItems(data.items || []);
+      setTotal(Number(data.total || 0));
+      setShippingCost(Number(data.shippingCost || 0));
+      setGrandTotal(Number(data.grandTotal || 0));
+    },
+    [],
+  );
+
+  const removeItem = useCallback(async (productId: number) => {
+    const data = await api
+      .delete("cart/item", { json: { productId } })
+      .json<CartResponse>();
+    setItems(data.items || []);
+    setTotal(Number(data.total || 0));
+    setShippingCost(Number(data.shippingCost || 0));
+    setGrandTotal(Number(data.grandTotal || 0));
+  }, []);
+
+  const clearLocal = useCallback(() => {
+    setItems([]);
+    setTotal(0);
+    setShippingCost(0);
+    setGrandTotal(0);
+  }, []);
+
+  // Initial load + re-fetch whenever auth changes
+  useEffect(() => {
+    fetchCart();
+    const handler = () => fetchCart();
+    window.addEventListener("leema:auth-changed", handler);
+    return () => window.removeEventListener("leema:auth-changed", handler);
+  }, [fetchCart]);
+
+  const count = items.reduce((s, it) => s + it.quantity, 0);
 
   return (
     <CartContext.Provider
       value={{
         items,
         total,
-        itemCount,
-        isLoading,
+        shippingCost,
+        grandTotal,
+        count,
+        loading,
         fetchCart,
         addToCart,
-        updateQuantity,
+        updateItem,
         removeItem,
+        clearLocal,
       }}
     >
       {children}
@@ -203,19 +147,10 @@ export const CartProvider = ({
   );
 };
 
-// =====================================================
-// HOOK
-// =====================================================
-
 export const useCart = () => {
-
-  const context = useContext(CartContext);
-
-  if (!context) {
-    throw new Error(
-      "useCart must be used within CartProvider"
-    );
+  const ctx = useContext(CartContext);
+  if (!ctx) {
+    throw new Error("useCart must be used within CartProvider");
   }
-
-  return context;
+  return ctx;
 };
