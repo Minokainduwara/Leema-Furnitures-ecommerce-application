@@ -17,10 +17,13 @@ interface CartItem {
 interface CartResponse {
   items: CartItem[];
   total: number;
+  totalWeightKg: number;
+  shippingCost: number;
+  grandTotal: number;
 }
 
 const CheckoutPage: React.FC = () => {
-  
+
   const navigate = useNavigate();
   const { fetchCart: refreshCart } = useCart();
 
@@ -28,6 +31,8 @@ const CheckoutPage: React.FC = () => {
     items: [],
     total: 0,
   });
+
+  const [checkoutData, setCheckoutData] = useState<any>(null);
 
   const [loading, setLoading] = useState(false);
 
@@ -110,6 +115,8 @@ const CheckoutPage: React.FC = () => {
           })
           .json<any>();
 
+        setCheckoutData(response);
+
         await refreshCart();
 
         toast.success("Order placed successfully");
@@ -121,7 +128,7 @@ const CheckoutPage: React.FC = () => {
               orderId: response.orderId,
             },
           }
-        
+
         );
 
         return;
@@ -138,7 +145,7 @@ const CheckoutPage: React.FC = () => {
             json: form,
           })
           .json<any>();
-        
+
         const payhereResponse = await api
           .post("payment/payhere/init", {
             json: {
@@ -337,7 +344,7 @@ const CheckoutPage: React.FC = () => {
 
         {/* RIGHT */}
         <div>
-          <div className="bg-white rounded-2xl shadow-sm p-6 sticky top-6">
+          <div className="bg-white text-black rounded-2xl shadow-sm p-6 sticky top-6">
 
             <h2 className="text-xl font-bold text-stone-800 mb-6">
               Order Summary
@@ -369,6 +376,7 @@ const CheckoutPage: React.FC = () => {
             </div>
 
             <div className="border-t pt-4 space-y-2">
+
               <div className="flex justify-between">
                 <span className="text-stone-600">Subtotal</span>
 
@@ -381,7 +389,7 @@ const CheckoutPage: React.FC = () => {
                 <span className="text-stone-600">Shipping</span>
 
                 <span className="font-semibold">
-                  Rs. 500.00
+                  Rs. {(cart.shippingCost ?? 0).toFixed(2)}
                 </span>
               </div>
 
@@ -389,9 +397,10 @@ const CheckoutPage: React.FC = () => {
                 <span>Total</span>
 
                 <span className="text-amber-600">
-                  Rs. {(cart.total + 500).toFixed(2)}
+                  Rs. {(cart.grandTotal ?? cart.total).toFixed(2)}
                 </span>
               </div>
+
             </div>
 
             <button
