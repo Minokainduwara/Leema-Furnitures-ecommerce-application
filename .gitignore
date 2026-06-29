@@ -103,3 +103,6 @@ htmlcov/
 *.db
 *.vectorstore
 *.embeddings
+
+backend
+uiparts
