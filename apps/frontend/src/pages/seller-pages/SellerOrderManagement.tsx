@@ -25,6 +25,7 @@ function SellerOrderManagement() {
   const [viewOrder, setViewOrder] = useState<Order | null>(null);
   const [sidebaropen, setsidebar] = useState(false);
   const [showRepairForm, setShowRepairForm] = useState(false);
+  const [repairHistory, setRepairHistory] = useState<any[]>([]);
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
   const [selectedProductId, setSelectedProductId] = useState<number | null>(
     null,
@@ -96,6 +97,18 @@ function SellerOrderManagement() {
     }
   };
 
+  const loadRepairHistory = async (orderId: number) => {
+    try {
+      const res = await authFetch(
+        `http://localhost:8080/api/repairs/order-user/${orderId}`,
+      );
+
+      const data = await res.json();
+      setRepairHistory(data);
+    } catch (err) {
+      console.error("Error loading repair history:", err);
+    }
+  };
   const filterByStatus = async (status: string) => {
     const res = await authFetch(
       `http://localhost:8080/api/orders/status?status=${status}`,
@@ -165,13 +178,17 @@ function SellerOrderManagement() {
   };
   const submitRepair = async () => {
     try {
+      console.log("ORDER ID:", selectedOrderId);
+      console.log("PRODUCT ID:", selectedProductId);
+      console.log("ISSUE:", issue);
+      console.log("EST COST:", estimatedCost);
       await authFetch("http://localhost:8080/api/repairs", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          userId: orders.find((o) => o.id === selectedOrderId)?.userId,
+          // userId: orders.find((o) => o.id === selectedOrderId)?.userId,
           orderId: selectedOrderId,
           productId: selectedProductId,
           issueDescription: issue,
@@ -180,7 +197,7 @@ function SellerOrderManagement() {
       });
 
       alert("Repair Created ✅");
-
+      await loadRepairHistory(selectedOrderId!);
       setShowRepairForm(false);
       setIssue("");
       setEstimatedCost("");
@@ -192,6 +209,7 @@ function SellerOrderManagement() {
   const openRepairForm = (orderId: number, productId: number) => {
     setSelectedOrderId(orderId);
     setSelectedProductId(productId);
+    loadRepairHistory(orderId);
     setShowRepairForm(true);
   };
 
@@ -416,23 +434,29 @@ function SellerOrderManagement() {
 
               <div className="mt-2">
                 <b>Items:</b>
-                {viewOrder.items?.map((i, idx) => (
-                  <div
-                    key={idx}
-                    className="flex justify-between items-center mb-2"
-                  >
-                    <div>
-                      {i.productName} × {i.quantity}
-                    </div>
+                {viewOrder.items?.map((i, idx) => {
+                  console.log("ORDER ITEM:", i); // 👈 ADD THIS HERE
 
-                    <button
-                      onClick={() => openRepairForm(viewOrder.id, i.productId)}
-                      className="bg-orange-500 text-white px-2 py-1 rounded text-xs"
+                  return (
+                    <div
+                      key={idx}
+                      className="flex justify-between items-center mb-2"
                     >
-                      Add Repair
-                    </button>
-                  </div>
-                ))}
+                      <div>
+                        {i.productName} × {i.quantity}
+                      </div>
+
+                      <button
+                        onClick={() =>
+                          openRepairForm(viewOrder.id, i.productId)
+                        }
+                        className="bg-orange-500 text-white px-2 py-1 rounded text-xs"
+                      >
+                        Add Repair
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
 
               <p>
@@ -488,6 +512,28 @@ function SellerOrderManagement() {
                 >
                   Cancel
                 </button>
+              </div>
+              {/* 🔥 REPAIR HISTORY SECTION */}
+              <div className="mt-4">
+                <h4 className="font-bold mb-2">Repair History</h4>
+
+                {repairHistory.length === 0 ? (
+                  <p className="text-sm text-gray-500">No previous repairs</p>
+                ) : (
+                  repairHistory.map((r, idx) => (
+                    <div key={idx} className="border p-2 mb-2 rounded text-sm">
+                      <p>
+                        <b>Issue:</b> {r.issueDescription}
+                      </p>
+                      <p>
+                        <b>Cost:</b> Rs {r.estimatedCost}
+                      </p>
+                      <p>
+                        <b>Status:</b> {r.status}
+                      </p>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>

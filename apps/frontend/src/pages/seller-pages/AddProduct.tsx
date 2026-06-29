@@ -43,24 +43,40 @@ function AddProduct() {
     longDescription: "",
     image: "",
     status: "ACTIVE",
+    type: "OTHER",
+
     discountType: "",
     discountValue: "",
     startDate: "",
     endDate: "",
+    warrantyYears: 0,
   });
-
-  // ✅ Handle input change
-  const handleChange = (e: any) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
+  const warrantyMap: any = {
+    TEKA: 2,
+    OTHER: 15,
   };
+
+  const handleChange = (e: any) => {
+    const { name, value } = e.target;
+
+    const updatedForm: any = {
+      ...form,
+      [name]: value,
+    };
+
+    if (name === "type") {
+      updatedForm.warrantyPreview = warrantyMap[value] ?? 0;
+    }
+
+    setForm(updatedForm);
+  };
+
   const formatDate = (date: string) => {
     if (!date) return null;
     return date.includes(":") ? date : date + ":00";
   };
-  // ✅ Submit form
+
+  // Submit form
   const handleSubmit = async (e: any) => {
     e.preventDefault();
 
@@ -72,6 +88,7 @@ function AddProduct() {
 
       const formData = new FormData();
 
+      const productType = form.type?.trim() ? form.type : "OTHER";
       formData.append("name", form.name);
       formData.append("skuDigits", form.code);
       formData.append("description", form.description || "");
@@ -81,8 +98,9 @@ function AddProduct() {
       formData.append("cost", String(Number(form.cost || 0)));
       formData.append("stock", String(Number(form.stock || 0)));
       formData.append("categoryId", String(Number(form.category)));
+      formData.append("type", productType);
       formData.append("status", (form.status || "ACTIVE").toUpperCase());
-
+      
       if (imageFile) {
         formData.append("image", imageFile);
       }
@@ -249,6 +267,20 @@ function AddProduct() {
             onChange={handleChange}
             className="w-full border p-2 mb-3 rounded text-gray-700 border-gray-300"
           />
+          {/* PRODUCT TYPE */}
+          <label className="block text-sm font-medium mb-1 text-gray-700">
+            Product Type
+          </label>
+
+          <select
+            name="type"
+            value={form.type}
+            onChange={handleChange}
+            className="w-full border p-2 mb-3 rounded text-gray-700 border-gray-300"
+          >
+            <option value="OTHER">Other (default)</option>
+            <option value="TEKA">TEKA</option>
+          </select>
 
           {/* COST */}
           <label className="block text-sm font-medium mb-1 text-gray-700">
@@ -260,6 +292,16 @@ function AddProduct() {
             value={form.cost}
             onChange={handleChange}
             className="w-full border p-2 mb-3 rounded text-gray-700 border-gray-300"
+          />
+          <label className="block text-sm font-medium mb-1 text-gray-700">
+            Warranty (Auto-generated)
+          </label>
+
+          <input
+            type="number"
+            value={warrantyMap[form.type] ?? 0}
+            readOnly
+            className="w-full border p-2 mb-3 rounded bg-gray-100 text-gray-700"
           />
           {/* DISCOUNT TYPE */}
           <h3 className="font-bold mt-3 mb-2 text-gray-700">
