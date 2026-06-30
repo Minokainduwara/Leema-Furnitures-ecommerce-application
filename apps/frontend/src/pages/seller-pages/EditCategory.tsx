@@ -129,7 +129,7 @@ function EditCategory() {
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen flex font-sans">
+    <div className="bg-gray-100 min-h-screen flex font-sans overflow-y-auto ">
       <aside
         className={`bg-gray-900 w-70 h-screen fixed shadow-lg z-20 ${
           sidebaropen ? "translate-x-0" : "-translate-x-64"
@@ -163,7 +163,7 @@ function EditCategory() {
         </div>
       </aside>
 
-      <main className="w-full flex items-center justify-center p-6">
+      <main className="w-full flex items-center justify-center p-6 overflow-y-auto">
         <form
           onSubmit={handleUpdate}
           className="bg-white w-full max-w-md p-6 rounded-xl shadow-md"

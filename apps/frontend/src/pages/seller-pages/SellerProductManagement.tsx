@@ -41,7 +41,7 @@ function SellerProductManagement() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-
+  const [showAll, setShowAll] = useState(false);
   const [showDelete, setShowDelete] = useState({ show: false, id: null });
 
   const sideBarItems = [
@@ -64,6 +64,7 @@ function SellerProductManagement() {
     { name: "notification", icon: "/images/msg.png", path: "/messages" },
     { name: "Profile", icon: "/images/profile.png", path: "/profile" },
   ];
+  
   const handleLogout = () => {
     if (window.confirm("Are you sure you want to logout?")) {
       localStorage.removeItem("token");
@@ -108,11 +109,14 @@ function SellerProductManagement() {
     }
   };
 
-  const filteredProducts = products.filter(
-    (p) =>
+  const filtered = products.filter(
+    (p) => 
       p.name?.toLowerCase().includes(search.toLowerCase()) ||
       p.sku?.toLowerCase().includes(search.toLowerCase()),
   );
+const displayedProducts = showAll
+    ? filtered
+    : [...filtered].sort((a, b) => b.id - a.id).slice(0, 10);
 
   return (
     <div className={`bg-gray-100 min-h-screen flex `}>
@@ -150,7 +154,7 @@ function SellerProductManagement() {
       </aside>
 
       {/* MAIN */}
-      <main className="w-full min-h-screen p-6 bg-gray-50">
+      <main className="w-full min-h-screen p-6 bg-gray-50 overflow-y-auto">
         {/* HEADER */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-700">
@@ -162,9 +166,14 @@ function SellerProductManagement() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search products..."
-              className="border px-3 py-2 rounded"
+              className="border px-3 py-2 rounded border-gray-500 text-gray-400"
             />
-
+            <button
+              onClick={() => setShowAll(!showAll)}
+              className="bg-blue-500 text-white px-4 py-2 rounded"
+            >
+              {showAll ? "Show Recent" : "View All"}
+            </button>
             <button
               onClick={() => navigate("/products/add")}
               className="bg-orange-500 text-white px-4 py-2 rounded"
@@ -175,7 +184,7 @@ function SellerProductManagement() {
         </div>
 
         {/* TABLE */}
-        <div className="bg-white shadow rounded-lg overflow-x-auto">
+        <div className="bg-white shadow rounded-lg overflow-x-auto overflow-y-auto max-h-[500px]">
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-gray-100 text-left text-gray-700">
@@ -187,6 +196,7 @@ function SellerProductManagement() {
                 <th className="p-3">Image</th>
                 <th className="p-3">Discount</th>
                 <th className="p-3">Final Price</th>
+                <th className="p-3">Warranty</th>
                 <th className="p-3">Actions</th>
               </tr>
             </thead>
@@ -198,14 +208,14 @@ function SellerProductManagement() {
                     Loading...
                   </td>
                 </tr>
-              ) : filteredProducts.length === 0 ? (
+              ) : displayedProducts.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="text-center p-5">
                     No products found
                   </td>
                 </tr>
               ) : (
-                filteredProducts.map(
+                displayedProducts.map(
                   (p) => (
                     console.log(p),
                     (
@@ -251,7 +261,9 @@ function SellerProductManagement() {
                         <td className="p-3 text-green-600 font-bold">
                           Rs {p.finalPrice ?? p.price}
                         </td>
-
+                        <td className="p-3 text-blue-600 font-semibold">
+                          {p.warrantyYears ? `${p.warrantyYears} Years` : "N/A"}
+                        </td>
                         <td className="p-3 flex gap-2">
                           <button
                             onClick={() => navigate(`/products/edit/${p.id}`)}

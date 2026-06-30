@@ -41,10 +41,12 @@ function EditProduct() {
     longDescription: "",
     status: "ACTIVE",
     imageUrl: "",
+    type: "OTHER",
     discountType: "",
     discountValue: "",
     startDate: "",
     endDate: "",
+    warrantyYears: 0,
   });
 
   const handleChange = (e: any) => {
@@ -76,7 +78,9 @@ function EditProduct() {
           description: data.description,
           longDescription: data.longDescription,
           status: data.status,
+          type: data.type || "OTHER",
           imageUrl: data.image || "",
+          warrantyYears: data.warrantyYears,
         }));
       });
 
@@ -102,6 +106,7 @@ function EditProduct() {
     formData.append("description", form.description);
     formData.append("longDescription", form.longDescription);
     formData.append("status", (form.status || "ACTIVE").toUpperCase().trim());
+    formData.append("type", form.type);
     formData.append(
       "categoryId",
       form.categoryId ? String(Number(form.categoryId)) : "0",
@@ -214,17 +219,31 @@ function EditProduct() {
             value={form.price}
             onChange={handleChange}
           />
-
-          {/* COST */}
+          {/* PRODUCT TYPE */}
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Cost
+            Product Type
           </label>
-          <input
+
+          <select
             className="w-full border p-2 mb-3 border-gray-300 text-gray-700"
-            name="cost"
-            value={form.cost}
+            name="type"
+            value={form.type}
             onChange={handleChange}
+          >
+            <option value="OTHER">Other</option>
+            <option value="TEKA">TEKA</option>
+          </select>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Warranty (Years)
+          </label>
+
+          <input
+            value={form.type === "TEKA" ? 2 : 15}
+            readOnly
+            className="w-full border p-2 mb-3 bg-gray-100 text-gray-700"
           />
+          {/* COST */}
+          
 
           {/* STOCK */}
           <label className="block text-sm font-medium text-gray-700 mb-1">

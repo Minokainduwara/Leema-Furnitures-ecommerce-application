@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { authFetch } from "../../utils/api";
+import { authFetch, API_BASE, productImageUrl } from "../../utils/api";
 
 const EditIcon = () => (
   <svg
@@ -51,7 +51,7 @@ function ProductsPage() {
 
   // LOAD PRODUCTS
   useEffect(() => {
-    authFetch("http://localhost:8080/api/products")
+    authFetch(`${API_BASE}/api/products`)
       .then((res) => res.json())
       .then((data) => {
         setProducts(data || []);
@@ -69,7 +69,7 @@ function ProductsPage() {
 
     try {
       const res = await authFetch(
-        `http://localhost:8080/api/products/${showDelete.id}`,
+        `${API_BASE}/api/products/${showDelete.id}`,
         { method: "DELETE" }
       );
 
@@ -162,7 +162,7 @@ function ProductsPage() {
                   <td className="p-3">
                     {p.image ? (
                       <img
-                        src={`http://localhost:8080${p.image}`}
+                        src={productImageUrl(p.image)}
                         className="w-10 h-10 rounded object-cover"
                       />
                     ) : (
