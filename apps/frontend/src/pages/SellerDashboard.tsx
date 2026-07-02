@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { authFetch } from "../utils/api"; 
+import { authFetch } from "../utils/api";
+import { formatLkr } from "../utils/currency";
 
 const SalesIcon = () => (
   <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -80,7 +81,7 @@ function SellerDashboard() {
   const cards = [
     {
       title: "Total Sales",
-      value: loading ? "..." : `Rs ${dashboard.totalSales}`,
+      value: loading ? "..." : formatLkr(Number(dashboard.totalSales)),
       icon: <SalesIcon />,
       description: "Total revenue from orders",
     },

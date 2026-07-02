@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { authFetch, API_BASE, productImageUrl } from "../../utils/api";
+import { formatLkr } from "../../utils/currency";
 
 const EditIcon = () => (
   <svg
@@ -156,7 +157,7 @@ function ProductsPage() {
                     {p.categoryName || p.category?.name || "N/A"}
                   </td>
                   <td className="p-3 text-green-600 font-semibold">
-                    Rs {p.price}
+                    {formatLkr(Number(p.price || 0))}
                   </td>
 
                   <td className="p-3">

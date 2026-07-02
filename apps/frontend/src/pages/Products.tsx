@@ -1,6 +1,7 @@
 import React from "react";
 import { ShoppingCart, Star } from "lucide-react";
 import { PRODUCTS } from "../data/Product";
+import { formatLkr } from "../utils/currency";
 
 const Products: React.FC = () => {
   return (
@@ -69,13 +70,13 @@ const Products: React.FC = () => {
                   {/* Price */}
                   <div className="flex items-center gap-3 mb-5">
                     <span className="text-2xl font-bold text-amber-600">
-                      Rs. {discountedPrice.toLocaleString()}
+                      {formatLkr(discountedPrice)}
                     </span>
 
                     {product.discount > 0 && (
                       <>
                         <span className="text-sm line-through text-stone-400">
-                          Rs. {product.price.toLocaleString()}
+                          {formatLkr(product.price)}
                         </span>
 
                         <span className="bg-red-100 text-red-600 text-xs px-2 py-1 rounded-full font-semibold">

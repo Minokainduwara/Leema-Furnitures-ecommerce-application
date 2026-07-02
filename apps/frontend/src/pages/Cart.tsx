@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { formatLkr } from "../utils/currency";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -111,7 +112,7 @@ function Cart() {
                       {item.productName}
                     </p>
                     <p className="text-sm text-stone-500 font-medium mt-0.5">
-                      Rs. {item.price.toLocaleString()}
+                      {formatLkr(item.price)}
                     </p>
                   </div>
 
@@ -142,7 +143,7 @@ function Cart() {
                     {/* Line total */}
                     <div className="w-24 text-right">
                       <p className="font-black text-amber-600 text-lg">
-                        Rs. {item.lineTotal.toLocaleString()}
+                        {formatLkr(item.lineTotal)}
                       </p>
                     </div>
 
@@ -170,7 +171,7 @@ function Cart() {
               <div>
                 <p className="text-stone-500 font-medium mb-1">Subtotal</p>
                 <p className="text-3xl font-black text-stone-900">
-                  Rs. {total.toLocaleString()}
+                  {formatLkr(total)}
                 </p>
               </div>
 

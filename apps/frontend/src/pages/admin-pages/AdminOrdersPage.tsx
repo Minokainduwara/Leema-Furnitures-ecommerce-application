@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { authFetch, API_BASE } from "../../utils/api";
+import { formatLkr } from "../../utils/currency";
 import { Search, RefreshCw } from "lucide-react";
 
 type Order = {
@@ -187,7 +188,7 @@ const AdminOrdersPage = () => {
                       {o.orderDate ? new Date(o.orderDate).toLocaleDateString() : "—"}
                     </td>
                     <td className="px-4 py-3 font-semibold text-stone-900">
-                      LKR {Number(o.totalAmount || 0).toLocaleString()}
+                      {formatLkr(Number(o.totalAmount || 0))}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { authFetch } from "../../utils/api";
+import { formatLkr } from "../../utils/currency";
 
 import {
   LayoutDashboard,
@@ -136,7 +137,7 @@ export default function UserDashboard() {
                 <span>Order #{o.orderNumber || o.id}</span>
                 <span className="text-gray-500">{o.status}</span>
                 <span className="font-bold">
-                  LKR {o.totalAmount || o.price}
+                  {formatLkr(Number(o.totalAmount || o.price))}
                 </span>
               </div>
             ))}

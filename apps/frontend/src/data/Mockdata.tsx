@@ -72,7 +72,7 @@ export const RECENT_ORDERS: Order[] = [
 
 export const ANALYTICS_KPI: KPI[] = [
   { label: "Conversion Rate", value: "3.8%", change: "+0.6%", up: true },
-  { label: "Avg. Order Value", value: "$1,240", change: "+$88", up: true },
+  { label: "Avg. Order Value", value: "LKR 124,000", change: "+LKR 8,800", up: true },
   { label: "Return Rate", value: "2.1%", change: "-0.3%", up: true },
   { label: "Cart Abandonment", value: "61.4%", change: "-4.2%", up: true },
 ];

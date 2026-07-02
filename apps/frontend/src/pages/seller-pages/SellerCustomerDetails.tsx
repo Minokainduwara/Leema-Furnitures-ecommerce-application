@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { formatLkr } from "../../utils/currency";
 function SellerCustomerDetails() {
   type Order = {
     id: number;
@@ -121,7 +122,7 @@ function SellerCustomerDetails() {
                     className="flex justify-between bg-gray-100 dark:bg-white p-2 rounded mb-2"
                   >
                     <span>Order #{order.id}</span>
-                    <span>Rs {order.total}</span>
+                    <span>{formatLkr(Number(order.total))}</span>
                     <span className="text-sm text-blue-600">
                       {order.status}
                     </span>

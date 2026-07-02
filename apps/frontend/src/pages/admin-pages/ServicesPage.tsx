@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { formatLkr } from "../../utils/currency";
 
 // ─────────────────────────────────────────────────────────────
 // TYPES
@@ -110,12 +111,7 @@ const ICON_OPTIONS = ["🛡️", "🔧", "💼", "📞", "✅", "⚙️", "🚀"
 // HELPERS
 // ─────────────────────────────────────────────────────────────
 
-/** Format a number as Sri Lankan Rupees — e.g. Rs. 12,500.00 */
-const formatPrice = (amount: number) =>
-  `Rs. ${amount.toLocaleString("en-LK", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
+const formatPrice = (amount: number) => formatLkr(amount, { decimals: 2 });
 
 const Badge: React.FC<{ children: React.ReactNode; className: string }> = ({ children, className }) => (
   <span className={`px-2 py-1 rounded text-xs font-semibold ${className}`}>{children}</span>
@@ -454,7 +450,7 @@ const ServicesPage: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs text-gray-500 mb-1 block">Price (Rs.)</label>
+                  <label className="text-xs text-gray-500 mb-1 block">Price (LKR)</label>
                   <input
                     type="number"
                     min={0}

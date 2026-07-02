@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { authFetch } from "../../utils/api";
+import { formatLkr } from "../../utils/currency";
 import { useCart } from "../../hooks/CartContext";
 import { useAuth } from "../../hooks/Authcontext";
 import { ShoppingCart, Zap, Truck, Shield, RotateCcw, ArrowLeft, Tag } from "lucide-react";
@@ -277,11 +278,11 @@ const ProductDetail = () => {
                   className="text-3xl font-black text-transparent bg-clip-text"
                   style={{ backgroundImage: "linear-gradient(135deg,#92400e,#c2410c)" }}
                 >
-                  LKR {Number(product.price).toLocaleString()}
+                  {formatLkr(Number(product.price))}
                 </span>
                 {product.originalPrice > product.price && (
                   <span className="text-stone-400 line-through text-base pb-0.5">
-                    LKR {Number(product.originalPrice).toLocaleString()}
+                    {formatLkr(Number(product.originalPrice))}
                   </span>
                 )}
               </div>
@@ -424,7 +425,7 @@ const ProductDetail = () => {
                         className="font-black text-sm mt-2 text-transparent bg-clip-text"
                         style={{ backgroundImage: "linear-gradient(135deg,#92400e,#c2410c)" }}
                       >
-                        LKR {Number(p.price).toLocaleString()}
+                        {formatLkr(Number(p.price))}
                       </p>
                     </div>
                   </div>

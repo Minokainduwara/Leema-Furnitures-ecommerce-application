@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { api, authFetch, productImageUrl, type ApiProduct } from "../utils/api";
+import { formatLkr } from "../utils/currency";
 import { useCart } from "../hooks/CartContext";
 import { useAuth } from "../hooks/Authcontext";
 
@@ -251,7 +252,7 @@ function ProductCard({ item, onAddToCart, index }: ProductCardProps): React.Reac
 
         <div className="flex items-center justify-between mt-3 pt-3 border-t border-stone-100">
           <span className="text-amber-700 font-black text-lg">
-            LKR {item.price?.toLocaleString()}
+            {formatLkr(item.price ?? 0)}
           </span>
           <button
             onClick={handleAdd}

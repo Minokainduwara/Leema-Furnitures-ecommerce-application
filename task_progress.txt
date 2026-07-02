@@ -1,0 +1,8 @@
+Task progress tracking file.
+
+Current status:
+- [x] Standardize all prices to LKR across frontend
+- [x] Fix backend analytics to use LKR instead of $
+- [x] Enhance AnalyticsPage with detailed UI
+- [x] Add backend report generation endpoints
+- [x] Add report download feature in AnalyticsPage

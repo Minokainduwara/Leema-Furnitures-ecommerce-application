@@ -3,6 +3,7 @@ import { CreditCard, Truck, Wallet } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../hooks/CartContext";
 import toast from "react-hot-toast";
+import { formatLkr } from "../utils/currency";
 
 import api from "../api/client";
 
@@ -361,7 +362,7 @@ const CheckoutPage: React.FC = () => {
                   </div>
 
                   <p className="font-semibold text-stone-700">
-                    Rs. {item.lineTotal.toFixed(2)}
+                    {formatLkr(item.lineTotal, { decimals: 2 })}
                   </p>
                 </div>
               ))}
@@ -373,7 +374,7 @@ const CheckoutPage: React.FC = () => {
                 <span className="text-stone-600">Subtotal</span>
 
                 <span className="font-semibold">
-                  Rs. {cart.total.toFixed(2)}
+                  {formatLkr(cart.total, { decimals: 2 })}
                 </span>
               </div>
 
@@ -381,7 +382,7 @@ const CheckoutPage: React.FC = () => {
                 <span className="text-stone-600">Shipping</span>
 
                 <span className="font-semibold">
-                  Rs. 500.00
+                  {formatLkr(500, { decimals: 2 })}
                 </span>
               </div>
 
@@ -389,7 +390,7 @@ const CheckoutPage: React.FC = () => {
                 <span>Total</span>
 
                 <span className="text-amber-600">
-                  Rs. {(cart.total + 500).toFixed(2)}
+                  {formatLkr(cart.total + 500, { decimals: 2 })}
                 </span>
               </div>
             </div>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { authFetch } from "../../utils/api";
+import { formatLkr } from "../../utils/currency";
 /* ================= TYPES ================= */
 
 type Repair = {
@@ -224,7 +225,7 @@ function RepairManagement() {
                     </span>
                   </td>
 
-                  <td className="p-3">Rs {r.estimatedCost}</td>
+                  <td className="p-3">{formatLkr(Number(r.estimatedCost))}</td>
 
                   <td className="p-3">{r.order?.orderNumber|| "-"}</td>
 
@@ -269,10 +270,10 @@ function RepairManagement() {
                 <b>Issue:</b> {viewRepair.issueDescription}
               </p>
               <p>
-                <b>Estimated:</b> Rs {viewRepair.estimatedCost}
+                <b>Estimated:</b> {formatLkr(Number(viewRepair.estimatedCost))}
               </p>
               <p>
-                <b>Actual:</b> Rs {viewRepair.actualCost}
+                <b>Actual:</b> {formatLkr(Number(viewRepair.actualCost))}
               </p>
               <p>
                 <b>Date:</b> {viewRepair.createdAt}

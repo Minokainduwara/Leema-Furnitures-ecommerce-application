@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import type { Order, WishlistItem } from "../../types/dashboard.types";
+import { formatLkr } from "../../utils/currency";
 
 interface OrdersPanelProps {
   orders: Order[];
   wishlist: WishlistItem[];
 }
 
-const fmt = (n: number) => `LKR ${n.toLocaleString("en-LK")}.00`;
+const fmt = (n: number) => formatLkr(n, { decimals: 2 });
 
 const StatusBadge: React.FC<{ status: Order["status"] }> = ({ status }) => {
   const map = {

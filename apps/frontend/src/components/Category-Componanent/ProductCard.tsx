@@ -1,5 +1,6 @@
 import type { Product } from "../../types/Product";
 import React from "react";
+import { formatLkr } from "../../utils/currency";
 
   
 
@@ -41,7 +42,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         </p>
 
         <p className="font-bold text-[#2d5016]">
-          LKR {finalPrice.toLocaleString()}
+          {formatLkr(finalPrice)}
         </p>
 
         <button className="mt-3 bg-red-600 text-white px-3 py-1 rounded text-xs font-semibold">
