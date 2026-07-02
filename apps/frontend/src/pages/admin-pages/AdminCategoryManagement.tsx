@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { authFetch, API_BASE } from "../../utils/api";
 
 // ─────────────────────────────────────────────────────────────
 // ICONS
@@ -55,7 +56,7 @@ function AdminCategoryManagement() {
 
   // LOAD
   useEffect(() => {
-    fetch("http://localhost:8080/api/categories")
+    authFetch(`${API_BASE}/api/categories`)
       .then(async (res) => {
         if (!res.ok) throw new Error("Failed");
         return res.json();
@@ -73,7 +74,7 @@ function AdminCategoryManagement() {
 
   // DELETE
   const handleDelete = async () => {
-    await fetch(`http://localhost:8080/api/categories/${deleteState.id}`, {
+    await authFetch(`${API_BASE}/api/categories/${deleteState.id}`, {
       method: "DELETE",
     });
     setCategories((prev) => prev.filter((c) => c.id !== deleteState.id));

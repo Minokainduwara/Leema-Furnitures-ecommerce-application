@@ -1,14 +1,7 @@
-import {createContext, useState, useEffect, type ReactNode, useContext} from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 
-import api from "../api/client";
-
-export interface AuthUser {
-  id: number;
-  email: string;
-  role: string;
-}
-
-interface AuthResponse {
+// ✅ Response type
+export interface AuthResponse {
   accessToken: string;
   refreshToken: string;
   tokenType: string;
@@ -17,159 +10,160 @@ interface AuthResponse {
   role: string;
 }
 
-export interface AuthContextType {
-  user: AuthUser | null;
-  isLoading: boolean;
-  isAuthenticated: boolean;
-  error: string | null;
+// User shape exposed to consumers
+export interface AuthUser {
+  userId: number;
+  email: string;
+  role: string;
+}
 
-  login: (email: string, password: string) => Promise<AuthUser>;
+interface AuthContextType {
+  user: AuthUser | null;
+
   signup: (
     email: string,
     password: string,
-    name: string
+    name: string,
   ) => Promise<AuthUser>;
 
-  logout: () => Promise<void>;
+  login: (email: string, password: string) => Promise<AuthUser>;
+
+  logout: () => void;
+
+  isLoading: boolean;
+  error: string | null;
 }
 
-export const AuthContext = createContext<AuthContextType | undefined>(
-  undefined
-);
+export const AuthContext = createContext<AuthContextType | null>(null);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+const STORAGE_KEY = "leema_user";
+
+const readUser = (): AuthUser | null => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as AuthUser) : null;
+  } catch {
+    return null;
+  }
+};
+
+const persist = (data: AuthResponse): AuthUser => {
+  // Write both token keys so legacy pages (using "token") and the new uiparts
+  // pages (using "accessToken") both work without per-page changes.
+  localStorage.setItem("token", data.accessToken);
+  localStorage.setItem("accessToken", data.accessToken);
+  if (data.refreshToken) localStorage.setItem("refreshToken", data.refreshToken);
+  localStorage.setItem("role", data.role);
+  localStorage.setItem("userId", String(data.userId));
+  localStorage.setItem("email", data.email);
+
+  const user: AuthUser = {
+    userId: data.userId,
+    email: data.email,
+    role: data.role,
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+  window.dispatchEvent(new CustomEvent("leema:auth-changed"));
+  return user;
+};
+
+const clear = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("refreshToken");
+  localStorage.removeItem("role");
+  localStorage.removeItem("userId");
+  localStorage.removeItem("email");
+  localStorage.removeItem(STORAGE_KEY);
+  window.dispatchEvent(new CustomEvent("leema:auth-changed"));
+};
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<AuthUser | null>(readUser());
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Restore auth on refresh
+  // Sync across tabs and manual localStorage changes
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-
-    setIsLoading(false);
-  }, []);
-
-  const saveAuthData = (data: AuthResponse): AuthUser => {
-    localStorage.setItem("accessToken", data.accessToken);
-    localStorage.setItem("refreshToken", data.refreshToken);
-
-    const authUser: AuthUser = {
-      id: data.userId,
-      email: data.email,
-      role: data.role.toUpperCase(),
+    const sync = () => setUser(readUser());
+    window.addEventListener("storage", sync);
+    window.addEventListener("leema:auth-changed", sync);
+    return () => {
+      window.removeEventListener("storage", sync);
+      window.removeEventListener("leema:auth-changed", sync);
     };
-
-    localStorage.setItem("user", JSON.stringify(authUser));
-
-    setUser(authUser);
-
-    return authUser;
-  };
-
-  const login = async (
-    email: string,
-    password: string
-  ): Promise<AuthUser> => {
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const response = await api
-        .post("auth/login", {
-          json: { email, password },
-        })
-        .json<AuthResponse>();
-
-      return saveAuthData(response);
-    } catch (err: any) {
-      const message =
-        err?.response?.status === 401
-          ? "Invalid credentials"
-          : "Login failed";
-
-      setError(message);
-
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, []);
 
   const signup = async (
     email: string,
     password: string,
-    name: string
+    name: string,
   ): Promise<AuthUser> => {
+    setIsLoading(true);
+    setError(null);
     try {
-      setIsLoading(true);
-      setError(null);
-
-      const response = await api
-        .post("auth/register", {
-          json: { email, password, name },
-        })
-        .json<AuthResponse>();
-
-      return saveAuthData(response);
+      const res = await fetch("http://localhost:8080/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, name }),
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || "Signup failed");
+      }
+      const data: AuthResponse = await res.json();
+      const u = persist(data);
+      setUser(u);
+      return u;
     } catch (err: any) {
-      const message = "Signup failed";
-
-      setError(message);
-
+      setError(err.message);
       throw err;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const logout = async (): Promise<void> => {
+  const login = async (email: string, password: string): Promise<AuthUser> => {
+    setIsLoading(true);
+    setError(null);
     try {
-      const refreshToken = localStorage.getItem("refreshToken");
-
-      if (refreshToken) {
-        await api.post("auth/logout", {
-          json: { refreshToken },
-        });
+      const res = await fetch("http://localhost:8080/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || "Login failed");
       }
-    } catch (err) {
-      setError("Signup failed");
+      const data: AuthResponse = await res.json();
+      const u = persist(data);
+      setUser(u);
+      return u;
+    } catch (err: any) {
+      setError(err.message);
       throw err;
     } finally {
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
-      localStorage.removeItem("user");
-
-      setUser(null);
+      setIsLoading(false);
     }
   };
 
-  const value: AuthContextType = {
-    user,
-    isLoading,
-    isAuthenticated: !!user,
-    error,
-    login,
-    signup,
-    logout,
+  const logout = () => {
+    clear();
+    setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={{ user, signup, login, logout, isLoading, error }}>
       {children}
     </AuthContext.Provider>
   );
-}
+};
 
-export function useAuth(): AuthContextType {
+export const useAuth = () => {
   const context = useContext(AuthContext);
-
   if (!context) {
     throw new Error("useAuth must be used within AuthProvider");
   }
-
   return context;
-}
+};

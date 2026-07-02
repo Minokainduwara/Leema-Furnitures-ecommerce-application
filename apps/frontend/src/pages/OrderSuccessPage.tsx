@@ -5,9 +5,9 @@ import { Link, useParams, useLocation } from "react-router-dom";
 
 const OrderSuccessPage: React.FC = () => {
   const { orderNumber } = useParams();
-  
+
   const location = useLocation();
-  
+
   const orderId = location.state?.orderId;
 
   const handleDownloadInvoice = async (
@@ -103,7 +103,7 @@ const OrderSuccessPage: React.FC = () => {
           Download Invoice
         </button>
 
-        
+
 
           <Link
             to="/user/orders"

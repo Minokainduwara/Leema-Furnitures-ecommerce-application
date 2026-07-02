@@ -48,8 +48,8 @@ const LoginPage: React.FC = () => {
       } else {
         navigate("/user/dashboard");
       }
-    } catch {
-      setError(authError || "Login failed. Please try again.");
+    } catch (err: any) {
+      setError(err?.message || "Login failed. Please try again.");
     }
   };
 
@@ -83,7 +83,6 @@ const LoginPage: React.FC = () => {
                   name="email"
                   value={form.email}
                   onChange={handleChange}
-                  className="w-full pl-10 py-2.5 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-stone-900 placeholder-stone-400"
                   placeholder="admin@leema.com"
                   className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-stone-200 text-stone-900 placeholder:text-stone-400 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                 />
@@ -102,7 +101,6 @@ const LoginPage: React.FC = () => {
                   name="password"
                   value={form.password}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-10 py-2.5 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-stone-900 placeholder-stone-400"
                   placeholder="••••••••"
                   className="w-full pl-10 pr-10 py-2.5 rounded-lg border border-stone-200 text-stone-900 placeholder:text-stone-400 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                 />
@@ -132,7 +130,7 @@ const LoginPage: React.FC = () => {
               <a href="#" className="text-amber-600 hover:text-amber-700 font-medium">
                 Forgot password?
               </a>
-            </div>=
+            </div>
 
             {/* Login Button */}
             <button
