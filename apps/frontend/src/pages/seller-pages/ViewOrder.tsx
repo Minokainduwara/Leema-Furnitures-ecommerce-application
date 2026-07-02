@@ -8,6 +8,7 @@ function ViewOrder({ orders }: any) {
     { name: "Category", icon: "/images/products.png", path: "/category" },
 
     { name: "Orders", icon: "/images/orders.png", path: "/orders" },
+    { name: "Inventory", icon: "/images/inventory.png", path: "/inventory" },
     { name: "Repair", icon: "/images/products.png", path: "/repairs" },
     {
       name: "Customer Details",

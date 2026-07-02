@@ -11,9 +11,13 @@ type Notification = {
   userId: number;
   customerName?: string;
   customerEmail?: string;
+  orderNumber?: string;
+  createdAt?: string;
 };
 
 function SellerMessage() {
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState("all"); // all | recent
   const [sidebaropen, setsidebar] = useState<boolean>(false);
   const [darkmode, setdarkmode] = useState<boolean>(false);
   const navigate = useNavigate();
@@ -32,6 +36,7 @@ function SellerMessage() {
     { name: "Category", icon: "/images/category.png", path: "/category" },
 
     { name: "Orders", icon: "/images/orders.png", path: "/orders" },
+    { name: "Inventory", icon: "/images/inventory.png", path: "/inventory" },
     { name: "Repair", icon: "/images/service.png", path: "/repairs" },
     {
       name: "Customer Details",
@@ -60,7 +65,11 @@ function SellerMessage() {
 
   const fetchMessages = async () => {
     try {
-      const res = await authFetch("http://localhost:8080/api/notifications");
+      const token = localStorage.getItem("token");
+      console.log("🔍 Token from storage:", token);
+      const res = await authFetch(
+        "http://localhost:8080/api/notifications/seller",
+      );
       const data = await res.json();
       setMessages(data);
     } catch (err) {
@@ -88,7 +97,30 @@ function SellerMessage() {
       }
     }
   };
+  const filteredMessages = messages.filter((msg) => {
+    // SEARCH
+    if (
+      search &&
+      !msg.orderNumber?.toLowerCase().includes(search.toLowerCase())
+    ) {
+      return false;
+    }
 
+    // FILTER RECENT
+    if (filter === "recent") {
+      if (!msg.createdAt) return false;
+
+      const created = new Date(msg.createdAt);
+      if (isNaN(created.getTime())) return false;
+
+      const now = new Date();
+      const diff = (now.getTime() - created.getTime()) / (1000 * 60 * 60);
+
+      return diff <= 24;
+    }
+
+    return true;
+  });
   return (
     <div className="bg-gray-100 min-h-screen flex">
       <aside
@@ -124,7 +156,39 @@ function SellerMessage() {
         </div>
       </aside>
 
-      <main className={`w-full h-screen overflow-y-auto`}>
+      <main className={`w-full p-6 h-screen overflow-y-auto`}>
+        <div className="flex flex-col md:flex-row items-center gap-3 bg-white dark:bg-gray-900 p-4 rounded-xl shadow border mb-3">
+          {/* 🔍 Search Input */}
+          <div className="relative w-full md:w-72">
+            <input
+              type="text"
+              placeholder="Search by Order Number..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:border-gray-700"
+            />
+
+            {/* Icon */}
+            <span className="absolute left-3 top-2.5 text-gray-400">🔍</span>
+          </div>
+
+          {/* 🧾 Filter Dropdown */}
+          <div className="w-full md:w-40">
+            <select
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              className="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">📋 All</option>
+              <option value="recent">⚡ Recent</option>
+            </select>
+          </div>
+
+          {/* 📊 Optional Count */}
+          <div className="ml-auto text-sm text-gray-500 hidden md:block">
+            Showing results
+          </div>
+        </div>
         {/* HEADER */}
         <div className="px-6 py-4 bg-white dark:bg-gray-900 flex justify-between items-center">
           <div>
@@ -133,7 +197,7 @@ function SellerMessage() {
           </div>
 
           <div className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">
-            {messages.length} Messages
+            {filteredMessages.length} Messages
           </div>
         </div>
 
@@ -141,10 +205,10 @@ function SellerMessage() {
         <div className="flex h-[calc(100%-70px)]">
           {/* LEFT LIST */}
           <div className="w-1/3 border-r overflow-y-auto bg-white dark:bg-gray-900">
-            {messages.length === 0 ? (
+            {filteredMessages.length === 0 ? (
               <div className="p-4 text-gray-500">No messages</div>
             ) : (
-              messages.map((msg) => (
+              filteredMessages.map((msg) => (
                 <div
                   key={msg.id}
                   onClick={() => openMessage(msg)}
@@ -169,6 +233,9 @@ function SellerMessage() {
 
                   <p className="text-sm text-gray-500 truncate">
                     {msg.message}
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    Order: {msg.orderNumber || "N/A"}
                   </p>
                 </div>
               ))

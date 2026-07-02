@@ -45,6 +45,7 @@ function SellerOrderManagement() {
     { name: "Category", icon: "/images/category.png", path: "/category" },
 
     { name: "Orders", icon: "/images/orders.png", path: "/orders" },
+    { name: "Inventory", icon: "/images/inventory.png", path: "/inventory" },
     { name: "Repair", icon: "/images/service.png", path: "/repairs" },
     {
       name: "Customer Details",
@@ -159,13 +160,25 @@ function SellerOrderManagement() {
   };
 
   const updateStatus = async (id: number, status: string) => {
-    await authFetch(`http://localhost:8080/api/orders/${id}/status`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status }),
-    });
+    try {
+      const res = await authFetch(
+        `http://localhost:8080/api/orders/${id}/status`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status }),
+        },
+      );
 
-    loadOrders();
+      if (!res.ok) {
+        throw new Error("Failed to update status");
+      }
+
+      loadOrders();
+    } catch (err) {
+      console.error(err);
+      alert("Status update failed ❌");
+    }
   };
   const updatePaymentStatus = async (id: number, status: string) => {
     await authFetch(`http://localhost:8080/api/orders/${id}/payment-status`, {
@@ -366,7 +379,7 @@ function SellerOrderManagement() {
 
                   <td className="p-3">
                     <select
-                      value={order.status}
+                      value={order.status?.toUpperCase()}
                       onChange={(e) => updateStatus(order.id, e.target.value)}
                       className="border px-2 py-1"
                     >

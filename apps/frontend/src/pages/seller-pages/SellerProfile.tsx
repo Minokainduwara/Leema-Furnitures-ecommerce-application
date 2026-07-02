@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Link,useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { authFetch } from "../../utils/api";
 
 function SellerProfile() {
   const [sidebaropen, setsidebar] = useState<boolean>(false);
   const [darkmode, setdarkmode] = useState<boolean>(false);
-
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   // profile state
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -28,13 +30,14 @@ function SellerProfile() {
     { name: "Category", icon: "/images/category.png", path: "/category" },
 
     { name: "Orders", icon: "/images/orders.png", path: "/orders" },
+    { name: "Inventory", icon: "/images/inventory.png", path: "/inventory" },
     { name: "Repair", icon: "/images/service.png", path: "/repairs" },
     {
       name: "Customer Details",
       icon: "/images/Details.png",
       path: "/customers",
     },
-    
+
     { name: "notification", icon: "/images/msg.png", path: "/messages" },
     { name: "Profile", icon: "/images/profile.png", path: "/profile" },
   ];
@@ -67,7 +70,7 @@ function SellerProfile() {
       console.error("Profile load error", err);
     }
   };
-  
+
   const updateProfile = async () => {
     try {
       await authFetch("http://localhost:8080/api/users/me", {
@@ -114,11 +117,14 @@ function SellerProfile() {
     }
   };
 
-  
   return (
-    <div className={`flex min-h-screen ${darkmode ? "dark" : ""}`}>
+    <div className="flex h-screen overflow-hidden">
       {/* SIDEBAR */}
-      <aside className="bg-gray-900 w-64 h-screen fixed flex flex-col">
+      <aside
+        className={`bg-gray-900 w-70 h-screen fixed shadow-lg z-20 ${
+          sidebaropen ? "translate-x-0" : "-translate-x-64"
+        } lg:translate-x-0 lg:static transition-all flex flex-col`}
+      >
         <div className="flex items-center gap-2 p-4 border-b border-white">
           <img src="/images/leemalogo.jpg" className="h-6 w-18" />
           <span className="font-bold text-white">Seller Dashboard</span>
@@ -137,87 +143,160 @@ function SellerProfile() {
           ))}
         </nav>
 
-       <button
-  onClick={handleLogout}
-  className="w-full bg-red-500 text-white py-2 rounded"
->
-  Logout
-</button>
+        <div className="p-4 border-t border-white">
+          <button
+            onClick={handleLogout}
+            className="w-full bg-red-500 text-white py-2 rounded"
+          >
+            Logout
+          </button>
+        </div>
       </aside>
 
       {/* MAIN */}
-      <main className="ml-64 w-full p-8 bg-gray-50  ">
+      <main className=" w-full p-14 bg-gray-50  overflow-y-auto">
         <h1 className="text-2xl font-bold mb-6 text-gray-700">
           Seller Profile
         </h1>
 
         {/* PROFILE CARD */}
-        <div className="bg-white bg-white p-6 rounded shadow mb-6">
-          <h2 className="font-semibold mb-4 text-gray-500">Profile Details</h2>
-          <label className="text-gray-600">Name</label>
-          <input
-            className="w-full border p-2 mb-3 rounded border-gray-300 text-gray-600"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Name"
-          />
-          <label className="text-gray-600">Email</label>
-          <input
-            className="w-full border p-2 mb-3 rounded border-gray-300 text-gray-600"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email"
-          />
-          <label className="text-gray-600">Phone</label>
-          <input
-            className="w-full border p-2 mb-3 rounded border-gray-300 text-gray-600"
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-            placeholder="Phone Number"
-          />
+        <div className="bg-white p-8 rounded-2xl shadow-md w-full mb-6 border border-gray-100">
+          <h2 className="text-2xl font-semibold mb-6 text-gray-700">
+            Profile Details
+          </h2>
 
-          <button
-            onClick={updateProfile}
-            className="bg-blue-600 text-white px-4 py-2 rounded"
-          >
-            Update Profile
-          </button>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Name */}
+            <div>
+              <label className="block text-sm font-medium text-gray-500 mb-1">
+                Full Name
+              </label>
+              <input
+                className="w-full border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 p-3 rounded-lg outline-none transition text-gray-700 bg-gray-50"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Enter your name"
+              />
+            </div>
+
+            {/* Email */}
+            <div>
+              <label className="block text-sm font-medium text-gray-500 mb-1">
+                Email Address
+              </label>
+              <input
+                className="w-full border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 p-3 rounded-lg outline-none transition text-gray-700 bg-gray-50"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+              />
+            </div>
+
+            {/* Phone */}
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-500 mb-1">
+                Phone Number
+              </label>
+              <input
+                className="w-full border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 p-3 rounded-lg outline-none transition text-gray-700 bg-gray-50"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                placeholder="Enter phone number"
+              />
+            </div>
+          </div>
+
+          {/* Button */}
+          <div className="mt-8 flex justify-end">
+            <button
+              onClick={updateProfile}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg shadow-sm transition"
+            >
+              Save Changes
+            </button>
+          </div>
         </div>
 
         {/* PASSWORD CARD */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded shadow">
-          <h2 className="font-semibold mb-4">Change Password</h2>
+        <div className="bg-white p-8 rounded-2xl shadow-md w-full border border-gray-100">
+          <h2 className="text-2xl font-semibold mb-6 text-gray-700">
+            Change Password
+          </h2>
 
-          <input
-            type="password"
-            className="w-full border p-2 mb-3 rounded"
-            placeholder="Current Password"
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Current Password */}
+            <div className="relative md:col-span-2">
+              <label className="block text-sm font-medium text-gray-500 mb-1">
+                Current Password
+              </label>
+              <input
+                type={showCurrent ? "text" : "password"}
+                className="w-full border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 p-3 rounded-lg pr-12 outline-none transition text-gray-700 bg-gray-50"
+                placeholder="Enter current password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+              />
+              <button
+                type="button"
+                onClick={() => setShowCurrent(!showCurrent)}
+                className="absolute right-3 top-9 text-gray-400 hover:text-gray-600"
+              >
+                {showCurrent ? "🙈" : "👁️"}
+              </button>
+            </div>
 
-          <input
-            type="password"
-            className="w-full border p-2 mb-3 rounded"
-            placeholder="New Password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-          />
+            {/* New Password */}
+            <div className="relative">
+              <label className="block text-sm font-medium text-gray-500 mb-1">
+                New Password
+              </label>
+              <input
+                type={showNew ? "text" : "password"}
+                className="w-full border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 p-3 rounded-lg pr-12 outline-none transition text-gray-700 bg-gray-50"
+                placeholder="Enter new password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+              />
+              <button
+                type="button"
+                onClick={() => setShowNew(!showNew)}
+                className="absolute right-3 top-9 text-gray-400 hover:text-gray-600"
+              >
+                {showNew ? "🙈" : "👁️"}
+              </button>
+            </div>
 
-          <input
-            type="password"
-            className="w-full border p-2 mb-3 rounded"
-            placeholder="Confirm Password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-          />
+            {/* Confirm Password */}
+            <div className="relative">
+              <label className="block text-sm font-medium text-gray-500 mb-1">
+                Confirm Password
+              </label>
+              <input
+                type={showConfirm ? "text" : "password"}
+                className="w-full border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 p-3 rounded-lg pr-12 outline-none transition text-gray-700 bg-gray-50"
+                placeholder="Confirm new password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirm(!showConfirm)}
+                className="absolute right-3 top-9 text-gray-400 hover:text-gray-600"
+              >
+                {showConfirm ? "🙈" : "👁️"}
+              </button>
+            </div>
+          </div>
 
-          <button
-            onClick={changePassword}
-            className="bg-red-600 text-white px-4 py-2 rounded"
-          >
-            Update Password
-          </button>
+          {/* Button */}
+          <div className="mt-8 flex justify-end">
+            <button
+              onClick={changePassword}
+              className="bg-red-600 hover:bg-red-700 text-white font-medium px-6 py-3 rounded-lg shadow-sm transition"
+            >
+              Update Password
+            </button>
+          </div>
         </div>
       </main>
     </div>

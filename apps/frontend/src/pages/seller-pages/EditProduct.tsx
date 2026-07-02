@@ -12,6 +12,7 @@ function EditProduct() {
     { name: "Category", icon: "/images/category.png", path: "/category" },
 
     { name: "Orders", icon: "/images/orders.png", path: "/orders" },
+    { name: "Inventory", icon: "/images/orders.png", path: "/inventory" },
     { name: "Repair", icon: "/images/service.png", path: "/repairs" },
     {
       name: "Customer Details",

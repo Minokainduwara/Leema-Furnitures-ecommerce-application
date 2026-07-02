@@ -16,6 +16,7 @@ function EditCategory() {
     { name: "Category", icon: "/images/category.png", path: "/category" },
 
     { name: "Orders", icon: "/images/orders.png", path: "/orders" },
+    { name: "Inventory", icon: "/images/inventory.png", path: "/inventory" },
     { name: "Repair", icon: "/images/service.png", path: "/repairs" },
     {
       name: "Customer Details",
@@ -61,8 +62,10 @@ function EditCategory() {
 
     // CATEGORY DISCOUNT
     authFetch("http://localhost:8080/api/seller/category-discounts")
+    
       .then((res) => res.json())
       .then((list) => {
+        console.log("CATEGORY DISCOUNTS API RESPONSE:", list);
         const discount = list.find((d: any) => d.category.id == id);
 
         if (discount) {
@@ -163,10 +166,10 @@ function EditCategory() {
         </div>
       </aside>
 
-      <main className="w-full flex items-center justify-center p-6 overflow-y-auto">
+      <main className="w-full flex h-screen items-center justify-center p-6 overflow-y-auto">
         <form
           onSubmit={handleUpdate}
-          className="bg-white w-full max-w-md p-6 rounded-xl shadow-md"
+          className="bg-white w-full max-w-md p-6 rounded-xl shadow-md max-h-[90vh] overflow-y-auto"
         >
           <h2 className="text-2xl font-bold mb-6 text-gray-800">
             Edit Category #{id}
