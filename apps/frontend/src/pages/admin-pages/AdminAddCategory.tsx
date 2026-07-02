@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { authFetch, API_BASE } from "../../utils/api";
 
 function AdminAddCategory() {
   const navigate = useNavigate();
@@ -18,16 +19,20 @@ function AdminAddCategory() {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
 
-    await fetch("http://localhost:8080/api/categories", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-
-    alert("Category added successfully");
-
-    // ✅ FIXED ROUTE
-    navigate("/admin/categories");
+    try {
+      const res = await authFetch(`${API_BASE}/api/categories`, {
+        method: "POST",
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(errText || `HTTP ${res.status}`);
+      }
+      alert("Category added successfully");
+      navigate("/admin/categories");
+    } catch (err: any) {
+      alert(`Failed to add category: ${err.message || err}`);
+    }
   };
 
   return (

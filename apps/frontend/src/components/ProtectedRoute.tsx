@@ -7,14 +7,18 @@ interface ProtectedRouteProps {
 }
 
 const isAuthenticated = (): boolean => {
-  return Boolean(localStorage.getItem("authToken"));
+  return Boolean(localStorage.getItem("token"));
 };
 
 const isAdminUser = (): boolean => {
-  return localStorage.getItem("userRole") === "admin";
+  return localStorage.getItem("role") === "ADMIN";
 };
 
-function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
+function ProtectedRoute({
+  children,
+  requireAdmin = false,
+}: ProtectedRouteProps) {
+
   if (!isAuthenticated()) {
     return <Navigate to="/login" replace />;
   }

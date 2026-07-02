@@ -1,7 +1,9 @@
 import React, { useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "./hooks/Authcontext";
-import AppRoutes from "./router";
+import { CartProvider } from "./hooks/CartContext";
+import AppRoutes from "./router/AppRoutes";
 
 const App: React.FC = () => {
   useEffect(() => {
@@ -19,10 +21,14 @@ const App: React.FC = () => {
 
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <AppRoutes />
-      </BrowserRouter>
+      <CartProvider>
+        <BrowserRouter>
+          <AppRoutes />
+          <Toaster position="top-right" />
+        </BrowserRouter>
+      </CartProvider>
     </AuthProvider>
+
   );
 };
 

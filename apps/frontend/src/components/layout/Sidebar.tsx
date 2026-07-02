@@ -8,187 +8,102 @@ import {
   BarChart3,
   User,
   LogOut,
+  Tags,
+  ShoppingBag,
+  Megaphone,
 } from "lucide-react";
+import { getCurrentUser, logout as doLogout } from "../../utils/api";
 
-import { useAuth } from "../../hooks/Authcontext";
-import type { RouteMeta } from "../../types";
+type NavRoute = {
+  path: string;
+  label: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+};
 
-// ─── Role Types ────────────────────────────────────────────
-
-
-// ─── Navigation Routes ─────────────────────────────────────
-
-export const NAV_ROUTES: RouteMeta[] = [
-  {
-    path: "/admin/dashboard",
-    label: "Dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    path: "/admin/products",
-    label: "Products",
-    icon: Package,
-  },
-  {
-    path: "/admin/categories",
-    label: "Categories",
-    icon: Package,
-  },
-  {
-    path: "/admin/users",
-    label: "Users",
-    icon: Users,
-  },
-  {
-    path: "/admin/services",
-    label: "Services",
-    icon: Wrench,
-  },
-  {
-    path: "/admin/analytics",
-    label: "Analytics",
-    icon: BarChart3,
-  },
-  {
-    path: "/admin/profile",
-    label: "My Profile",
-    icon: User,
-  },
+export const NAV_ROUTES: NavRoute[] = [
+  { path: "/admin/dashboard",     label: "Dashboard",     icon: LayoutDashboard },
+  { path: "/admin/users",         label: "Users",         icon: Users },
+  { path: "/admin/products",      label: "Products",      icon: Package },
+  { path: "/admin/categories",    label: "Categories",    icon: Tags },
+  { path: "/admin/orders",        label: "Orders",        icon: ShoppingBag },
+  { path: "/admin/services",      label: "Services",      icon: Wrench },
+  { path: "/admin/announcements", label: "Announcements", icon: Megaphone },
+  { path: "/admin/analytics",     label: "Analytics",     icon: BarChart3 },
+  { path: "/admin/profile",       label: "My Profile",    icon: User },
 ];
 
-// ─── Props ─────────────────────────────────────────────────
-
 interface SidebarProps {
-  open: boolean;
+  open:    boolean;
   onClose: () => void;
 }
 
-// ─── Component ─────────────────────────────────────────────
-
 const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
-  const { user, logout } = useAuth();
+  const user = getCurrentUser();
   const navigate = useNavigate();
 
-  // ─── Logout Handler ─────────────────────────────────────
-
   const handleLogout = (): void => {
-    logout();
+    doLogout();
     navigate("/login", { replace: true });
   };
 
-  // ─── Role-based Route Filtering ─────────────────────────
-
-  const visibleRoutes = NAV_ROUTES;
-
   return (
     <>
-      {/* ─── Mobile Overlay ─────────────────────────────── */}
       {open && (
-        <div
-          className="fixed inset-0 bg-black/40 z-30 lg:hidden"
-          onClick={onClose}
-        />
+        <div className="fixed inset-0 bg-black/40 z-30 lg:hidden" onClick={onClose} />
       )}
-
-      {/* ─── Sidebar ───────────────────────────────────── */}
       <aside
-        className={`
-          fixed lg:relative z-40
-          w-64 h-screen
-          bg-linear-to-b from-stone-900 to-stone-800
-          border-r border-stone-700
-          flex flex-col
-          transition-transform duration-300 ease-in-out
-          ${open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
-        `}
+        className={`fixed lg:relative z-40 w-60 h-full bg-stone-900 flex flex-col
+          transition-transform duration-300
+          ${open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
       >
-        {/* ─── Logo Section ───────────────────────────── */}
-        <div className="px-6 py-6 border-b border-stone-700 shrink-0">
+        <div className="px-5 py-6 border-b border-stone-800 flex-shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center text-white font-black text-lg shadow-lg">
-              L
-            </div>
-
+            <div className="w-9 h-9 bg-amber-500 rounded-xl flex items-center justify-center text-white font-black text-lg">L</div>
             <div>
-              <h1
-                className="text-white text-lg font-bold tracking-wide"
-                style={{ fontFamily: "'Playfair Display', serif" }}
-              >
-                LEEMA
-              </h1>
-
-              <p className="text-stone-400 text-[10px] uppercase tracking-[0.2em]">
-                Furniture Admin
-              </p>
+              <div className="text-white font-bold text-sm tracking-wide" style={{ fontFamily: "'Playfair Display', serif" }}>LEEMA</div>
+              <div className="text-stone-500 text-[10px] tracking-widest uppercase">Furniture Admin</div>
             </div>
           </div>
         </div>
 
-        {/* ─── Navigation ─────────────────────────────── */}
-        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
-          {visibleRoutes.map((item) => (
+        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+          {NAV_ROUTES.map((item) => (
             <NavLink
               key={item.path}
               to={item.path}
               onClick={onClose}
+              end={item.path === "/admin/dashboard"}
               className={({ isActive }) =>
-                `
-                flex items-center gap-3
-                px-4 py-3
-                rounded-xl
-                text-sm font-medium
-                transition-all duration-200
-
-                ${
-                  isActive
-                    ? "bg-amber-500 text-white shadow-lg shadow-amber-900/30"
-                    : "text-stone-300 hover:bg-stone-700 hover:text-white"
-                }
-              `
+                `w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
+                ${isActive
+                  ? "bg-amber-500 text-white shadow-lg shadow-amber-900/30"
+                  : "text-stone-400 hover:text-white hover:bg-stone-800"
+                }`
               }
             >
-              <item.icon size={18} />
-              <span>{item.label}</span>
+              <item.icon size={17} />
+              {item.label}
             </NavLink>
           ))}
         </nav>
 
-        {/* ─── Footer ─────────────────────────────────── */}
-        <div className="border-t border-stone-700 p-4 space-y-3 shrink-0">
-          {/* User Info */}
+        <div className="px-3 pb-4 pt-4 border-t border-stone-800 flex-shrink-0 space-y-2">
           {user && (
-            <div className="flex items-center gap-3 px-2">
-              <div className="w-9 h-9 rounded-lg bg-linear-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white text-sm font-bold">
-                {user.name?.charAt(0).toUpperCase()}
+            <div className="flex items-center gap-2.5 px-3 py-2">
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                {(user.email || "A").charAt(0).toUpperCase()}
               </div>
-
               <div className="min-w-0">
-                <p className="text-sm text-white truncate font-medium">
-                  {user.name}
-                </p>
-
-                <p className="text-xs text-stone-400 capitalize">
-                  {user.role}
-                </p>
+                <div className="text-xs font-medium text-stone-300 truncate">{user.email || "Admin"}</div>
+                <div className="text-[10px] text-stone-500 capitalize">{user.role.toLowerCase()}</div>
               </div>
             </div>
           )}
-
-          {/* Logout */}
           <button
             onClick={handleLogout}
-            className="
-              w-full flex items-center gap-3
-              px-4 py-3
-              rounded-xl
-              text-sm font-medium
-              text-stone-300
-              hover:bg-red-500/10
-              hover:text-red-400
-              transition-all duration-200
-            "
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-stone-400 hover:text-red-400 hover:bg-stone-800 transition-all"
           >
-            <LogOut size={18} />
+            <LogOut size={17} />
             Logout
           </button>
         </div>

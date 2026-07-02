@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { authFetch, API_BASE } from "../../utils/api";
 
 function AdminAddProduct() {
   const navigate = useNavigate();
@@ -68,7 +69,7 @@ function AdminAddProduct() {
         console.log(pair[0], pair[1]);
       }
 
-      const res = await fetch("http://localhost:8080/api/products", {
+      const res = await authFetch(`${API_BASE}/api/products`, {
         method: "POST",
         body: formData,
       });
@@ -94,7 +95,7 @@ function AdminAddProduct() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await fetch("http://localhost:8080/api/categories");
+        const res = await authFetch(`${API_BASE}/api/categories`);
 
         if (!res.ok) throw new Error("Failed to load categories");
 

@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 
 
 const images = [
-  "product-1.png",
-  "product-4.png",
-   "product-6.png",
-  "product-4.png",
+  "/product-1.png",
+  "/product-4.png",
+   "/product-6.png",
+  "/product-4.png",
 ];
 
 export default function CategoryBanner() {
@@ -40,7 +40,7 @@ export default function CategoryBanner() {
           New Collection
         </p>
 
-        <h1 className="font-serif text-4xl font-black leading-tight px-10">
+        <h1 className="font-serif text-4xl font-black text-[#ff1500]  leading-tight px-10">
           Create a peaceful <br />
           retreat with <br />
           <span className="text-[#ff1500]">

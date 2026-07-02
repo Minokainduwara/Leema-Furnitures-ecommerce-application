@@ -162,7 +162,7 @@ const OrderTrackingPage: React.FC = () => {
                 {/* Vertical Line */}
 
                 {index !== STATUS_STEPS.length - 1 && (
-                    
+
                     <div className={` absolute left-2.75 top-6 w-0.5 h-full ${ completed ? "bg-green-500" : "bg-stone-300" } `} />
                 )}
 
