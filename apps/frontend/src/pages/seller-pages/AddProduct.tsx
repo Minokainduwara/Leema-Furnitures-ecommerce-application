@@ -25,6 +25,7 @@ function AddProduct() {
   const [sidebaropen, setsidebar] = useState<boolean>(false);
   const [darkmode, setdarkmode] = useState<boolean>(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [additionalImageFiles, setAdditionalImageFiles] = useState<File[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
 
@@ -82,6 +83,11 @@ function AddProduct() {
       if (imageFile) {
         formData.append("image", imageFile);
       }
+
+      // Add additional images
+      additionalImageFiles.forEach((file) => {
+        formData.append("additionalImages", file);
+      });
 
       // 👉 STEP 1: CREATE PRODUCT FIRST
       const res = await authFetch("http://localhost:8080/api/products", {
@@ -355,6 +361,43 @@ function AddProduct() {
               src={URL.createObjectURL(imageFile)}
               className="w-32 h-32 object-cover rounded mb-3"
             />
+          )}
+
+          {/* ADDITIONAL IMAGES */}
+          <label className="block text-sm font-medium mb-1 text-gray-700">
+            Additional Images (Optional)
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={(e: any) => {
+              const files = Array.from(e.target.files || []) as File[];
+              setAdditionalImageFiles(files);
+            }}
+            className="w-full border p-2 mb-3 rounded text-gray-700 border-gray-300"
+          />
+          {additionalImageFiles.length > 0 && (
+            <div className="flex gap-2 flex-wrap mb-3">
+              {additionalImageFiles.map((file, index) => (
+                <div key={index} className="relative">
+                  <img
+                    src={URL.createObjectURL(file)}
+                    alt={`Additional ${index + 1}`}
+                    className="w-24 h-24 object-cover rounded border"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAdditionalImageFiles(additionalImageFiles.filter((_, i) => i !== index));
+                    }}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
           )}
 
           {/* SHORT DESCRIPTION */}

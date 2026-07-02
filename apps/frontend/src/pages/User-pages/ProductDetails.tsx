@@ -5,7 +5,8 @@ import { authFetch } from "../../utils/api";
 import { formatLkr } from "../../utils/currency";
 import { useCart } from "../../hooks/CartContext";
 import { useAuth } from "../../hooks/Authcontext";
-import { ShoppingCart, Zap, Truck, Shield, RotateCcw, ArrowLeft, Tag } from "lucide-react";
+import { ShoppingCart, Zap, Truck, Shield, RotateCcw, ArrowLeft, Tag, Heart } from "lucide-react";
+import { userApi } from "../../utils/userApi";
 
 // ── Styles ────────────────────────────────────────────────────────────────────
 
@@ -83,6 +84,9 @@ const ProductDetail = () => {
   const [addingCart, setAddingCart] = useState(false);
   const [buyingNow,  setBuyingNow]  = useState(false);
   const [imgLoaded,  setImgLoaded]  = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [inWishlist, setInWishlist] = useState(false);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
 
   const getImage = (img?: string) =>
     img ? `http://localhost:8080/${img.replace(/^\/+/, "")}` : "/placeholder.png";
@@ -114,14 +118,56 @@ const ProductDetail = () => {
     }
   };
 
+  const handleWishlistToggle = async () => {
+    if (!user) { navigate("/login"); return; }
+    if (!product) return;
+    setWishlistLoading(true);
+    try {
+      if (inWishlist) {
+        const ok = await userApi.removeFromWishlist(product.id);
+        if (ok) {
+          setInWishlist(false);
+          toast.success("Removed from wishlist");
+        } else {
+          toast.error("Could not remove from wishlist");
+        }
+      } else {
+        const ok = await userApi.addToWishlist(product.id);
+        if (ok) {
+          setInWishlist(true);
+          toast.success("Added to wishlist");
+        } else {
+          toast.error("Could not add to wishlist");
+        }
+      }
+    } finally {
+      setWishlistLoading(false);
+    }
+  };
+
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
       setImgLoaded(false);
+      setSelectedImageIndex(0);
       try {
         const res1 = await authFetch(`http://localhost:8080/api/products/${id}`);
         if (!res1.ok) throw new Error("Product fetch failed");
         const data = await res1.json();
+        
+        // Build images array: start with main image, then add additional images
+        const images: string[] = [];
+        if (data.image) {
+          images.push(getImage(data.image));
+        }
+        if (data.images && Array.isArray(data.images)) {
+          data.images.forEach((img: string) => {
+            if (img && !images.includes(getImage(img))) {
+              images.push(getImage(img));
+            }
+          });
+        }
+        
         setProduct({
           id:            data.id,
           name:          data.name,
@@ -130,7 +176,8 @@ const ProductDetail = () => {
           description:   data.description || "Premium quality furniture designed for modern living spaces.",
           sku:           data.sku || "N/A",
           category:      data.category?.name || "Furniture",
-          image:         getImage(data.image),
+          image:         images[0] || "/placeholder.png",
+          images:        images,
         });
 
         const res2 = await authFetch(`http://localhost:8080/api/products/${id}/related`);
@@ -152,6 +199,14 @@ const ProductDetail = () => {
     loadData();
     window.scrollTo(0, 0);
   }, [id]);
+
+  useEffect(() => {
+    if (!user || !product?.id) {
+      setInWishlist(false);
+      return;
+    }
+    userApi.isInWishlist(product.id).then(setInWishlist);
+  }, [user, product?.id]);
 
   const discount = product && product.originalPrice > product.price
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
@@ -211,7 +266,7 @@ const ProductDetail = () => {
             >
               {!imgLoaded && <div className="skeleton absolute inset-0 h-[460px]" />}
               <img
-                src={product.image}
+                src={product.images && product.images.length > 0 ? product.images[selectedImageIndex] : product.image}
                 alt={product.name}
                 onLoad={() => setImgLoaded(true)}
                 className="w-full h-[460px] object-cover transition-opacity duration-500"
@@ -229,6 +284,29 @@ const ProductDetail = () => {
                 </div>
               )}
             </div>
+            
+            {/* Thumbnail Gallery */}
+            {product.images && product.images.length > 1 && (
+              <div className="flex gap-3 mt-4 overflow-x-auto pb-2">
+                {product.images.map((img: string, index: number) => (
+                  <button
+                    key={index}
+                    onClick={() => setSelectedImageIndex(index)}
+                    className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
+                      selectedImageIndex === index
+                        ? "border-amber-500 shadow-lg"
+                        : "border-stone-200 hover:border-amber-300"
+                    }`}
+                  >
+                    <img
+                      src={img}
+                      alt={`${product.name} - ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* ── Info ── */}
@@ -289,20 +367,35 @@ const ProductDetail = () => {
 
               {/* Buttons */}
               <div className="flex flex-col gap-3">
-                <button
-                  onClick={handleAddToCart}
-                  disabled={addingCart}
-                  className="w-full py-3.5 rounded-2xl text-sm font-black border-2 border-stone-800 text-stone-800 bg-white hover:bg-stone-900 hover:text-white disabled:opacity-60 transition-all duration-300 flex items-center justify-center gap-2 group"
-                >
-                  {addingCart ? (
-                    <span className="inline-block w-4 h-4 border-2 border-stone-400 border-t-stone-800 rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      <ShoppingCart size={16} className="group-hover:scale-110 transition-transform duration-200" />
-                      Add to Cart
-                    </>
-                  )}
-                </button>
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleAddToCart}
+                    disabled={addingCart}
+                    className="flex-1 py-3.5 rounded-2xl text-sm font-black border-2 border-stone-800 text-stone-800 bg-white hover:bg-stone-900 hover:text-white disabled:opacity-60 transition-all duration-300 flex items-center justify-center gap-2 group"
+                  >
+                    {addingCart ? (
+                      <span className="inline-block w-4 h-4 border-2 border-stone-400 border-t-stone-800 rounded-full animate-spin" />
+                    ) : (
+                      <>
+                        <ShoppingCart size={16} className="group-hover:scale-110 transition-transform duration-200" />
+                        Add to Cart
+                      </>
+                    )}
+                  </button>
+
+                  <button
+                    onClick={handleWishlistToggle}
+                    disabled={wishlistLoading}
+                    title={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
+                    className={`px-4 py-3.5 rounded-2xl border-2 transition-all duration-300 flex items-center justify-center disabled:opacity-60 ${
+                      inWishlist
+                        ? "border-red-400 bg-red-50 text-red-500"
+                        : "border-stone-200 text-stone-500 hover:border-red-300 hover:text-red-500"
+                    }`}
+                  >
+                    <Heart size={18} className={inWishlist ? "fill-current" : ""} />
+                  </button>
+                </div>
 
                 <button
                   onClick={handleBuyNow}

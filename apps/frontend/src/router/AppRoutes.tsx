@@ -12,7 +12,9 @@ const ContactUs = lazy(() => import("../pages/ContactUs"));
 // ─── User Pages ───────────────────────────────────────────────
 
 const UserDashboard = lazy(() => import("../pages/User-pages/UserDashboard"));
+const UserOrdersPage = lazy(() => import("../pages/User-pages/UserOrdersPage"));
 const Category = lazy(() => import("../pages/User-pages/Category"));
+const RequireAuth = lazy(() => import("../guards/RequireAuth"));
 const ProductDetails = lazy(() => import("../pages/User-pages/ProductDetails"));
 const Cart = lazy(() => import("../pages/Cart"));
 const CheckoutPage = lazy(() => import("../pages/CheckoutPage"));
@@ -57,6 +59,7 @@ const ProfilePage = lazy(() => import("../pages/admin-pages/ProfilePage"));
 const ForbiddenPage = lazy(() => import("../pages/ForbiddenPage"));
 const ProtectedRoute = lazy(() => import("../components/ProtectedRoute"));
 const PublicLayout = lazy(() => import("../components/PublicLayout"));
+const UserLayout = lazy(() => import("../components/UserLayout"));
 const SellerLayout = lazy(() => import("../components/SellerLayout"));
 
 // ─── Loader ──────────────────────────────────────────────────
@@ -86,15 +89,25 @@ const AppRoutes: React.FC = () => {
         <Route path="/signup" element={S(<SignupPage />)} />
         <Route path="/aboutus" element={S(<AboutUs />)} />
         <Route path="/contactus" element={S(<ContactUs />)} />
-        <Route path="/user/dashboard" element={S(<UserDashboard />)} />
         <Route path="/user/category" element={S(<Category />)} />
         <Route path="/product/details/:id" element={S(<ProductDetails />)} />
-        <Route path="/addtocart" element={S(<Cart />)} />
-        <Route path="/cart" element={S(<Cart />)} />
-        <Route path="/checkout" element={S(<CheckoutPage />)} />
-        <Route path="/user/order-success/:orderNumber" element={S(<OrderSuccessPage />)} />
-        <Route path="/order/tracking/:id" element={S(<OrderTrackingPage />)} />
         <Route path="/payment/cancel" element={S(<PaymentCancel />)} />
+
+        <Route element={S(<RequireAuth />)}>
+          <Route path="/addtocart" element={S(<Cart />)} />
+          <Route path="/cart" element={S(<Cart />)} />
+          <Route path="/checkout" element={S(<CheckoutPage />)} />
+          <Route path="/user/order-success/:orderNumber" element={S(<OrderSuccessPage />)} />
+          <Route path="/order/tracking/:id" element={S(<OrderTrackingPage />)} />
+        </Route>
+      </Route>
+
+      {/* User dashboard — full-screen, no site navbar */}
+      <Route element={S(<RequireAuth />)}>
+        <Route element={S(<UserLayout />)}>
+          <Route path="/user/dashboard" element={S(<UserDashboard />)} />
+          <Route path="/user/orders" element={S(<UserOrdersPage />)} />
+        </Route>
       </Route>
 
       {/* Seller Routes — wrapped in SellerLayout so the site Navbar sits on top */}

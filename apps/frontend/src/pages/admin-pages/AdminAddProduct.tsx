@@ -6,6 +6,7 @@ function AdminAddProduct() {
   const navigate = useNavigate();
 
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [additionalImageFiles, setAdditionalImageFiles] = useState<File[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
 
@@ -63,6 +64,11 @@ function AdminAddProduct() {
 
       // IMPORTANT
       formData.append("image", imageFile);
+
+      // Add additional images
+      additionalImageFiles.forEach((file) => {
+        formData.append("additionalImages", file);
+      });
 
       // DEBUG
       for (const pair of formData.entries()) {
@@ -195,20 +201,65 @@ function AdminAddProduct() {
           <option value="DRAFT">Draft</option>
         </select>
 
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
+        <div className="mb-3">
+          <label className="block text-sm font-semibold mb-1">Main Product Image *</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                setImageFile(file);
+              }
+            }}
+            className="w-full border p-2 rounded text-black"
+          />
+          {imageFile && (
+            <div className="mt-2">
+              <img
+                src={URL.createObjectURL(imageFile)}
+                alt="Preview"
+                className="w-32 h-32 object-cover rounded border"
+              />
+            </div>
+          )}
+        </div>
 
-            console.log("SELECTED FILE:", file);
-
-            if (file) {
-              setImageFile(file);
-            }
-          }}
-          className="w-full border p-2 mb-3 rounded text-black"
-        />
+        <div className="mb-3">
+          <label className="block text-sm font-semibold mb-1">Additional Images (Optional)</label>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={(e) => {
+              const files = Array.from(e.target.files || []);
+              setAdditionalImageFiles(files);
+            }}
+            className="w-full border p-2 rounded text-black"
+          />
+          {additionalImageFiles.length > 0 && (
+            <div className="mt-2 flex gap-2 flex-wrap">
+              {additionalImageFiles.map((file, index) => (
+                <div key={index} className="relative">
+                  <img
+                    src={URL.createObjectURL(file)}
+                    alt={`Additional ${index + 1}`}
+                    className="w-24 h-24 object-cover rounded border"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAdditionalImageFiles(additionalImageFiles.filter((_, i) => i !== index));
+                    }}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         <textarea
           name="description"
