@@ -1,24 +1,58 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { authFetch } from "../utils/api"; 
+import { authFetch } from "../utils/api";
 import { getUserName } from "../utils/jwt";
 
 const SalesIcon = () => (
-  <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h1l2 9h13l2-9h1" />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M16 10V6a4 4 0 00-8 0v4" />
+  <svg
+    className="w-6 h-6 text-blue-500"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M3 10h1l2 9h13l2-9h1"
+    />
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M16 10V6a4 4 0 00-8 0v4"
+    />
   </svg>
 );
 
 const OrderIcon = () => (
-  <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2a2 2 0 012-2h2a2 2 0 012 2v2" />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h10M7 7a2 2 0 012-2h6a2 2 0 012 2M7 7v10a2 2 0 002 2h6a2 2 0 002-2V7" />
+  <svg
+    className="w-6 h-6 text-green-500"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M9 17v-2a2 2 0 012-2h2a2 2 0 012 2v2"
+    />
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M7 7h10M7 7a2 2 0 012-2h6a2 2 0 012 2M7 7v10a2 2 0 002 2h6a2 2 0 002-2V7"
+    />
   </svg>
 );
 
 const ProductIcon = () => (
-  <svg className="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+  <svg
+    className="w-6 h-6 text-purple-500"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    viewBox="0 0 24 24"
+  >
     <rect width="20" height="12" x="2" y="6" rx="2" />
     <path strokeLinecap="round" strokeLinejoin="round" d="M2 6l10 7 10-7" />
   </svg>
@@ -34,30 +68,84 @@ function SellerDashboard() {
     totalOrders: 0,
     totalCategories: 0,
   });
-
+  const [inventory, setInventory] = useState({
+    totalProducts: 0,
+    inStock: 0,
+    lowStock: 0,
+  });
+  const [pendingOrders, setPendingOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState("");
-const [recentOrders, setRecentOrders] = useState([]);
+  const [recentServices, setRecentServices] = useState<any[]>([]);
+  const [pendingCount, setPendingCount] = useState(0);
+
+useEffect(() => {
+  const load = async () => {
+    const res = await authFetch(
+      "http://localhost:8080/api/orders/pending/count"
+    );
+
+    const data = await res.json();
+    setPendingCount(data);
+  };
+
+  load();
+}, []);
   useEffect(() => {
     const userName = getUserName();
     setName(userName);
   }, []);
   useEffect(() => {
-  const loadRecentOrders = async () => {
-    try {
-      const res = await authFetch("http://localhost:8080/api/orders/recent");
+    const loadPendingOrders = async () => {
+      try {
+        const res = await authFetch("http://localhost:8080/api/orders/pending");
 
-      if (!res.ok) throw new Error("Failed to load recent orders");
+        if (!res.ok) throw new Error("Failed to load pending orders");
 
-      const data = await res.json();
-      setRecentOrders(data);
-    } catch (err) {
-      console.error("Recent orders error:", err);
-    }
-  };
+        const data = await res.json();
+        setPendingOrders(data);
+      } catch (err) {
+        console.error("Pending orders error:", err);
+      }
+    };
 
-  loadRecentOrders();
-}, []);
+    loadPendingOrders();
+  }, []);
+  useEffect(() => {
+    const loadInventory = async () => {
+      try {
+        const res = await authFetch(
+          "http://localhost:8080/api/inventory/summary",
+        );
+
+        const data = await res.json();
+
+        setInventory(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    loadInventory();
+  }, []);
+  useEffect(() => {
+    const loadPendingServices = async () => {
+      try {
+        const res = await authFetch(
+          "http://localhost:8080/api/repairs/seller/pending",
+        );
+
+        if (!res.ok) throw new Error("Failed to load pending services");
+
+        const data = await res.json();
+        setRecentServices(data); // you can rename later
+      } catch (err) {
+        console.error("Pending services error:", err);
+      }
+    };
+
+    loadPendingServices();
+  }, []);
   const sideBarItems = [
     {
       name: "Dashboard",
@@ -75,16 +163,17 @@ const [recentOrders, setRecentOrders] = useState([]);
       icon: "/images/Details.png",
       path: "/customers",
     },
-    
+
     { name: "notification", icon: "/images/msg.png", path: "/messages" },
     { name: "Profile", icon: "/images/profile.png", path: "/profile" },
   ];
 
-  
   useEffect(() => {
     const loadDashboard = async () => {
       try {
-        const res = await authFetch("http://localhost:8080/api/dashboard/seller");
+        const res = await authFetch(
+          "http://localhost:8080/api/dashboard/seller",
+        );
 
         if (!res.ok) throw new Error("Dashboard API failed");
 
@@ -107,11 +196,11 @@ const [recentOrders, setRecentOrders] = useState([]);
   }, []);
 
   const handleLogout = () => {
-  if (window.confirm("Are you sure you want to logout?")) {
-    localStorage.removeItem("token");
-    navigate("/login");
-  }
-};
+    if (window.confirm("Are you sure you want to logout?")) {
+      localStorage.removeItem("token");
+      navigate("/login");
+    }
+  };
   const cards = [
     {
       title: "Total Sales",
@@ -121,13 +210,13 @@ const [recentOrders, setRecentOrders] = useState([]);
     },
     {
       title: "Orders",
-      value: loading ? "..." : dashboard.totalOrders,
+      value: pendingCount,
       icon: <OrderIcon />,
       description: "All placed orders",
     },
     {
       title: "Products",
-      value: loading ? "..." : dashboard.totalProducts,
+      value: loading ? "..." : inventory.totalProducts,
       icon: <ProductIcon />,
       description: "Total products in store",
     },
@@ -137,72 +226,84 @@ const [recentOrders, setRecentOrders] = useState([]);
       icon: <ProductIcon />,
       description: "Total product categories",
     },
+    {
+      title: "In Stock",
+      value: inventory.inStock,
+      icon: <ProductIcon />,
+      description: "Products available",
+    },
+    {
+      title: "Low Stock",
+      value: inventory.lowStock,
+      icon: <ProductIcon />,
+      description: "Stock less than 5",
+    },
   ];
 
   return (
-    <div className="min-h-screen flex bg-white">
-
-    
+    <div className="h-screen flex overflow-hidden bg-white">
       <aside
-              className={`bg-gray-900 w-70 h-screen fixed shadow-lg z-20 ${
-                sidebaropen ? "translate-x-0" : "-translate-x-64"
-              } lg:translate-x-0 lg:static transition-all flex flex-col`}
+        className={`bg-gray-900 w-70 h-screen fixed shadow-lg z-20 ${
+          sidebaropen ? "translate-x-0" : "-translate-x-64"
+        } lg:translate-x-0 lg:static transition-all flex flex-col`}
+      >
+        <div className="flex items-center gap-2 p-4 border-b border-white">
+          <img src="/images/leemalogo.jpg" className="h-6 w-18" />
+          <span className="font-bold text-white">Seller Dashboard</span>
+        </div>
+
+        <nav className="flex-1 mt-6">
+          {sideBarItems.map((item) => (
+            <Link
+              key={item.name}
+              to={item.path!}
+              className="flex items-center gap-3 px-4 py-3 hover:bg-yellow-500"
             >
-              <div className="flex items-center gap-2 p-4 border-b border-white">
-                <img src="/images/leemalogo.jpg" className="h-6 w-18" />
-                <span className="font-bold text-white">Seller Dashboard</span>
-              </div>
-      
-              <nav className="flex-1 mt-6">
-                {sideBarItems.map((item) => (
-                  <Link
-                    key={item.name}
-                    to={item.path!}
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-yellow-500"
-                  >
-                    <img src={item.icon} className="w-6 h-6" />
-                    <span className="text-white">{item.name}</span>
-                  </Link>
-                ))}
-              </nav>
-      
-              <div className="p-4 border-t border-white">
-                <button
+              <img src={item.icon} className="w-6 h-6" />
+              <span className="text-white">{item.name}</span>
+            </Link>
+          ))}
+        </nav>
+
+        <div className="p-4 border-t border-white">
+          <button
             onClick={handleLogout}
             className="w-full bg-red-500 text-white py-2 rounded"
           >
             Logout
           </button>
-              </div>
-            </aside>
+        </div>
+      </aside>
 
       {/* MAIN */}
-      <main className="w-full min-h-screen p-6">
-
+      <main className="flex-1 min-h-0 overflow-y-auto p-6">
         <div className="flex justify-between items-center p-4 shadow shadow-xl mb-6">
-      
-      <h1 className="text-xl font-bold text-gray-700">
-        Dashboard
-      </h1>
+          <h1 className="text-xl font-bold text-gray-700">Dashboard</h1>
 
-      {/* TOP RIGHT USER NAME */}
-      <div className="text-right">
-        <p className="text-gray-600 text-sm">Welcome,</p>
-        <p className="font-semibold text-gray-500">{name}</p>
-      </div>
-
-    </div>
+          {/* TOP RIGHT USER NAME */}
+          <div className="text-right">
+            <p className="text-gray-600 text-sm">Welcome,</p>
+            <p className="font-semibold text-gray-500">{name}</p>
+          </div>
+        </div>
 
         {/* CARDS */}
         <section className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {cards.map((card) => (
-            <div key={card.title} className="bg-white shadow shadow-lg rounded-xl p-6 border">
+            <div
+              key={card.title}
+              className="bg-white shadow shadow-lg rounded-xl p-6 border"
+            >
               <div className="flex items-center gap-3">
                 {card.icon}
-                <div className="text-lg font-semibold text-gray-700">{card.title}</div>
+                <div className="text-lg font-semibold text-gray-700">
+                  {card.title}
+                </div>
               </div>
 
-              <div className="text-2xl font-bold mt-3 text-gray-400">{card.value}</div>
+              <div className="text-2xl font-bold mt-3 text-gray-400">
+                {card.value}
+              </div>
 
               <div className="text-sm text-gray-500 mt-2">
                 {card.description}
@@ -211,34 +312,81 @@ const [recentOrders, setRecentOrders] = useState([]);
           ))}
         </section>
         <section className="mt-8 bg-white shadow rounded-xl p-6">
-  <h2 className="text-lg font-bold text-gray-700 mb-4">
-    Recent Orders
-  </h2>
+          <h2 className="text-lg font-bold text-gray-700 mb-4">
+            Pending Services
+          </h2>
 
-  <table className="w-full border-collapse">
-    <thead>
-      <tr className="text-left border-b">
-        <th className="py-2 text-gray-500">Order No</th>
-        <th className="text-gray-500">Status</th>
-        <th className="text-gray-500">Amount</th>
-      </tr>
-    </thead>
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="text-left border-b">
+                <th className="py-2 text-gray-500">Order No</th>
+                <th className="text-gray-500">Status</th>
+                <th className="text-gray-500">Amount</th>
+              </tr>
+            </thead>
 
-    <tbody>
-      {recentOrders.map((order: any) => (
-        <tr key={order.id} className="border-b hover:bg-gray-50">
-          <td className="py-2">{order.orderNumber}</td>
-          <td>
-            <span className="px-2 py-1 text-xs rounded bg-blue-100 text-blue-600">
-              {order.status}
-            </span>
-          </td>
-          <td>Rs {order.totalAmount}</td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
-</section>
+            <tbody>
+              {recentServices.map((service: any) => (
+                <tr key={service.id} className="border-b hover:bg-gray-50">
+                  <td className="py-2 text-gray-700">
+                    {service.order?.orderNumber || "N/A"}
+                  </td>
+
+                  <td>
+                    <span className="px-2 py-1 text-xs rounded bg-yellow-100 text-yellow-600">
+                      {service.status}
+                    </span>
+                  </td>
+
+                  <td className="py-2 text-gray-700">
+                    Rs {service.estimatedCost ?? "0"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+        <section className="mt-8 bg-white shadow rounded-xl p-6">
+          <h2 className="text-lg font-bold text-gray-700 mb-4">
+            Pending Orders
+          </h2>
+
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="text-left border-b">
+                <th className="py-2 text-gray-500">Order No</th>
+                <th className="text-gray-500">Status</th>
+                <th className="text-gray-500">Amount</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {pendingOrders.length === 0 ? (
+                <tr>
+                  <td colSpan={3} className="py-4 text-center text-gray-400">
+                    No pending orders
+                  </td>
+                </tr>
+              ) : (
+                pendingOrders.map((order: any) => (
+                  <tr key={order.id} className="border-b hover:bg-gray-50">
+                    <td className="py-2 text-gray-700">{order.orderNumber}</td>
+
+                    <td>
+                      <span className="px-2 py-1 text-xs rounded bg-yellow-100 text-yellow-600">
+                        {order.status}
+                      </span>
+                    </td>
+
+                    <td className="py-2 text-gray-700">
+                      Rs {order.totalAmount}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </section>
       </main>
     </div>
   );
