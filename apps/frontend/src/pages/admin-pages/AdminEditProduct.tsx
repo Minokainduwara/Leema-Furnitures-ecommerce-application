@@ -40,7 +40,7 @@ function AdminEditProduct() {
 
     const fetchProduct = async () => {
       try {
-        const res = await authFetch(`${API_BASE}/api/products/${id}`);
+        const res = await authFetch(`${API_BASE}/api/admin/products/${id}`);
         if (!res.ok) throw new Error("Failed to fetch product");
 
         const data = await res.json();
@@ -64,7 +64,7 @@ function AdminEditProduct() {
 
     const fetchCategories = async () => {
       try {
-        const res = await authFetch(`${API_BASE}/api/categories`);
+        const res = await authFetch(`${API_BASE}/api/admin/categories`);
         if (!res.ok) throw new Error("Failed to load categories");
 
         const data = await res.json();
@@ -123,7 +123,7 @@ function AdminEditProduct() {
       }
 
       const res = await authFetch(
-        `${API_BASE}/api/products/${id}`,
+        `${API_BASE}/api/admin/products/${id}`,
         {
           method: "PUT",
           body: formData,

@@ -56,7 +56,7 @@ function AdminCategoryManagement() {
 
   // LOAD
   useEffect(() => {
-    authFetch(`${API_BASE}/api/categories`)
+    authFetch(`${API_BASE}/api/admin/categories`)
       .then(async (res) => {
         if (!res.ok) throw new Error("Failed");
         return res.json();
@@ -74,7 +74,7 @@ function AdminCategoryManagement() {
 
   // DELETE
   const handleDelete = async () => {
-    await authFetch(`${API_BASE}/api/categories/${deleteState.id}`, {
+    await authFetch(`${API_BASE}/api/admin/categories/${deleteState.id}`, {
       method: "DELETE",
     });
     setCategories((prev) => prev.filter((c) => c.id !== deleteState.id));

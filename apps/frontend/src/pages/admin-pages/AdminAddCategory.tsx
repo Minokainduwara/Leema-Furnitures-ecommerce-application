@@ -20,7 +20,7 @@ function AdminAddCategory() {
     e.preventDefault();
 
     try {
-      const res = await authFetch(`${API_BASE}/api/categories`, {
+      const res = await authFetch(`${API_BASE}/api/admin/categories`, {
         method: "POST",
         body: JSON.stringify(form),
       });

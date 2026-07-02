@@ -51,7 +51,7 @@ function ProductsPage() {
 
   // LOAD PRODUCTS
   useEffect(() => {
-    authFetch(`${API_BASE}/api/products`)
+    authFetch(`${API_BASE}/api/admin/products`)
       .then((res) => res.json())
       .then((data) => {
         setProducts(data || []);
@@ -69,7 +69,7 @@ function ProductsPage() {
 
     try {
       const res = await authFetch(
-        `${API_BASE}/api/products/${showDelete.id}`,
+        `${API_BASE}/api/admin/products/${showDelete.id}`,
         { method: "DELETE" }
       );
 

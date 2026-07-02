@@ -69,7 +69,7 @@ function AdminAddProduct() {
         console.log(pair[0], pair[1]);
       }
 
-      const res = await authFetch(`${API_BASE}/api/products`, {
+      const res = await authFetch(`${API_BASE}/api/admin/products`, {
         method: "POST",
         body: formData,
       });
@@ -95,7 +95,7 @@ function AdminAddProduct() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await authFetch(`${API_BASE}/api/categories`);
+        const res = await authFetch(`${API_BASE}/api/admin/categories`);
 
         if (!res.ok) throw new Error("Failed to load categories");
 

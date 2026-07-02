@@ -47,7 +47,7 @@ const AdminOrdersPage = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await authFetch(`${API_BASE}/api/orders/all`);
+      const res = await authFetch(`${API_BASE}/api/admin/orders/all`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setOrders(Array.isArray(data) ? data : []);
@@ -76,7 +76,7 @@ const AdminOrdersPage = () => {
 
   const updateStatus = async (id: number, newStatus: string) => {
     try {
-      const res = await authFetch(`${API_BASE}/api/orders/${id}/status`, {
+      const res = await authFetch(`${API_BASE}/api/admin/orders/${id}/status`, {
         method: "PATCH",
         body: JSON.stringify({ status: newStatus }),
       });
@@ -91,7 +91,7 @@ const AdminOrdersPage = () => {
 
   const updatePaymentStatus = async (id: number, newStatus: string) => {
     try {
-      const res = await authFetch(`${API_BASE}/api/orders/${id}/payment-status`, {
+      const res = await authFetch(`${API_BASE}/api/admin/orders/${id}/payment-status`, {
         method: "PATCH",
         body: JSON.stringify({ paymentStatus: newStatus }),
       });

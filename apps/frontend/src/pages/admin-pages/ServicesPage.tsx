@@ -57,7 +57,7 @@ const ViewIcon = () => (
 // API
 // ─────────────────────────────────────────────────────────────
 
-const BASE = "http://localhost:8080/api/services";
+const BASE = "http://localhost:8080/api/admin/services";
 
 function authHeaders(): Record<string, string> {
   const token = localStorage.getItem("token");
