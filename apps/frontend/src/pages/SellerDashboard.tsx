@@ -119,6 +119,22 @@ function SellerDashboard() {
       });
   }, []);
   useEffect(() => {
+  authFetch("http://localhost:8080/api/categories/stats/status")
+    .then((res) => res.json())
+    .then((data) => {
+      console.log("RAW:", data);
+
+      const formatted = data.map((item: any) => ({
+        ...item,
+        status: item.status ? "Active" : "Inactive", // ✅ FIX
+      }));
+
+      console.log("FORMATTED:", formatted);
+
+      setStatusData(formatted);
+    });
+}, []);
+  useEffect(() => {
     const load = async () => {
       const res = await authFetch(
         "http://localhost:8080/api/orders/pending/count",
@@ -520,8 +536,8 @@ function SellerDashboard() {
                   innerRadius={60}
                   paddingAngle={4}
                   labelLine={false}
-                  label={({ name, percent }) =>
-                    `${name} ${(percent * 100).toFixed(0)}%`
+                  label={(entry: any) =>
+                    `${entry.category} ${((entry.percent ?? 0) * 100).toFixed(0)}%`
                   }
                 >
                   {categoryData.map((_, index) => (
@@ -558,22 +574,20 @@ function SellerDashboard() {
 
           {statusData.length > 0 && (
             <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={statusData}
-                  dataKey="count"
-                  nameKey="status"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={110}
-                  label
-                >
-                  <Cell fill="#22c55e" /> {/* Active */}
-                  <Cell fill="#ef4444" /> {/* Inactive */}
-                </Pie>
-
+              <BarChart data={statusData}>
+                <XAxis dataKey="status" tick={{ fill: "#111827" }} />
+                <YAxis tick={{ fill: "#111827" }} />
                 <Tooltip />
-              </PieChart>
+
+                <Bar dataKey="count" radius={[8, 8, 0, 0]}>
+                  {statusData.map((entry: any, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={entry.status === "Active" ? "#22c55e" : "#ef4444"}
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
             </ResponsiveContainer>
           )}
         </section>

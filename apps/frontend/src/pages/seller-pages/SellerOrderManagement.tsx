@@ -6,6 +6,8 @@ import { authFetch } from "../../utils/api";
 type Order = {
   id: number;
   userId?: number;
+  userName?: string;
+  userEmail?: string;
   orderNumber?: string;
   totalAmount?: number;
   status: string;
@@ -26,6 +28,11 @@ function SellerOrderManagement() {
   const [sidebaropen, setsidebar] = useState(false);
   const [showRepairForm, setShowRepairForm] = useState(false);
   const [repairHistory, setRepairHistory] = useState<any[]>([]);
+  const [customer, setCustomer] = useState<{
+    id?: number;
+    name?: string;
+    email?: string;
+  } | null>(null);
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
   const [selectedProductId, setSelectedProductId] = useState<number | null>(
     null,
@@ -72,6 +79,7 @@ function SellerOrderManagement() {
     try {
       const res = await authFetch("http://localhost:8080/api/orders/all");
       const data = await res.json();
+      console.log("ORDER DATA:", data);
       setOrders(data);
     } catch (err) {
       console.error("Error loading orders:", err);
@@ -417,7 +425,15 @@ function SellerOrderManagement() {
                   </td>
                   <td className="p-3">
                     <button
-                      onClick={() => setViewOrder(order)}
+                      onClick={() => {
+                        setViewOrder(order);
+
+                        setCustomer({
+                          id: order.userId,
+                          name: order.userName,
+                          email: order.userEmail,
+                        });
+                      }}
                       className="bg-blue-500 text-white px-3 py-1 rounded"
                     >
                       View
@@ -473,13 +489,15 @@ function SellerOrderManagement() {
               </div>
 
               <p>
-                <b>Name:</b> {viewOrder.customerName}
+                <b>Name:</b> {viewOrder.userName || "N/A"}
               </p>
+
               <p>
-                <b>Phone:</b> {viewOrder.phone}
+                <b>Email:</b> {viewOrder.userEmail || "N/A"}
               </p>
+
               <p>
-                <b>Address:</b> {viewOrder.address}
+                <b>User ID:</b> {viewOrder.userId || "N/A"}
               </p>
 
               <button
