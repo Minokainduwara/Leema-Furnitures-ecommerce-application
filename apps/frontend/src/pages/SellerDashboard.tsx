@@ -2,7 +2,21 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { authFetch } from "../utils/api";
 import { getUserName } from "../utils/jwt";
-
+import { LayoutGrid } from "lucide-react";
+import { CheckCircle } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
+import { Package } from "lucide-react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
 const SalesIcon = () => (
   <svg
     className="w-6 h-6 text-blue-500"
@@ -60,6 +74,7 @@ const ProductIcon = () => (
 
 function SellerDashboard() {
   const [sidebaropen, setsidebar] = useState(false);
+  const [statusData, setStatusData] = useState([]);
   const navigate = useNavigate();
 
   const [dashboard, setDashboard] = useState({
@@ -78,19 +93,43 @@ function SellerDashboard() {
   const [name, setName] = useState("");
   const [recentServices, setRecentServices] = useState<any[]>([]);
   const [pendingCount, setPendingCount] = useState(0);
+  const [ordersData, setOrdersData] = useState([]);
+  const [categoryData, setCategoryData] = useState([]);
 
-useEffect(() => {
-  const load = async () => {
-    const res = await authFetch(
-      "http://localhost:8080/api/orders/pending/count"
-    );
+  useEffect(() => {
+    authFetch("http://localhost:8080/api/orders/stats/per-day")
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("RAW orders API:", data);
+        const formatted = data.map((d: any) => ({
+          date: new Date(d.date).toLocaleDateString("en-US", {
+            weekday: "short",
+          }),
+          orders: d.orders,
+        }));
+        setOrdersData(formatted);
+      });
 
-    const data = await res.json();
-    setPendingCount(data);
-  };
+    authFetch("http://localhost:8080/api/categories/stats/distribution")
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("CATEGORY DATA:", data);
+        console.log("LENGTH:", data.length);
+        setCategoryData(data);
+      });
+  }, []);
+  useEffect(() => {
+    const load = async () => {
+      const res = await authFetch(
+        "http://localhost:8080/api/orders/pending/count",
+      );
 
-  load();
-}, []);
+      const data = await res.json();
+      setPendingCount(data);
+    };
+
+    load();
+  }, []);
   useEffect(() => {
     const userName = getUserName();
     setName(userName);
@@ -115,10 +154,11 @@ useEffect(() => {
     const loadInventory = async () => {
       try {
         const res = await authFetch(
-          "http://localhost:8080/api/inventory/summary",
+          "http://localhost:8080/api/inventory-logs/summary",
         );
 
         const data = await res.json();
+        console.log("Inventory API:", data);
 
         setInventory(data);
       } catch (err) {
@@ -156,7 +196,7 @@ useEffect(() => {
     { name: "Category", icon: "/images/category.png", path: "/category" },
 
     { name: "Orders", icon: "/images/orders.png", path: "/orders" },
-    { name: "Inventory", icon: "/images/orders.png", path: "/inventory" },
+    { name: "Inventory", icon: "/images/inventory.png", path: "/inventory" },
     { name: "Repair", icon: "/images/service.png", path: "/repairs" },
     {
       name: "Customer Details",
@@ -212,30 +252,30 @@ useEffect(() => {
       title: "Orders",
       value: pendingCount,
       icon: <OrderIcon />,
-      description: "All placed orders",
+      description: "All pending orders",
     },
     {
       title: "Products",
       value: loading ? "..." : inventory.totalProducts,
-      icon: <ProductIcon />,
+      icon: <Package className="w-6 h-6 text-purple-500" />,
       description: "Total products in store",
     },
     {
       title: "Categories",
       value: loading ? "..." : dashboard.totalCategories,
-      icon: <ProductIcon />,
+      icon: <LayoutGrid className="w-6 h-6 text-indigo-500" />,
       description: "Total product categories",
     },
     {
       title: "In Stock",
       value: inventory.inStock,
-      icon: <ProductIcon />,
+      icon: <CheckCircle className="w-6 h-6 text-green-500" />,
       description: "Products available",
     },
     {
       title: "Low Stock",
       value: inventory.lowStock,
-      icon: <ProductIcon />,
+      icon: <AlertTriangle className="w-6 h-6 text-red-500" />,
       description: "Stock less than 5",
     },
   ];
@@ -243,7 +283,7 @@ useEffect(() => {
   return (
     <div className="h-screen flex overflow-hidden bg-white">
       <aside
-        className={`bg-gray-900 w-70 h-screen fixed shadow-lg z-20 ${
+        className={`bg-gray-900 w-56 h-screen fixed shadow-lg z-20 ${
           sidebaropen ? "translate-x-0" : "-translate-x-64"
         } lg:translate-x-0 lg:static transition-all flex flex-col`}
       >
@@ -276,69 +316,74 @@ useEffect(() => {
       </aside>
 
       {/* MAIN */}
-      <main className="flex-1 min-h-0 overflow-y-auto p-6">
-        <div className="flex justify-between items-center p-4 shadow shadow-xl mb-6">
-          <h1 className="text-xl font-bold text-gray-700">Dashboard</h1>
+      <main className="flex-1 min-h-0 overflow-y-auto bg-gray-50 p-6">
+        {/* HEADER */}
+        <div className="flex justify-between items-center bg-white px-6 py-4 rounded-xl shadow-sm border mb-6">
+          <h1 className="text-2xl font-bold text-gray-800 tracking-tight">
+            Dashboard
+          </h1>
 
-          {/* TOP RIGHT USER NAME */}
           <div className="text-right">
-            <p className="text-gray-600 text-sm">Welcome,</p>
-            <p className="font-semibold text-gray-500">{name}</p>
+            <p className="text-gray-400 text-sm">Welcome back,</p>
+            <p className="font-semibold text-gray-700">{name}</p>
           </div>
         </div>
 
         {/* CARDS */}
-        <section className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {cards.map((card) => (
             <div
               key={card.title}
-              className="bg-white shadow shadow-lg rounded-xl p-6 border"
+              className="bg-white border rounded-xl p-5 shadow-sm hover:shadow-md transition duration-300"
             >
-              <div className="flex items-center gap-3">
-                {card.icon}
-                <div className="text-lg font-semibold text-gray-700">
-                  {card.title}
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-500">{card.title}</p>
+                  <p className="text-2xl font-bold text-gray-800 mt-1">
+                    {card.value}
+                  </p>
                 </div>
+
+                <div className="p-3 rounded-lg bg-gray-100">{card.icon}</div>
               </div>
 
-              <div className="text-2xl font-bold mt-3 text-gray-400">
-                {card.value}
-              </div>
-
-              <div className="text-sm text-gray-500 mt-2">
-                {card.description}
-              </div>
+              <p className="text-xs text-gray-400 mt-3">{card.description}</p>
             </div>
           ))}
         </section>
-        <section className="mt-8 bg-white shadow rounded-xl p-6">
-          <h2 className="text-lg font-bold text-gray-700 mb-4">
+
+        {/* PENDING SERVICES */}
+        <section className="mt-8 bg-white rounded-xl shadow-sm border p-6">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">
             Pending Services
           </h2>
 
-          <table className="w-full border-collapse">
+          <table className="w-full text-sm">
             <thead>
-              <tr className="text-left border-b">
-                <th className="py-2 text-gray-500">Order No</th>
-                <th className="text-gray-500">Status</th>
-                <th className="text-gray-500">Amount</th>
+              <tr className="text-left text-gray-500 border-b">
+                <th className="py-3">Order No</th>
+                <th>Status</th>
+                <th className="text-right">Amount</th>
               </tr>
             </thead>
 
             <tbody>
               {recentServices.map((service: any) => (
-                <tr key={service.id} className="border-b hover:bg-gray-50">
-                  <td className="py-2 text-gray-700">
+                <tr
+                  key={service.id}
+                  className="border-b hover:bg-gray-50 transition"
+                >
+                  <td className="py-3 text-gray-700">
                     {service.order?.orderNumber || "N/A"}
                   </td>
 
                   <td>
-                    <span className="px-2 py-1 text-xs rounded bg-yellow-100 text-yellow-600">
+                    <span className="px-3 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-700">
                       {service.status}
                     </span>
                   </td>
 
-                  <td className="py-2 text-gray-700">
+                  <td className="text-right font-medium text-gray-700">
                     Rs {service.estimatedCost ?? "0"}
                   </td>
                 </tr>
@@ -346,39 +391,44 @@ useEffect(() => {
             </tbody>
           </table>
         </section>
-        <section className="mt-8 bg-white shadow rounded-xl p-6">
-          <h2 className="text-lg font-bold text-gray-700 mb-4">
+
+        {/* PENDING ORDERS */}
+        <section className="mt-8 bg-white rounded-xl shadow-sm border p-6">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">
             Pending Orders
           </h2>
 
-          <table className="w-full border-collapse">
+          <table className="w-full text-sm">
             <thead>
-              <tr className="text-left border-b">
-                <th className="py-2 text-gray-500">Order No</th>
-                <th className="text-gray-500">Status</th>
-                <th className="text-gray-500">Amount</th>
+              <tr className="text-left text-gray-500 border-b">
+                <th className="py-3">Order No</th>
+                <th>Status</th>
+                <th className="text-right">Amount</th>
               </tr>
             </thead>
 
             <tbody>
               {pendingOrders.length === 0 ? (
                 <tr>
-                  <td colSpan={3} className="py-4 text-center text-gray-400">
+                  <td colSpan={3} className="py-6 text-center text-gray-400">
                     No pending orders
                   </td>
                 </tr>
               ) : (
                 pendingOrders.map((order: any) => (
-                  <tr key={order.id} className="border-b hover:bg-gray-50">
-                    <td className="py-2 text-gray-700">{order.orderNumber}</td>
+                  <tr
+                    key={order.id}
+                    className="border-b hover:bg-gray-50 transition"
+                  >
+                    <td className="py-3 text-gray-700">{order.orderNumber}</td>
 
                     <td>
-                      <span className="px-2 py-1 text-xs rounded bg-yellow-100 text-yellow-600">
+                      <span className="px-3 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-700">
                         {order.status}
                       </span>
                     </td>
 
-                    <td className="py-2 text-gray-700">
+                    <td className="text-right font-medium text-gray-700">
                       Rs {order.totalAmount}
                     </td>
                   </tr>
@@ -386,6 +436,146 @@ useEffect(() => {
               )}
             </tbody>
           </table>
+        </section>
+        {/* Orders Per Day */}
+        <section className="mt-8 bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-2xl p-6 shadow-md hover:shadow-lg transition">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-semibold text-gray-800">
+              Orders Per Day
+            </h2>
+            <span className="text-xs px-3 py-1 rounded-full bg-blue-50 text-blue-600 border border-blue-100">
+              Analytics
+            </span>
+          </div>
+
+          {ordersData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={320}>
+              <BarChart data={ordersData}>
+                <XAxis
+                  dataKey="date"
+                  tick={{
+                    fill: "#111827",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    style: { fill: "#111827", opacity: 1 },
+                  }}
+                />
+
+                <YAxis
+                  tick={{
+                    fill: "#111827",
+                    fontSize: 12,
+                    style: { fill: "#111827", opacity: 1 },
+                  }}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#fff",
+                    border: "1px solid #e5e7eb",
+                    borderRadius: "10px",
+                  }}
+                />
+                <Bar
+                  dataKey="orders"
+                  radius={[8, 8, 0, 0]}
+                  fill="#2563eb"
+                  barSize={100}
+                />
+                <defs>
+                  <linearGradient id="blueGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#2563eb" stopOpacity={1} />
+                    <stop offset="100%" stopColor="#60a5fa" stopOpacity={0.6} />
+                  </linearGradient>
+                </defs>
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="text-center text-gray-400 py-12">
+              No order data available
+            </div>
+          )}
+        </section>
+
+        {/* Category Distribution */}
+        <section className="mt-8 bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-2xl p-6 shadow-md hover:shadow-lg transition">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-semibold text-gray-800">
+              Category Distribution
+            </h2>
+            <span className="text-xs px-3 py-1 rounded-full bg-purple-50 text-purple-600 border border-purple-100">
+              Insights
+            </span>
+          </div>
+
+          {categoryData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={320}>
+              <PieChart>
+                <Pie
+                  data={categoryData}
+                  dataKey="count"
+                  nameKey="category"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={110}
+                  innerRadius={60}
+                  paddingAngle={4}
+                  labelLine={false}
+                  label={({ name, percent }) =>
+                    `${name} ${(percent * 100).toFixed(0)}%`
+                  }
+                >
+                  {categoryData.map((_, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={
+                        ["#6366f1", "#22c55e", "#f59e0b", "#ef4444", "#14b8a6"][
+                          index % 5
+                        ]
+                      }
+                    />
+                  ))}
+                </Pie>
+
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#fff",
+                    border: "1px solid #e5e7eb",
+                    borderRadius: "10px",
+                  }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="text-center text-gray-400 py-12">
+              No category data available
+            </div>
+          )}
+        </section>
+        <section className="mt-8 bg-white border rounded-xl p-6 shadow-sm">
+          <h2 className="text-lg font-semibold mb-4 text-gray-800">
+            Category Status
+          </h2>
+
+          {statusData.length > 0 && (
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={statusData}
+                  dataKey="count"
+                  nameKey="status"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={110}
+                  label
+                >
+                  <Cell fill="#22c55e" /> {/* Active */}
+                  <Cell fill="#ef4444" /> {/* Inactive */}
+                </Pie>
+
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          )}
         </section>
       </main>
     </div>
