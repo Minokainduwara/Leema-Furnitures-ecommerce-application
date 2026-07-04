@@ -75,7 +75,7 @@ function AdminEditCategory() {
             name="name"
             value={form.name}
             onChange={handleChange}
-            className="w-full border border-stone-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+            className="w-full border border-stone-200 rounded-lg px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
             required
           />
         </div>
@@ -86,7 +86,7 @@ function AdminEditCategory() {
             name="slug"
             value={form.slug}
             onChange={handleChange}
-            className="w-full border border-stone-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+            className="w-full border border-stone-200 rounded-lg px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
           />
         </div>
 
@@ -97,7 +97,7 @@ function AdminEditCategory() {
             value={form.description}
             onChange={handleChange}
             rows={3}
-            className="w-full border border-stone-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+            className="w-full border border-stone-200 rounded-lg px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
           />
         </div>
 
@@ -109,7 +109,7 @@ function AdminEditCategory() {
             onChange={(e) =>
               setForm({ ...form, isActive: e.target.value === "true" })
             }
-            className="w-full border border-stone-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+            className="w-full border border-stone-200 rounded-lg px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
           >
             <option value="true">Active</option>
             <option value="false">Inactive</option>
