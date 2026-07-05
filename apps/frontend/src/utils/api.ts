@@ -1,4 +1,4 @@
-export const API_BASE = "http://localhost:8080";
+export const API_BASE = import.meta.env.VITE_API_URL?.replace(/\/api$/, "") || "http://localhost:8080";
 
 const AUTH_EVENT = "leema:auth-changed";
 

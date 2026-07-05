@@ -90,7 +90,7 @@ const ProductDetail = () => {
   const [wishlistLoading, setWishlistLoading] = useState(false);
 
   const getImage = (img?: string) =>
-    img ? `http://localhost:8080/${img.replace(/^\/+/, "")}` : "/placeholder.png";
+    img ? `${import.meta.env.VITE_API_URL.replace(/\/api$/, "")}/${img.replace(/^\/+/, "")}` : "/placeholder.png";
 
   const handleAddToCart = async () => {
     if (!product) return;
@@ -154,7 +154,7 @@ const ProductDetail = () => {
       setImgLoaded(false);
       setSelectedImageIndex(0);
       try {
-        const res1 = await authFetch(`http://localhost:8080/api/products/${id}`);
+        const res1 = await authFetch(`${import.meta.env.VITE_API_URL}/api/products/${id}`);
         if (!res1.ok) throw new Error("Product fetch failed");
         const data = await res1.json();
         
@@ -183,7 +183,7 @@ const ProductDetail = () => {
           images:        images,
         });
 
-        const res2 = await authFetch(`http://localhost:8080/api/products/${id}/related`);
+        const res2 = await authFetch(`${import.meta.env.VITE_API_URL}/api/products/${id}/related`);
         if (res2.ok) {
           const rel = await res2.json();
           setRelated(rel.map((item: any) => ({

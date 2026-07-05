@@ -82,8 +82,8 @@ export default function CategoryPage() {
       try {
         // Fetch categories and products simultaneously
         const [catsRes, prodsRes] = await Promise.all([
-          authFetch("http://localhost:8080/api/categories"),
-          authFetch("http://localhost:8080/api/products")
+          authFetch(`${import.meta.env.VITE_API_URL}/api/categories`),
+          authFetch(`${import.meta.env.VITE_API_URL}/api/products`)
         ]);
 
         if (!catsRes.ok || !prodsRes.ok) throw new Error("Failed to fetch data");
@@ -133,7 +133,7 @@ export default function CategoryPage() {
             category: catName,
             type: "All",
             img: item.image
-              ? `http://localhost:8080/${String(item.image).replace(/^\/+/, "")}`
+              ? `${import.meta.env.VITE_API_URL.replace(/\/api$/, "")}/${String(item.image).replace(/^\/+/, "")}`
               : "/placeholder.png",
           };
         });

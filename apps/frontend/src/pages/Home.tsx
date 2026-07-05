@@ -456,8 +456,8 @@ function CategorySections({ onAddToCart }: CategorySectionsProps): React.ReactEl
     const load = async () => {
       try {
         const [catsRes, prodsRes] = await Promise.all([
-          authFetch("http://localhost:8080/api/categories"),
-          authFetch("http://localhost:8080/api/products"),
+          authFetch(`${import.meta.env.VITE_API_URL}/api/categories`),
+          authFetch(`${import.meta.env.VITE_API_URL}/api/products`),
         ]);
         if (!catsRes.ok || !prodsRes.ok) throw new Error("Failed to fetch");
 

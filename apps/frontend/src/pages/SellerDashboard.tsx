@@ -97,7 +97,7 @@ function SellerDashboard() {
   const [categoryData, setCategoryData] = useState([]);
 
   useEffect(() => {
-    authFetch("http://localhost:8080/api/orders/stats/per-day")
+    authFetch(`${import.meta.env.VITE_API_URL}/api/orders/stats/per-day`)
       .then((res) => res.json())
       .then((data) => {
         console.log("RAW orders API:", data);
@@ -110,7 +110,7 @@ function SellerDashboard() {
         setOrdersData(formatted);
       });
 
-    authFetch("http://localhost:8080/api/categories/stats/distribution")
+    authFetch(`${import.meta.env.VITE_API_URL}/api/categories/stats/distribution`)
       .then((res) => res.json())
       .then((data) => {
         console.log("CATEGORY DATA:", data);
@@ -119,7 +119,7 @@ function SellerDashboard() {
       });
   }, []);
   useEffect(() => {
-  authFetch("http://localhost:8080/api/categories/stats/status")
+  authFetch(`${import.meta.env.VITE_API_URL}/api/categories/stats/status`)
     .then((res) => res.json())
     .then((data) => {
       console.log("RAW:", data);
@@ -137,7 +137,7 @@ function SellerDashboard() {
   useEffect(() => {
     const load = async () => {
       const res = await authFetch(
-        "http://localhost:8080/api/orders/pending/count",
+        `${import.meta.env.VITE_API_URL}/api/orders/pending/count`,
       );
 
       const data = await res.json();
@@ -153,7 +153,7 @@ function SellerDashboard() {
   useEffect(() => {
     const loadPendingOrders = async () => {
       try {
-        const res = await authFetch("http://localhost:8080/api/orders/pending");
+        const res = await authFetch(`${import.meta.env.VITE_API_URL}/api/orders/pending`);
 
         if (!res.ok) throw new Error("Failed to load pending orders");
 
@@ -170,7 +170,7 @@ function SellerDashboard() {
     const loadInventory = async () => {
       try {
         const res = await authFetch(
-          "http://localhost:8080/api/inventory-logs/summary",
+          `${import.meta.env.VITE_API_URL}/api/inventory-logs/summary`,
         );
 
         const data = await res.json();
@@ -188,7 +188,7 @@ function SellerDashboard() {
     const loadPendingServices = async () => {
       try {
         const res = await authFetch(
-          "http://localhost:8080/api/repairs/seller/pending",
+          `${import.meta.env.VITE_API_URL}/api/repairs/seller/pending`,
         );
 
         if (!res.ok) throw new Error("Failed to load pending services");
@@ -228,7 +228,7 @@ function SellerDashboard() {
     const loadDashboard = async () => {
       try {
         const res = await authFetch(
-          "http://localhost:8080/api/dashboard/seller",
+          `${import.meta.env.VITE_API_URL}/api/dashboard/seller`,
         );
 
         if (!res.ok) throw new Error("Dashboard API failed");

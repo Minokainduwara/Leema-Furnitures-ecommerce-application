@@ -22,7 +22,7 @@ function Cart() {
   // Fetch cart
   const fetchCart = async () => {
   try {
-    const res = await authFetch(`http://localhost:8080/api/cart`);
+    const res = await authFetch(`${import.meta.env.VITE_API_URL}/api/cart`);
     const data = await res.json();
     setItems(data.items || []);
     setTotal(data.total || 0);
@@ -59,7 +59,7 @@ function Cart() {
   // Remove item
   const removeItem = async (productId: number) => {
   try {
-    const res = await authFetch(`http://localhost:8080/api/cart/remove`, {
+    const res = await authFetch(`${import.meta.env.VITE_API_URL}/api/cart/remove`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
