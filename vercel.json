@@ -1,4 +1,3 @@
 {
-  "rootDirectory": "apps/frontend",
-  "outputDirectory": "dist"
+  "outputDirectory": "apps/frontend/dist"
 }
