@@ -23,6 +23,7 @@ function AdminEditProduct() {
     description: "",
     longDescription: "",
     status: "ACTIVE",
+    type: "TEKA",
     imageUrl: "",
   });
 
@@ -58,6 +59,7 @@ function AdminEditProduct() {
           description: data.description ?? "",
           longDescription: data.longDescription ?? "",
           status: data.status ?? "ACTIVE",
+          type: data.type ?? "TEKA",
           imageUrl: data.image ?? "",
         });
 
@@ -73,7 +75,7 @@ function AdminEditProduct() {
 
     const fetchCategories = async () => {
       try {
-        const res = await authFetch(`${API_BASE}/api/admin/categories`);
+        const res = await authFetch(`${API_BASE}/api/categories`);
         if (!res.ok) throw new Error("Failed to load categories");
 
         const data = await res.json();
@@ -126,6 +128,7 @@ function AdminEditProduct() {
       formData.append("description", form.description || "");
       formData.append("longDescription", form.longDescription || "");
       formData.append("status", form.status.toUpperCase());
+      formData.append("type", form.type);
 
       if (imageFile) {
         formData.append("image", imageFile);
@@ -245,6 +248,16 @@ function AdminEditProduct() {
           <option value="INACTIVE">Inactive</option>
           <option value="DISCONTINUED">Discontinued</option>
           <option value="DRAFT">Draft</option>
+        </select>
+
+        <select
+          name="type"
+          value={form.type}
+          onChange={handleChange}
+          className="w-full border p-2 mb-3 rounded text-black"
+        >
+          <option value="TEKA">TEKA</option>
+          <option value="OTHER">OTHER</option>
         </select>
 
         <input

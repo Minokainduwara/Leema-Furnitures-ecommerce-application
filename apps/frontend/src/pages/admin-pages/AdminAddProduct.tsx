@@ -19,7 +19,7 @@ function AdminAddProduct() {
     description: "",
     longDescription: "",
     status: "ACTIVE",
-    type: "PRODUCT",
+    type: "TEKA",
   });
 
   const handleChange = (
@@ -80,7 +80,7 @@ function AdminAddProduct() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await authFetch(`${API_BASE}/api/admin/categories`);
+        const res = await authFetch(`${API_BASE}/api/categories`);
         const data = await res.json();
         setCategories(Array.isArray(data) ? data : []);
       } catch (err) {
@@ -164,8 +164,8 @@ function AdminAddProduct() {
           onChange={handleChange}
           className="w-full border p-2 mb-2"
         >
-          <option value="PRODUCT">PRODUCT</option>
-          <option value="SERVICE">SERVICE</option>
+          <option value="TEKA">TEKA</option>
+          <option value="OTHER">OTHER</option>
         </select>
 
         <select

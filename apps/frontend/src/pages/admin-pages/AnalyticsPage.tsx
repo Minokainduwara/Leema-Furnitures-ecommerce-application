@@ -547,11 +547,19 @@ const AnalyticsPage: React.FC = () => {
           </div>
           <div className="flex items-center gap-1 bg-white border border-stone-200 rounded-lg p-1">
             <Calendar size={14} className="text-stone-400 ml-2" />
-            <input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)}
-              className="text-xs text-stone-700 bg-transparent border-none outline-none py-1.5 w-28" />
+            <input 
+              type="date" 
+              value={fromDate || ""} 
+              onChange={(e) => setFromDate(e.target.value)}
+              className="text-xs text-stone-700 bg-transparent border-none outline-none py-1.5 w-28" 
+            />
             <span className="text-stone-300">-</span>
-            <input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)}
-              className="text-xs text-stone-700 bg-transparent border-none outline-none py-1.5 w-28" />
+            <input 
+              type="date" 
+              value={toDate || ""} 
+              onChange={(e) => setToDate(e.target.value)}
+              className="text-xs text-stone-700 bg-transparent border-none outline-none py-1.5 w-28" 
+            />
           </div>
           <button onClick={fetchAnalytics}
             className="flex items-center gap-1.5 px-3 py-2 text-sm text-stone-700 bg-white border border-stone-200 rounded-lg hover:bg-stone-50">
