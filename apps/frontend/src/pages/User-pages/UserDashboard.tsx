@@ -43,13 +43,13 @@ const VALID_PANELS = new Set<string>(Object.keys(PANEL_TITLES));
 export default function UserDashboard() {
   const [orderHistory, setOrderHistory] = useState<any[]>([]);
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
-  const [wishlist, setWishlist] = React.useState<WishlistResponse | null>(null);
-  const [orders, setOrders] = React.useState<Order[]>([]);
+  const [wishlist, setWishlist] = React.useState<any | null>(null);
+  const [orders, setOrders] = React.useState<any[]>([]);
   const [showServiceForm, setShowServiceForm] = useState(false);
   const [serviceType, setServiceType] = useState("REPAIR");
   const [description, setDescription] = useState("");
   const [orderNumber, setOrderNumber] = useState("");
-  const [services, setServices] = React.useState<Repair[]>([]);
+  const [services, setServices] = React.useState<any[]>([]);
   const [panel, setPanel] = useState<Panel>("overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
