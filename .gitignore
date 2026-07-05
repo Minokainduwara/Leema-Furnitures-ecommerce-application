@@ -43,6 +43,7 @@ pip-delete-this-directory.txt
 !package.json
 !package-lock.json
 !composer.json
+!vercel.json
 !tsconfig*.json
 firebase-debug.log
 firebase-debug.*.log
