@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Mail, Phone, MapPin, Send, CheckCircle2, Clock, MessageSquare } from "lucide-react";
+import { Mail, Phone, MapPin, Send, CheckCircle2, Clock, MessageSquare, AlertCircle, Loader2 } from "lucide-react";
 
 interface ContactForm {
   name: string;
@@ -31,8 +31,8 @@ const INFO = [
   {
     icon: Phone,
     label: "Phone",
-    value: "+94 77 123 4567",
-    sub: "Mon – Sat, 9am – 6pm",
+    value: "035 2232155",
+    sub: "Mon – Sunday, 9am – 6pm",
     color: "from-amber-400 to-orange-400",
   },
   {
@@ -45,7 +45,7 @@ const INFO = [
   {
     icon: MapPin,
     label: "Address",
-    value: "123/A Main Street, Kegalle",
+    value: "No.331, Kandy Road, Kegalle",
     sub: "Sri Lanka",
     color: "from-amber-500 to-yellow-400",
   },
@@ -56,6 +56,8 @@ const INFO = [
 const ContactUs: React.FC = () => {
   const [form, setForm] = useState<ContactForm>({ name: "", email: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [focused, setFocused] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -63,11 +65,31 @@ const ContactUs: React.FC = () => {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    setForm({ name: "", email: "", message: "" });
-    setTimeout(() => setSubmitted(false), 4000);
+    setLoading(true);
+    setError(null);
+
+    try {
+      const endpoint = import.meta.env.VITE_FORMSPREE_ENDPOINT;
+      if (!endpoint) throw new Error("Formspree endpoint not configured");
+
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      if (!res.ok) throw new Error("Failed to send message. Please try again.");
+
+      setSubmitted(true);
+      setForm({ name: "", email: "", message: "" });
+      setTimeout(() => setSubmitted(false), 4000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const inputBase =
@@ -244,6 +266,20 @@ const ContactUs: React.FC = () => {
                 </div>
               )}
 
+              {/* Error banner */}
+              {error && (
+                <div
+                  className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl px-4 py-3.5 mb-6"
+                  style={{ animation: "successPop 0.4s ease both" }}
+                >
+                  <AlertCircle size={18} color="#dc2626" className="flex-shrink-0" />
+                  <div>
+                    <p className="text-red-700 font-bold text-sm">Error</p>
+                    <p className="text-red-600 text-xs mt-0.5">{error}</p>
+                  </div>
+                </div>
+              )}
+
               <form onSubmit={handleSubmit} className="space-y-5">
                 {/* Name */}
                 <div>
@@ -329,15 +365,16 @@ const ContactUs: React.FC = () => {
                 {/* Submit */}
                 <button
                   type="submit"
-                  className="relative overflow-hidden group w-full py-3.5 rounded-2xl text-sm font-black text-white flex items-center justify-center gap-2 transition-all duration-300 hover:scale-[1.02]"
+                  disabled={loading}
+                  className="relative overflow-hidden group w-full py-3.5 rounded-2xl text-sm font-black text-white flex items-center justify-center gap-2 transition-all duration-300 hover:scale-[1.02] disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100"
                   style={{
                     background: "linear-gradient(135deg, #f59e0b, #f97316)",
                     boxShadow: "0 6px 24px rgba(245,158,11,0.38)",
                   }}
                 >
                   <span className="relative z-10 flex items-center gap-2">
-                    <Send size={15} />
-                    Send Message
+                    {loading ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />}
+                    {loading ? "Sending..." : "Send Message"}
                   </span>
                   {/* Shimmer sweep */}
                   <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
