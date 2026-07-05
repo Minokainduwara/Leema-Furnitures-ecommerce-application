@@ -74,7 +74,7 @@ const ViewIcon = () => (
 // API
 // ─────────────────────────────────────────────────────────────
 
-const BASE = `${import.meta.env.VITE_API_URL}/admin/users`;
+const BASE = `${import.meta.env.VITE_API_URL}/api/admin/users`;
 
 function authHeaders(): Record<string, string> {
   const token = localStorage.getItem("token");

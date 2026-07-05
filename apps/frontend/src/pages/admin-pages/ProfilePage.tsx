@@ -28,7 +28,7 @@ interface ProfileData {
 // API CONFIG
 // ─────────────────────────────────────────────────────────────
 
-const BASE = `${import.meta.env.VITE_API_URL}/users`;
+const BASE = `${import.meta.env.VITE_API_URL}/api/users`;
 
 function authHeaders(): Record<string, string> {
   const token = localStorage.getItem("token");
