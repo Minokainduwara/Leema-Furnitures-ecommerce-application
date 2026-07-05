@@ -17,7 +17,7 @@ function AdminEditCategory() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    authFetch(`${API_BASE}/api/admin/categories/${id}`)
+    authFetch(`${API_BASE}/api/categories/${id}`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to load category");
         return res.json();
@@ -44,7 +44,7 @@ function AdminEditCategory() {
     setSaving(true);
 
     try {
-      const res = await authFetch(`${API_BASE}/api/admin/categories/${id}`, {
+      const res = await authFetch(`${API_BASE}/api/categories/${id}`, {
         method: "PUT",
         body: JSON.stringify(form),
       });
