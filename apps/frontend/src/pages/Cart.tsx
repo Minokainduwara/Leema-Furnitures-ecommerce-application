@@ -58,22 +58,24 @@ function Cart() {
 
   // Remove item
   const removeItem = async (productId: number) => {
-    try {
-      await fetch(`${API_URL}/cart/item`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ productId }),
-      });
+  try {
+    const res = await authFetch(`http://localhost:8080/api/cart/remove`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ productId }),
+    });
 
-      toast.success("Item removed");
-      fetchCart();
-    } catch {
-      toast.error("Failed to remove item");
-    }
-  };
+    if (!res.ok) throw new Error();
+
+    toast.success("Item removed");
+    fetchCart();
+  } catch {
+    toast.error("Failed to remove item");
+  }
+};
 
   return (
     <div className="min-h-screen flex justify-center items-start pt-16 pb-24 bg-stone-50 px-4">
