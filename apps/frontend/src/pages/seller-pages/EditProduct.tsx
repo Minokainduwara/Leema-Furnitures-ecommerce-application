@@ -28,6 +28,9 @@ function EditProduct() {
   const [sidebaropen] = useState(false);
 
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [additionalImageFiles, setAdditionalImageFiles] = useState<File[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
+  const [imagesToKeep, setImagesToKeep] = useState<string[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
 
@@ -83,6 +86,12 @@ function EditProduct() {
           imageUrl: data.image || "",
           warrantyYears: data.warrantyYears,
         }));
+
+        // Load existing additional images
+        if (data.images && Array.isArray(data.images)) {
+          setExistingImages(data.images);
+          setImagesToKeep(data.images);
+        }
       });
 
     authFetch("http://localhost:8080/api/categories")
@@ -113,6 +122,18 @@ function EditProduct() {
       form.categoryId ? String(Number(form.categoryId)) : "0",
     );
     if (imageFile) formData.append("image", imageFile);
+
+    // Add new additional images
+    additionalImageFiles.forEach((file) => {
+      formData.append("additionalImages", file);
+    });
+
+    // Send list of existing images to keep
+    if (imagesToKeep.length > 0) {
+      imagesToKeep.forEach((img) => {
+        formData.append("existingImagesToKeep", img);
+      });
+    }
 
     const res = await authFetch(`http://localhost:8080/api/products/${id}`, {
       method: "PUT",
@@ -292,6 +313,81 @@ function EditProduct() {
           {form.imageUrl && !imageFile && (
             <img src={getImageUrl(form.imageUrl)} className="w-28 h-28 mb-3" />
           )}
+
+          {/* Additional Images Management */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Additional Images
+            </label>
+            
+            {/* Existing Images */}
+            {existingImages.length > 0 && (
+              <div className="mb-3">
+                <p className="text-xs text-gray-600 mb-2">Current images (click to remove):</p>
+                <div className="flex gap-2 flex-wrap">
+                  {existingImages.map((img, index) => (
+                    <div key={index} className="relative">
+                      <img
+                        src={getImageUrl(img)}
+                        alt={`Existing ${index + 1}`}
+                        className={`w-20 h-20 object-cover rounded border-2 cursor-pointer ${
+                          imagesToKeep.includes(img) ? "border-green-500" : "border-red-500 opacity-50"
+                        }`}
+                        onClick={() => {
+                          if (imagesToKeep.includes(img)) {
+                            setImagesToKeep(imagesToKeep.filter(i => i !== img));
+                          } else {
+                            setImagesToKeep([...imagesToKeep, img]);
+                          }
+                        }}
+                      />
+                      <div className="absolute -top-1 -right-1 bg-gray-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
+                        {imagesToKeep.includes(img) ? "✓" : "✗"}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Click to toggle keep/remove</p>
+              </div>
+            )}
+
+            {/* Add New Images */}
+            <div>
+              <label className="block text-xs text-gray-600 mb-1">Add new images:</label>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={(e: any) => {
+                  const files = Array.from(e.target.files || []) as File[];
+                  setAdditionalImageFiles(files);
+                }}
+                className="w-full border p-2 rounded text-gray-700 border-gray-300 text-sm"
+              />
+              {additionalImageFiles.length > 0 && (
+                <div className="mt-2 flex gap-2 flex-wrap">
+                  {additionalImageFiles.map((file, index) => (
+                    <div key={index} className="relative">
+                      <img
+                        src={URL.createObjectURL(file)}
+                        alt={`New ${index + 1}`}
+                        className="w-20 h-20 object-cover rounded border"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAdditionalImageFiles(additionalImageFiles.filter((_, i) => i !== index));
+                        }}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
 
           {/* DESCRIPTION */}
           <label className="block text-sm font-medium text-gray-700 mb-1">

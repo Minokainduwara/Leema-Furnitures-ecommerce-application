@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef, type ChangeEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { authFetch } from "../../utils/api";
+import { formatLkr } from "../../utils/currency";
 const EditIcon = () => (
   <svg
     className="w-5 h-5 text-blue-500"
@@ -238,7 +239,7 @@ const displayedProducts = showAll
                         </td>
 
                         <td className="p-3 text-green-600 font-semibold">
-                          Rs {p.price}
+                          {formatLkr(Number(p.price || 0))}
                         </td>
 
                         <td className="p-3">
@@ -255,12 +256,12 @@ const displayedProducts = showAll
                           {p.discountType
                             ? p.discountType === "PERCENTAGE"
                               ? `${p.discountValue}% OFF`
-                              : `Rs ${p.discountValue} OFF`
+                              : `${formatLkr(Number(p.discountValue))} OFF`
                             : "No Discount"}
                         </td>
 
                         <td className="p-3 text-green-600 font-bold">
-                          Rs {p.finalPrice ?? p.price}
+                          {formatLkr(Number(p.finalPrice ?? p.price))}
                         </td>
                         <td className="p-3 text-blue-600 font-semibold">
                           {p.warrantyYears ? `${p.warrantyYears} Years` : "N/A"}

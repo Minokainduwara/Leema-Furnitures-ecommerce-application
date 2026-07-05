@@ -19,11 +19,16 @@ export interface CartItem {
 interface CartResponse {
   items: CartItem[];
   total: number;
+  shippingCost: number;
+  grandTotal: number;
+  totalWeightKg: number;
 }
 
 interface CartContextType {
   items: CartItem[];
   total: number;
+  shippingCost: number;
+  grandTotal: number;
   count: number;
   loading: boolean;
   fetchCart: () => Promise<void>;
@@ -41,6 +46,8 @@ const isLoggedIn = () =>
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [items, setItems] = useState<CartItem[]>([]);
   const [total, setTotal] = useState(0);
+  const [shippingCost, setShippingCost] = useState(0);
+  const [grandTotal, setGrandTotal] = useState(0);
   const [loading, setLoading] = useState(false);
 
   const fetchCart = useCallback(async () => {
@@ -54,6 +61,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const data = await api.get("cart").json<CartResponse>();
       setItems(data.items || []);
       setTotal(Number(data.total || 0));
+      setShippingCost(Number(data.shippingCost || 0));
+      setGrandTotal(Number(data.grandTotal || 0));
+      setShippingCost(Number(data.shippingCost || 0));
+      setGrandTotal(Number(data.grandTotal || 0));
     } catch {
       setItems([]);
       setTotal(0);
@@ -69,6 +80,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .json<CartResponse>();
       setItems(data.items || []);
       setTotal(Number(data.total || 0));
+      setShippingCost(Number(data.shippingCost || 0));
+      setGrandTotal(Number(data.grandTotal || 0));
     },
     [],
   );
@@ -80,6 +93,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .json<CartResponse>();
       setItems(data.items || []);
       setTotal(Number(data.total || 0));
+      setShippingCost(Number(data.shippingCost || 0));
+      setGrandTotal(Number(data.grandTotal || 0));
     },
     [],
   );
@@ -90,11 +105,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       .json<CartResponse>();
     setItems(data.items || []);
     setTotal(Number(data.total || 0));
+    setShippingCost(Number(data.shippingCost || 0));
+    setGrandTotal(Number(data.grandTotal || 0));
   }, []);
 
   const clearLocal = useCallback(() => {
     setItems([]);
     setTotal(0);
+    setShippingCost(0);
+    setGrandTotal(0);
   }, []);
 
   // Initial load + re-fetch whenever auth changes
@@ -112,6 +131,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       value={{
         items,
         total,
+        shippingCost,
+        grandTotal,
         count,
         loading,
         fetchCart,

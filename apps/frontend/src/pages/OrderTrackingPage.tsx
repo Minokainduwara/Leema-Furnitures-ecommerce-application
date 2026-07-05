@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../api/client";
+import { formatLkr } from "../utils/currency";
 
 const STATUS_STEPS = [
   "pending",
@@ -119,7 +120,7 @@ const OrderTrackingPage: React.FC = () => {
             </p>
 
             <p className="font-bold text-stone-800">
-              Rs. {order.totalAmount}
+              {formatLkr(order.totalAmount)}
             </p>
           </div>
 

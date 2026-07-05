@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { authFetch, API_BASE, productImageUrl } from "../../utils/api";
+import { formatLkr } from "../../utils/currency";
 
 const EditIcon = () => (
   <svg
@@ -51,7 +52,7 @@ function ProductsPage() {
 
   // LOAD PRODUCTS
   useEffect(() => {
-    authFetch(`${API_BASE}/api/products`)
+    authFetch(`${API_BASE}/api/admin/products`)
       .then((res) => res.json())
       .then((data) => {
         setProducts(data || []);
@@ -69,15 +70,15 @@ function ProductsPage() {
 
     try {
       const res = await authFetch(
-        `${API_BASE}/api/products/${showDelete.id}`,
-        { method: "DELETE" }
+        `${API_BASE}/api/admin/products/${showDelete.id}`,
+        {
+          method: "DELETE",
+        },
       );
 
       if (!res.ok) throw new Error("Delete failed");
 
-      setProducts((prev) =>
-        prev.filter((p) => p.id !== showDelete.id)
-      );
+      setProducts((prev) => prev.filter((p) => p.id !== showDelete.id));
 
       setShowDelete({ show: false, id: null });
     } catch (err) {
@@ -89,16 +90,14 @@ function ProductsPage() {
   const filteredProducts = products.filter(
     (p) =>
       p.name?.toLowerCase().includes(search.toLowerCase()) ||
-      p.sku?.toLowerCase().includes(search.toLowerCase())
+      p.sku?.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
     <div className="bg-gray-100 min-h-screen p-6">
       {/* HEADER */}
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-700">
-          Product Management
-        </h2>
+        <h2 className="text-2xl font-bold text-gray-700">Product Management</h2>
 
         <div className="flex gap-2">
           <input
@@ -156,7 +155,7 @@ function ProductsPage() {
                     {p.categoryName || p.category?.name || "N/A"}
                   </td>
                   <td className="p-3 text-green-600 font-semibold">
-                    Rs {p.price}
+                    {formatLkr(Number(p.price || 0))}
                   </td>
 
                   <td className="p-3">
@@ -173,18 +172,14 @@ function ProductsPage() {
                   <td className="p-3 flex gap-2">
                     {/* FIXED ROUTE */}
                     <button
-                      onClick={() =>
-                        navigate(`/admin/products/edit/${p.id}`)
-                      }
+                      onClick={() => navigate(`/admin/products/edit/${p.id}`)}
                       className="p-2 bg-blue-100 rounded"
                     >
                       <EditIcon />
                     </button>
 
                     <button
-                      onClick={() =>
-                        setShowDelete({ show: true, id: p.id })
-                      }
+                      onClick={() => setShowDelete({ show: true, id: p.id })}
                       className="p-2 bg-red-100 rounded"
                     >
                       <DeleteIcon />
@@ -205,9 +200,7 @@ function ProductsPage() {
 
             <div className="flex gap-2 justify-end">
               <button
-                onClick={() =>
-                  setShowDelete({ show: false, id: null })
-                }
+                onClick={() => setShowDelete({ show: false, id: null })}
                 className="px-3 py-1 bg-gray-300 rounded"
               >
                 Cancel

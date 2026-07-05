@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { Badge, StatCard, PageHeader } from "../../components/ui/admin-ui/index";
 import { ProgressBar } from "../../components/charts/index";
 import { authFetch, API_BASE, productImageUrl } from "../../utils/api";
+import { formatLkr } from "../../utils/currency";
 
 type DashboardStats = {
   totalRevenue: number;
@@ -81,7 +82,7 @@ const DashboardPage: React.FC = () => {
   const statCards = [
     {
       label: "Total Revenue",
-      value: `LKR ${Number(stats.totalRevenue || 0).toLocaleString()}`,
+      value: formatLkr(Number(stats.totalRevenue || 0), { compact: true }),
       icon: DollarSign,
       colorClass: "text-amber-500", bgClass: "bg-amber-50", ringClass: "ring-amber-100",
     },
@@ -144,7 +145,7 @@ const DashboardPage: React.FC = () => {
                   <tr key={o.id} className="border-b border-stone-50 hover:bg-stone-50 transition-colors">
                     <td className="py-2.5 pr-4 font-mono text-xs text-stone-500">{o.orderNumber || `#${o.id}`}</td>
                     <td className="py-2.5 pr-4 text-stone-700 font-medium">{o.customerName || "—"}</td>
-                    <td className="py-2.5 pr-4 font-semibold text-stone-800">LKR {Number(o.totalAmount || 0).toLocaleString()}</td>
+                    <td className="py-2.5 pr-4 font-semibold text-stone-800">{formatLkr(Number(o.totalAmount || 0))}</td>
                     <td className="py-2.5">
                       <Badge variant={STATUS_VARIANT[o.status] || "default"}>{o.status}</Badge>
                     </td>
@@ -193,7 +194,7 @@ const DashboardPage: React.FC = () => {
                     <span className="text-xs text-stone-400">{p.totalSales || 0} sales</span>
                   </div>
                 </div>
-                <span className="text-sm font-bold text-stone-800">LKR {Number(p.price || 0).toLocaleString()}</span>
+                <span className="text-sm font-bold text-stone-800">{formatLkr(Number(p.price || 0))}</span>
               </div>
             ))}
           </div>

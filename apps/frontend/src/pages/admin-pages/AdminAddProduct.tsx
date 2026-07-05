@@ -11,7 +11,7 @@ function AdminAddProduct() {
 
   const [form, setForm] = useState({
     name: "",
-    code: "",
+    skuDigits: "",
     price: "",
     cost: "",
     stock: "",
@@ -19,13 +19,11 @@ function AdminAddProduct() {
     description: "",
     longDescription: "",
     status: "ACTIVE",
+    type: "PRODUCT",
   });
 
-  // handle input
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     setForm((prev) => ({
       ...prev,
@@ -33,50 +31,38 @@ function AdminAddProduct() {
     }));
   };
 
-  // submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
-      if (!form.name || !form.code || !form.price || !form.category) {
-        alert("Please fill all required fields");
-        return;
-      }
-
-      if (!imageFile) {
-        alert("Please select an image");
+      if (!form.name || !form.skuDigits || !form.price || !form.category) {
+        alert("Please fill required fields");
         return;
       }
 
       const formData = new FormData();
 
       formData.append("name", form.name);
-      formData.append("sku", form.code);
-      formData.append("description", form.description || "");
-      formData.append("longDescription", form.longDescription || "");
-
+      formData.append("skuDigits", form.skuDigits);
       formData.append("price", form.price);
       formData.append("cost", form.cost || "0");
       formData.append("stock", form.stock || "0");
-      formData.append("categoryId", form.category);
+      formData.append("description", form.description);
+      formData.append("longDescription", form.longDescription);
       formData.append("status", form.status);
+      formData.append("type", form.type); // ✅ REQUIRED
+      formData.append("categoryId", form.category);
 
-      // IMPORTANT
-      formData.append("image", imageFile);
-
-      // DEBUG
-      for (const pair of formData.entries()) {
-        console.log(pair[0], pair[1]);
+      if (imageFile) {
+        formData.append("image", imageFile);
       }
 
-      const res = await authFetch(`${API_BASE}/api/products`, {
+      const res = await authFetch(`${API_BASE}/api/products/add`, {
         method: "POST",
         body: formData,
       });
 
       const text = await res.text();
-
-      console.log(text);
 
       if (!res.ok) {
         throw new Error(text);
@@ -91,20 +77,14 @@ function AdminAddProduct() {
     }
   };
 
-  // load categories
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await authFetch(`${API_BASE}/api/categories`);
-
-        if (!res.ok) throw new Error("Failed to load categories");
-
+        const res = await authFetch(`${API_BASE}/api/admin/categories`);
         const data = await res.json();
-
         setCategories(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error(err);
-        setCategories([]);
       } finally {
         setLoadingCategories(false);
       }
@@ -114,27 +94,27 @@ function AdminAddProduct() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-6 text-gray-900">
+    <div className="min-h-screen bg-gray-100 flex justify-center p-6">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-2xl bg-white p-6 rounded-xl shadow-lg overflow-y-auto max-h-[90vh]"
+        className="w-full max-w-2xl bg-white p-6 rounded shadow text-stone-600"
       >
-        <h2 className="text-2xl font-bold mb-6">Add Product</h2>
+        <h2 className="text-2xl font-bold mb-4">Add Product</h2>
 
         <input
           name="name"
-          placeholder="Product Name"
+          placeholder="Name"
           value={form.name}
           onChange={handleChange}
-          className="w-full border p-2 mb-3 rounded text-black"
+          className="w-full border p-2 mb-2"
         />
 
         <input
-          name="code"
-          placeholder="Product Code"
-          value={form.code}
+          name="skuDigits"
+          placeholder="SKU"
+          value={form.skuDigits}
           onChange={handleChange}
-          className="w-full border p-2 mb-3 rounded text-black"
+          className="w-full border p-2 mb-2"
         />
 
         <input
@@ -143,7 +123,7 @@ function AdminAddProduct() {
           placeholder="Price"
           value={form.price}
           onChange={handleChange}
-          className="w-full border p-2 mb-3 rounded text-black"
+          className="w-full border p-2 mb-2"
         />
 
         <input
@@ -152,7 +132,7 @@ function AdminAddProduct() {
           placeholder="Cost"
           value={form.cost}
           onChange={handleChange}
-          className="w-full border p-2 mb-3 rounded text-black"
+          className="w-full border p-2 mb-2"
         />
 
         <input
@@ -161,61 +141,50 @@ function AdminAddProduct() {
           placeholder="Stock"
           value={form.stock}
           onChange={handleChange}
-          className="w-full border p-2 mb-3 rounded text-black"
+          className="w-full border p-2 mb-2"
         />
 
         <select
           name="category"
           value={form.category}
           onChange={handleChange}
-          className="w-full border p-2 mb-3 rounded text-black"
+          className="w-full border p-2 mb-2"
         >
           <option value="">Select Category</option>
+          {categories.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
 
-          {loadingCategories ? (
-            <option value="">Loading...</option>
-          ) : (
-            categories.map((cat: any) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))
-          )}
+        <select
+          name="type"
+          value={form.type}
+          onChange={handleChange}
+          className="w-full border p-2 mb-2"
+        >
+          <option value="PRODUCT">PRODUCT</option>
+          <option value="SERVICE">SERVICE</option>
         </select>
 
         <select
           name="status"
           value={form.status}
           onChange={handleChange}
-          className="w-full border p-2 mb-3 rounded text-black"
+          className="w-full border p-2 mb-2"
         >
-          <option value="ACTIVE">Active</option>
-          <option value="INACTIVE">Inactive</option>
-          <option value="DISCONTINUED">Discontinued</option>
-          <option value="DRAFT">Draft</option>
+          <option value="ACTIVE">ACTIVE</option>
+          <option value="INACTIVE">INACTIVE</option>
+          <option value="DISCONTINUED">DISCONTINUED</option>
         </select>
-
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-
-            console.log("SELECTED FILE:", file);
-
-            if (file) {
-              setImageFile(file);
-            }
-          }}
-          className="w-full border p-2 mb-3 rounded text-black"
-        />
 
         <textarea
           name="description"
-          placeholder="Short Description"
+          placeholder="Description"
           value={form.description}
           onChange={handleChange}
-          className="w-full border p-2 mb-3 rounded text-black"
+          className="w-full border p-2 mb-2"
         />
 
         <textarea
@@ -223,25 +192,18 @@ function AdminAddProduct() {
           placeholder="Long Description"
           value={form.longDescription}
           onChange={handleChange}
-          className="w-full border p-2 mb-4 rounded text-black"
+          className="w-full border p-2 mb-2"
         />
 
-        <div className="flex gap-2">
-          <button
-            type="submit"
-            className="bg-green-600 text-white px-4 py-2 rounded w-full"
-          >
-            Save Product
-          </button>
+        <input
+          type="file"
+          onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+          className="w-full mb-3"
+        />
 
-          <button
-            type="button"
-            onClick={() => navigate("/admin/products")}
-            className="bg-gray-500 text-white px-4 py-2 rounded w-full"
-          >
-            Cancel
-          </button>
-        </div>
+        <button className="bg-green-600 text-white px-4 py-2 w-full">
+          Save Product
+        </button>
       </form>
     </div>
   );

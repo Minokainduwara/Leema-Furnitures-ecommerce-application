@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { formatLkr } from "../../utils/currency";
 
 // ─────────────────────────────────────────────────────────────
 // TYPES
@@ -57,12 +58,15 @@ const ViewIcon = () => (
 // API
 // ─────────────────────────────────────────────────────────────
 
-const BASE = "http://localhost:8080/api/services";
+const BASE = "http://localhost:8080/api/admin/services";
 
-function authHeaders(): Record<string, string> {
+function authHeaders(isJson = true): Record<string, string> {
   const token = localStorage.getItem("token");
-  const h: Record<string, string> = { "Content-Type": "application/json" };
+  const h: Record<string, string> = {};
+
+  if (isJson) h["Content-Type"] = "application/json";
   if (token) h.Authorization = `Bearer ${token}`;
+
   return h;
 }
 
@@ -77,13 +81,29 @@ async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
 
 const api = {
   getAll: () => apiFetch<Service[]>(BASE),
-  getById: (id: number) => apiFetch<Service>(`${BASE}/${id}`),
+
+  getById: (id: number) =>
+    apiFetch<Service>(`${BASE}/${id}`),
+
   create: (body: Omit<Service, "id">) =>
-    apiFetch<Service>(BASE, { method: "POST", body: JSON.stringify(body) }),
+    apiFetch<Service>(BASE, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify(body),
+    }),
+
   update: (id: number, body: Omit<Service, "id">) =>
-    apiFetch<Service>(`${BASE}/${id}`, { method: "PUT", body: JSON.stringify(body) }),
+    apiFetch<Service>(`${BASE}/${id}`, {
+      method: "PUT",
+      headers: authHeaders(),
+      body: JSON.stringify(body),
+    }),
+
   delete: async (id: number) => {
-    const res = await fetch(`${BASE}/${id}`, { method: "DELETE", headers: authHeaders() });
+    const res = await fetch(`${BASE}/${id}`, {
+      method: "DELETE",
+      headers: authHeaders(),
+    });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
   },
 };
@@ -110,12 +130,7 @@ const ICON_OPTIONS = ["🛡️", "🔧", "💼", "📞", "✅", "⚙️", "🚀"
 // HELPERS
 // ─────────────────────────────────────────────────────────────
 
-/** Format a number as Sri Lankan Rupees — e.g. Rs. 12,500.00 */
-const formatPrice = (amount: number) =>
-  `Rs. ${amount.toLocaleString("en-LK", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
+const formatPrice = (amount: number) => formatLkr(amount, { decimals: 2 });
 
 const Badge: React.FC<{ children: React.ReactNode; className: string }> = ({ children, className }) => (
   <span className={`px-2 py-1 rounded text-xs font-semibold ${className}`}>{children}</span>
@@ -193,20 +208,37 @@ const ServicesPage: React.FC = () => {
 
   // ── CREATE ──
   const handleCreate = async () => {
-    if (!form.name.trim()) { alert("Service name is required"); return; }
-    if (form.price < 0)    { alert("Price cannot be negative"); return; }
-    setFormLoading(true);
-    try {
-      await api.create(form);
-      setCreateOpen(false);
-      setForm(emptyForm);
-      fetchServices();
-    } catch (e: unknown) {
-      alert(e instanceof Error ? e.message : "Failed to create service");
-    } finally {
-      setFormLoading(false);
-    }
-  };
+  if (!form.name.trim()) {
+    alert("Service name is required");
+    return;
+  }
+
+  if (form.price < 0) {
+    alert("Price cannot be negative");
+    return;
+  }
+
+  setFormLoading(true);
+
+  try {
+    await api.create({
+      name: form.name,
+      type: form.type,
+      price: form.price,
+      description: form.description,
+      icon: form.icon,
+      active: form.active,
+    });
+
+    setCreateOpen(false);
+    setForm(emptyForm);
+    fetchServices();
+  } catch (e: unknown) {
+    alert(e instanceof Error ? e.message : "Failed to create service");
+  } finally {
+    setFormLoading(false);
+  }
+};
 
   // ── EDIT ──
   const openEdit = (service: Service) => {
@@ -454,7 +486,7 @@ const ServicesPage: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs text-gray-500 mb-1 block">Price (Rs.)</label>
+                  <label className="text-xs text-gray-500 mb-1 block">Price (LKR)</label>
                   <input
                     type="number"
                     min={0}

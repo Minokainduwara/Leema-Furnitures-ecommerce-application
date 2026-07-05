@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { authFetch } from "../utils/api";
+import { authFetch } from "../utils/api"
 import { getUserName } from "../utils/jwt";
 import { LayoutGrid } from "lucide-react";
 import { CheckCircle } from "lucide-react";
@@ -260,7 +260,7 @@ function SellerDashboard() {
   const cards = [
     {
       title: "Total Sales",
-      value: loading ? "..." : `Rs ${dashboard.totalSales}`,
+      value: loading ? "..." : "Rs" +Number(dashboard.totalSales),
       icon: <SalesIcon />,
       description: "Total revenue from orders",
     },
@@ -304,7 +304,7 @@ function SellerDashboard() {
         } lg:translate-x-0 lg:static transition-all flex flex-col`}
       >
         <div className="flex items-center gap-2 p-4 border-b border-white">
-          <img src="/images/leemalogo.jpg" className="h-6 w-18" />
+          <img src="/images/leemalogo.jpg" alt="Leema" className="h-8 w-24 rounded" />
           <span className="font-bold text-white">Seller Dashboard</span>
         </div>
 

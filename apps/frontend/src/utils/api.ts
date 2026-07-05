@@ -64,10 +64,20 @@ export const dashboardPath = (role: string): string => {
 
 export const productImageUrl = (img?: string | null): string => {
   if (!img) return "/images/placeholder.jpg";
-  if (/^https?:\/\//i.test(img)) return img;
-  return `${API_BASE}/${img.replace(/^\/+/, "")}`;
-};
 
+  // full URL
+  if (/^https?:\/\//i.test(img)) return img;
+
+  const clean = img.replace(/^\/+/, "");
+
+  // already contains uploads
+  if (clean.startsWith("uploads/")) {
+    return `${API_BASE}/${clean}`;
+  }
+
+  // normal case
+  return `${API_BASE}/uploads/${clean}`;
+};
 export type ApiProduct = {
   id: number;
   name: string;

@@ -24,6 +24,7 @@ interface AuthContextType {
     email: string,
     password: string,
     name: string,
+     phone: string
   ) => Promise<AuthUser>;
 
   login: (email: string, password: string) => Promise<AuthUser>;
@@ -98,6 +99,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     email: string,
     password: string,
     name: string,
+     phone: string
   ): Promise<AuthUser> => {
     setIsLoading(true);
     setError(null);
@@ -105,7 +107,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const res = await fetch("http://localhost:8080/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, name }),
+        body: JSON.stringify({ email, password, name,phone }),
       });
       if (!res.ok) {
         const text = await res.text();

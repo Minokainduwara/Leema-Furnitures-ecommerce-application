@@ -1,14 +1,13 @@
 import React from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/Authcontext";
-import type { AuthUser } from "../types";
 
 // ─── RequireAuth ──────────────────────────────────────────────────────────────
 // Wraps any route that needs the user to be logged in.
 // Saves the attempted URL so we can redirect back after login.
 
 interface RequireAuthProps {
-  allowedRoles?: AuthUser["role"][];
+  allowedRoles?: string[];
 }
 
 const RequireAuth: React.FC<RequireAuthProps> = ({ allowedRoles }) => {
@@ -28,7 +27,7 @@ const RequireAuth: React.FC<RequireAuthProps> = ({ allowedRoles }) => {
   }
 
   if (allowedRoles && !allowedRoles.includes(user.role)) {
-    return <Navigate to="/403" replace />;
+    return <Navigate to="/forbidden" replace />;
   }
 
   return <Outlet />;

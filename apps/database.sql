@@ -475,7 +475,7 @@ CREATE TABLE payments (
   user_id INT NOT NULL,
   payment_method_id INT,
   amount DECIMAL(10, 2) NOT NULL,
-  currency VARCHAR(3) DEFAULT 'USD',
+  currency VARCHAR(3) DEFAULT 'LKR',
   status ENUM('pending', 'processing', 'completed', 'failed', 'refunded', 'cancelled') DEFAULT 'pending',
   gateway VARCHAR(50), -- stripe, paypal, razorpay, etc.
   gateway_transaction_id VARCHAR(255) UNIQUE,

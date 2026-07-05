@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-
+import { formatLkr } from "../utils/currency";
+import { authFetch } from "../utils/api";
+import { useAuth } from "../hooks/Authcontext";
 const API_URL = import.meta.env.VITE_API_URL;
 
 interface CartItem {
@@ -14,34 +16,30 @@ interface CartItem {
 function Cart() {
   const [items, setItems] = useState<CartItem[]>([]);
   const [total, setTotal] = useState(0);
-
+  const { user } = useAuth();
   const token = localStorage.getItem("token");
 
   // Fetch cart
   const fetchCart = async () => {
-    try {
-      const res = await fetch(`${API_URL}/cart`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const data = await res.json();
-      setItems(data.items || []);
-      setTotal(data.total || 0);
-    } catch {
-      toast.error("Failed to load cart");
-    }
-  };
+  try {
+    const res = await authFetch(`http://localhost:8080/api/cart`);
+    const data = await res.json();
+    setItems(data.items || []);
+    setTotal(data.total || 0);
+  } catch {
+    toast.error("Failed to load cart");
+  }
+};
 
   useEffect(() => {
+  if (user) {
     fetchCart();
-  }, []);
-
+  }
+}, [user]);
   // Update quantity
   const updateQuantity = async (productId: number, quantity: number) => {
     if (quantity < 1) return; // Prevent negative quantity
-    
+
     try {
       await fetch(`${API_URL}/cart/update`, {
         method: "PUT",
@@ -89,10 +87,14 @@ function Cart() {
             <div className="w-20 h-20 bg-stone-100 rounded-full flex items-center justify-center text-4xl mb-4">
               🛒
             </div>
-            <p className="text-stone-700 text-lg font-bold mb-2">Cart is empty</p>
-            <p className="text-stone-500 mb-8">Looks like you haven't added anything yet.</p>
+            <p className="text-stone-700 text-lg font-bold mb-2">
+              Cart is empty
+            </p>
+            <p className="text-stone-500 mb-8">
+              Looks like you haven't added anything yet.
+            </p>
             <button
-              onClick={() => window.location.href = "/"}
+              onClick={() => (window.location.href = "/")}
               className="px-8 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl transition-colors shadow-sm"
             >
               Continue Shopping
@@ -111,7 +113,7 @@ function Cart() {
                       {item.productName}
                     </p>
                     <p className="text-sm text-stone-500 font-medium mt-0.5">
-                      Rs. {item.price.toLocaleString()}
+                      {formatLkr(item.price)}
                     </p>
                   </div>
 
@@ -119,7 +121,9 @@ function Cart() {
                     {/* Quantity controls */}
                     <div className="flex items-center gap-1.5 bg-white border border-stone-200 rounded-lg p-1">
                       <button
-                        onClick={() => updateQuantity(item.productId, item.quantity - 1)}
+                        onClick={() =>
+                          updateQuantity(item.productId, item.quantity - 1)
+                        }
                         className="w-8 h-8 flex items-center justify-center bg-stone-50 text-stone-700 hover:bg-stone-200 rounded-md font-bold transition-colors"
                         aria-label="Decrease quantity"
                       >
@@ -131,7 +135,9 @@ function Cart() {
                       </span>
 
                       <button
-                        onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                        onClick={() =>
+                          updateQuantity(item.productId, item.quantity + 1)
+                        }
                         className="w-8 h-8 flex items-center justify-center bg-stone-50 text-stone-700 hover:bg-stone-200 rounded-md font-bold transition-colors"
                         aria-label="Increase quantity"
                       >
@@ -142,7 +148,7 @@ function Cart() {
                     {/* Line total */}
                     <div className="w-24 text-right">
                       <p className="font-black text-amber-600 text-lg">
-                        Rs. {item.lineTotal.toLocaleString()}
+                        {formatLkr(item.lineTotal)}
                       </p>
                     </div>
 
@@ -152,7 +158,17 @@ function Cart() {
                       className="text-stone-400 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-lg"
                       title="Remove item"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
                         <path d="M3 6h18"></path>
                         <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
                         <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
@@ -170,23 +186,33 @@ function Cart() {
               <div>
                 <p className="text-stone-500 font-medium mb-1">Subtotal</p>
                 <p className="text-3xl font-black text-stone-900">
-                  Rs. {total.toLocaleString()}
+                  {formatLkr(total)}
                 </p>
               </div>
 
               <div className="w-full md:w-auto flex flex-col sm:flex-row gap-3">
                 <button
-                  onClick={() => window.location.href = "/"}
+                  onClick={() => (window.location.href = "/")}
                   className="px-6 py-3.5 bg-stone-100 hover:bg-stone-200 text-stone-800 font-bold rounded-xl transition-colors text-center w-full sm:w-auto"
                 >
                   Continue Shopping
                 </button>
                 <button
-                  onClick={() => window.location.href = "/checkout"}
+                  onClick={() => (window.location.href = "/checkout")}
                   className="px-8 py-3.5 bg-stone-900 hover:bg-black text-white font-bold rounded-xl transition-all shadow-md hover:shadow-lg text-center w-full sm:w-auto flex items-center justify-center gap-2"
                 >
                   Proceed to Checkout
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
                     <line x1="5" y1="12" x2="19" y2="12"></line>
                     <polyline points="12 5 19 12 12 19"></polyline>
                   </svg>

@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { formatLkr } from "../../utils/currency";
 function ViewOrder({ orders }: any) {
   const sideBarItems = [
     { name: "Dashboard", icon: "/images/dashboard.png", path: "/dashboard" },
@@ -92,7 +93,7 @@ function ViewOrder({ orders }: any) {
               <div className="p-4 bg-gray-100 dark:bg-gray-700 rounded-xl">
                 <p className="text-sm text-gray-500">Total Amount</p>
                 <p className="text-lg font-semibold text-green-600">
-                  Rs {order.total}
+                  {formatLkr(Number(order.total))}
                 </p>
               </div>
 

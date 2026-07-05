@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { authFetch } from "../../utils/api";
+import { formatLkr } from "../../utils/currency";
 /* ================= TYPES ================= */
 
 type Order = {
@@ -379,11 +380,11 @@ function SellerOrderManagement() {
 
                   <td className="p-3">
                     {order.items?.map((i, idx) => (
-                      <div key={idx}>Rs {i.unitPrice}</div>
+                      <div key={idx}>{formatLkr(Number(i.unitPrice))}</div>
                     ))}
                   </td>
 
-                  <td className="p-3 font-bold">Rs {order.totalAmount}</td>
+                  <td className="p-3 font-bold">{formatLkr(Number(order.totalAmount))}</td>
 
                   <td className="p-3">
                     <select
@@ -458,7 +459,7 @@ function SellerOrderManagement() {
                 <b>Status:</b> {viewOrder.status}
               </p>
               <p>
-                <b>Total:</b> Rs {viewOrder.totalAmount}
+                <b>Total:</b> {formatLkr(Number(viewOrder.totalAmount))}
               </p>
 
               <div className="mt-2">
