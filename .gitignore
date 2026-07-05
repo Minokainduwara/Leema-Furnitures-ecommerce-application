@@ -27,9 +27,10 @@ pip-delete-this-directory.txt
 .env
 .env.local
 .env.development
-.env.production
 .env.test
 *.env
+# Allow production env files for deployment (Vercel, Netlify)
+!.env.production
 
 # =========================
 # Firebase
@@ -37,6 +38,12 @@ pip-delete-this-directory.txt
 .firebase/
 .firebaserc
 *.json
+!tsconfig.json
+!tsconfig.node.json
+!package.json
+!package-lock.json
+!composer.json
+!tsconfig*.json
 firebase-debug.log
 firebase-debug.*.log
 !package.json
