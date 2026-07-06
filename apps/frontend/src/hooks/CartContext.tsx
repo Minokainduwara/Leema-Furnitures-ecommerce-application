@@ -101,7 +101,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const removeItem = useCallback(async (productId: number) => {
     const data = await api
-      .delete("cart/item", { json: { productId } })
+      .post("cart/remove", { json: { productId } })
       .json<CartResponse>();
     setItems(data.items || []);
     setTotal(Number(data.total || 0));

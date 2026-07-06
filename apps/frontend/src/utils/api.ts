@@ -1,4 +1,7 @@
-export const API_BASE = import.meta.env.VITE_API_URL?.replace(/\/api$/, "") || "http://localhost:8080";
+export const API_BASE = (import.meta.env.VITE_API_URL || "http://localhost:8080").replace(
+  /\/api$/,
+  ""
+);
 
 const AUTH_EVENT = "leema:auth-changed";
 
@@ -13,7 +16,14 @@ export const authFetch = async (url: string, options: any = {}) => {
     ...options.headers,
   };
 
-  return fetch(url, { ...options, headers });
+  // Ensure credentials mode is set for authenticated requests
+  const fetchOptions: RequestInit = {
+    ...options,
+    headers,
+    credentials: "include",
+  };
+
+  return fetch(url, fetchOptions);
 };
 
 export const isLoggedIn = (): boolean => Boolean(localStorage.getItem("token"));

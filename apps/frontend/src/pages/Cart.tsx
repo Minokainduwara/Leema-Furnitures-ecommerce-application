@@ -41,12 +41,8 @@ function Cart() {
     if (quantity < 1) return; // Prevent negative quantity
 
     try {
-      await fetch(`${API_URL}/cart/update`, {
+      await authFetch(`${API_URL}/api/cart/update`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
         body: JSON.stringify({ productId, quantity }),
       });
 

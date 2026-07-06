@@ -1,8 +1,12 @@
 import ky from "ky";
 
+const API_ROOT = (import.meta.env.VITE_API_URL || "http://localhost:8080").replace(
+  /\/api$/,
+  ""
+);
+
 const api = ky.create({
-  prefixUrl: import.meta.env.VITE_API_URL || "http://localhost:8080",
-  credentials: "include",
+  prefixUrl: `${API_ROOT}/api`,
   headers: {
     "Content-Type": "application/json",
   },
@@ -29,6 +33,8 @@ const api = ky.create({
       },
     ],
   },
+  // Add credentials mode for CORS with cookies/auth
+  credentials: "include",
 });
 
 export default api;

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { formatLkr } from "../../utils/currency";
+import { authFetch, API_BASE } from "../../utils/api";
 
 // ─────────────────────────────────────────────────────────────
 // TYPES
@@ -58,20 +59,10 @@ const ViewIcon = () => (
 // API
 // ─────────────────────────────────────────────────────────────
 
-const BASE = "http://localhost:8080/api/admin/services";
-
-function authHeaders(isJson = true): Record<string, string> {
-  const token = localStorage.getItem("token");
-  const h: Record<string, string> = {};
-
-  if (isJson) h["Content-Type"] = "application/json";
-  if (token) h.Authorization = `Bearer ${token}`;
-
-  return h;
-}
+const BASE = `${API_BASE}/api/admin/services`;
 
 async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(url, { ...options, headers: authHeaders() });
+  const res = await authFetch(url, options);
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
     throw new Error(body?.message || `HTTP ${res.status}`);
@@ -88,21 +79,20 @@ const api = {
   create: (body: Omit<Service, "id">) =>
     apiFetch<Service>(BASE, {
       method: "POST",
-      headers: authHeaders(),
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     }),
 
   update: (id: number, body: Omit<Service, "id">) =>
     apiFetch<Service>(`${BASE}/${id}`, {
       method: "PUT",
-      headers: authHeaders(),
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     }),
 
   delete: async (id: number) => {
-    const res = await fetch(`${BASE}/${id}`, {
+    const res = await authFetch(`${BASE}/${id}`, {
       method: "DELETE",
-      headers: authHeaders(),
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
   },

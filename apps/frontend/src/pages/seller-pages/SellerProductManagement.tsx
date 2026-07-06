@@ -34,6 +34,8 @@ const DeleteIcon = () => (
   </svg>
 );
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+
 function SellerProductManagement() {
   const [sidebaropen, setsidebar] = useState(false);
   const [darkmode, setdarkmode] = useState(false);
@@ -76,7 +78,7 @@ function SellerProductManagement() {
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        const res = await authFetch("http://localhost:8080/api/products");
+        const res = await authFetch(`${API_URL}/api/products`);
 
         if (!res.ok) throw new Error("Failed to fetch");
 
@@ -96,7 +98,7 @@ function SellerProductManagement() {
   const handleDelete = async () => {
     try {
       const res = await authFetch(
-        `http://localhost:8080/api/products/${showDelete.id}`,
+        `${API_URL}/api/products/${showDelete.id}`,
         { method: "DELETE" },
       );
 
@@ -245,7 +247,7 @@ const displayedProducts = showAll
                         <td className="p-3">
                           {p.image ? (
                             <img
-                              src={`http://localhost:8080${p.image}`}
+                              src={`${API_URL}${p.image}`}
                               className="w-10 h-10 rounded object-cover"
                             />
                           ) : (
