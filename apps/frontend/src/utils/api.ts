@@ -73,7 +73,7 @@ export const dashboardPath = (role: string): string => {
 };
 
 export const productImageUrl = (img?: string | null): string => {
-  if (!img) return "/images/placeholder.jpg";
+  if (!img) return "/images/sofa.jpg";
 
   // full URL
   if (/^https?:\/\//i.test(img)) return img;

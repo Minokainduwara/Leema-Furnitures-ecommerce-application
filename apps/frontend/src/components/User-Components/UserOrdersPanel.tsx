@@ -104,13 +104,11 @@ export default function UserOrdersPanel() {
               key={order.id}
               className="bg-white rounded-xl border border-stone-100 p-4 shadow-sm flex flex-wrap gap-4 items-center"
             >
-              {order.productImage && (
-                <img
-                  src={order.productImage}
-                  alt={order.productName}
-                  className="w-20 h-20 object-cover rounded-lg border border-stone-100"
-                />
-              )}
+              <img
+                src={order.productImage}
+                alt={order.productName}
+                className="w-20 h-20 object-cover rounded-lg border border-stone-100"
+              />
               <div className="flex-1 min-w-[180px]">
                 <p className="font-bold text-stone-800">{order.orderNumber}</p>
                 <p className="text-sm text-stone-500 mt-0.5">{order.productName}</p>
