@@ -112,5 +112,5 @@ htmlcov/
 *.vectorstore
 *.embeddings
 
-backend
+!Backend/
 uiparts
