@@ -113,4 +113,5 @@ htmlcov/
 *.embeddings
 
 !Backend/
+!backend/
 uiparts
