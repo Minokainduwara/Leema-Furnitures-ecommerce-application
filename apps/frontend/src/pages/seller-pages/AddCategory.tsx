@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { authFetch } from "../../utils/api";
+import { authFetch, API_BASE } from "../../utils/api";
+
 function AddCategory() {
   const navigate = useNavigate();
   const [sidebaropen, setsidebar] = useState<boolean>(false);
@@ -45,7 +46,7 @@ function AddCategory() {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
 
-    await authFetch("http://localhost:8080/api/categories/add", {
+    await authFetch(`${API_BASE}/api/categories/add`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
@@ -92,7 +93,7 @@ function AddCategory() {
       </aside>
 
       {/* MAIN */}
-      <main className="w-full  flex items-center justify-center">
+      <main className="w-full flex items-center justify-center">
         <form
           onSubmit={handleSubmit}
           className="bg-white p-6 rounded shadow w-[420px]"

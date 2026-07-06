@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { authFetch } from "../../utils/api";
+import { authFetch, API_BASE, productImageUrl } from "../../utils/api";
+
 function EditProduct() {
   const sideBarItems = [
     {
@@ -57,9 +58,6 @@ function EditProduct() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const getImageUrl = (path: string) =>
-    path ? `http://localhost:8080${path}` : "";
-
   const handleLogout = () => {
     if (window.confirm("Are you sure you want to logout?")) {
       localStorage.removeItem("token");
@@ -68,7 +66,7 @@ function EditProduct() {
   };
   // LOAD
   useEffect(() => {
-    authFetch(`http://localhost:8080/api/products/${id}`)
+    authFetch(`${API_BASE}/api/products/${id}`)
       .then((res) => res.json())
       .then((data) => {
         setForm((prev) => ({
@@ -94,7 +92,7 @@ function EditProduct() {
         }
       });
 
-    authFetch("http://localhost:8080/api/categories")
+    authFetch(`${API_BASE}/api/categories`)
       .then((res) => res.json())
       .then((data) => {
         setCategories(data);
@@ -135,7 +133,7 @@ function EditProduct() {
       });
     }
 
-    const res = await authFetch(`http://localhost:8080/api/products/${id}`, {
+    const res = await authFetch(`${API_BASE}/api/products/${id}`, {
       method: "PUT",
       body: formData,
     });
@@ -146,7 +144,7 @@ function EditProduct() {
     }
 
     if (form.discountType && form.discountValue) {
-      await authFetch("http://localhost:8080/api/product-discounts", {
+      await authFetch(`${API_BASE}/api/product-discounts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -200,7 +198,7 @@ function EditProduct() {
       </aside>
 
       {/* MAIN FIXED AREA */}
-      <main className="w-full  p-6 overflow-y-auto h-screen">
+      <main className="w-full p-6 overflow-y-auto h-screen">
         <form
           onSubmit={handleSubmit}
           className="max-w-2xl mx-auto bg-white p-6 rounded-xl shadow-lg"
@@ -266,7 +264,6 @@ function EditProduct() {
           />
           {/* COST */}
           
-
           {/* STOCK */}
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Stock Quantity
@@ -311,7 +308,7 @@ function EditProduct() {
           />
 
           {form.imageUrl && !imageFile && (
-            <img src={getImageUrl(form.imageUrl)} className="w-28 h-28 mb-3" />
+            <img src={productImageUrl(form.imageUrl)} className="w-28 h-28 mb-3" />
           )}
 
           {/* Additional Images Management */}
@@ -328,7 +325,7 @@ function EditProduct() {
                   {existingImages.map((img, index) => (
                     <div key={index} className="relative">
                       <img
-                        src={getImageUrl(img)}
+                        src={productImageUrl(img)}
                         alt={`Existing ${index + 1}`}
                         className={`w-20 h-20 object-cover rounded border-2 cursor-pointer ${
                           imagesToKeep.includes(img) ? "border-green-500" : "border-red-500 opacity-50"

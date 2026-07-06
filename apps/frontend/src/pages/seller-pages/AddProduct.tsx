@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { authFetch } from "../../utils/api";
+import { authFetch, API_BASE } from "../../utils/api";
 
 function AddProduct() {
   const sideBarItems = [
@@ -112,7 +112,7 @@ function AddProduct() {
         formData.append("additionalImages", file);
       });
 
-      const res = await authFetch("http://localhost:8080/api/products/add", {
+      const res = await authFetch(`${API_BASE}/api/products/add`, {
         method: "POST",
         body: formData,
       });
@@ -132,7 +132,7 @@ function AddProduct() {
 
       if (hasDiscount) {
         const disres = await authFetch(
-          "http://localhost:8080/api/product-discounts",
+          `${API_BASE}/api/product-discounts`,
           {
             method: "POST",
             headers: {
@@ -161,7 +161,7 @@ function AddProduct() {
     }
   };
   useEffect(() => {
-    authFetch("http://localhost:8080/api/categories/active")
+    authFetch(`${API_BASE}/api/categories/active`)
       .then((res) => res.json())
       .then((data) => {
         setCategories(data);
@@ -179,7 +179,7 @@ function AddProduct() {
     }
   };
   return (
-    <div className={`bg-gray-100 min-h-screen font-sans flex overflow-y-auto`}>
+    <div className="bg-gray-100 min-h-screen font-sans flex overflow-y-auto">
       <aside
         className={`bg-gray-900 w-70 h-screen fixed shadow-lg z-20 ${
           sidebaropen ? "translate-x-0" : "-translate-x-64"
@@ -215,8 +215,7 @@ function AddProduct() {
 
       {/* MAIN */}
       <main
-        className="w-full h-screen pl-40 bg-gray-50 p-30 flex items-center justify-center 
-      "
+        className="w-full h-screen pl-40 bg-gray-50 p-30 flex items-center justify-center"
       >
         <form
           onSubmit={handleSubmit}
@@ -235,7 +234,6 @@ function AddProduct() {
             className="w-full border p-2 mb-3 rounded text-gray-700 border-gray-300"
           />
 
-          {/* PRODUCT CODE */}
           {/* PRODUCT CODE */}
           <label className="block text-sm font-medium mb-1 text-gray-700">
             Product Code (SKU)

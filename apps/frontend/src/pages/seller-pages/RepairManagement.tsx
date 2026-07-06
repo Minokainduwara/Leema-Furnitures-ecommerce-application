@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { authFetch } from "../../utils/api";
+import { authFetch, API_BASE } from "../../utils/api";
 
 type User = {
   id: number;
@@ -89,7 +89,7 @@ function RepairManagement() {
   }, []);
 
   const loadRepairs = async () => {
-    const res = await authFetch(`${import.meta.env.VITE_API_URL}/api/repairs`);
+    const res = await authFetch(`${API_BASE}/api/repairs`);
     const data = await res.json();
     console.log("REPAIRS DATA:", data);
     setRepairs(Array.isArray(data) ? data : []);
@@ -101,7 +101,7 @@ function RepairManagement() {
     if (status === "ALL") return loadRepairs();
 
     const res = await authFetch(
-      `${import.meta.env.VITE_API_URL}/api/repairs/status?status=${status}`,
+      `${API_BASE}/api/repairs/status?status=${status}`,
     );
     const data = await res.json();
     setRepairs(Array.isArray(data) ? data : []);
@@ -142,7 +142,7 @@ function RepairManagement() {
   /* ================= UPDATE STATUS ================= */
 
   const updateStatus = async (id: number, status: string) => {
-    await authFetch(`${import.meta.env.VITE_API_URL}/api/repairs/${id}/status`, {
+    await authFetch(`${API_BASE}/api/repairs/${id}/status`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status }),
@@ -151,7 +151,7 @@ function RepairManagement() {
     loadRepairs();
   };
   const getUser = async (id: number) => {
-    const res = await authFetch(`${import.meta.env.VITE_API_URL}/api/users/${id}`);
+    const res = await authFetch(`${API_BASE}/api/users/${id}`);
     const data = await res.json();
     setCustomer(data);
   };
@@ -303,7 +303,7 @@ function RepairManagement() {
 
                               // 2. Load history
                               const historyRes = await authFetch(
-                                `${import.meta.env.VITE_API_URL}/api/repairs/order/${r.order?.id}`,
+                                `${API_BASE}/api/repairs/order/${r.order?.id}`,
                               );
 
                               setServiceHistory(await historyRes.json());
@@ -430,7 +430,7 @@ function RepairManagement() {
                 <button
                   onClick={async () => {
                     await authFetch(
-                      `${import.meta.env.VITE_API_URL}/api/repairs/${editRepair.id}/update`,
+                      `${API_BASE}/api/repairs/${editRepair.id}/update`,
                       {
                         method: "PATCH",
                         headers: { "Content-Type": "application/json" },
@@ -524,7 +524,7 @@ function RepairManagement() {
                 <button
                   onClick={async () => {
                     try {
-                      await authFetch(`${import.meta.env.VITE_API_URL}/api/repairs`, {
+                      await authFetch(`${API_BASE}/api/repairs`, {
                         method: "POST",
                         headers: {
                           "Content-Type": "application/json",

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { authFetch } from "../../utils/api";
+import { authFetch, API_BASE } from "../../utils/api";
+
 function EditCategory() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -48,7 +49,7 @@ function EditCategory() {
   };
   useEffect(() => {
     // CATEGORY
-    authFetch(`http://localhost:8080/api/categories/${id}`)
+    authFetch(`${API_BASE}/api/categories/${id}`)
       .then((res) => res.json())
       .then((data) => {
         setForm((prev) => ({
@@ -61,7 +62,7 @@ function EditCategory() {
       });
 
     // CATEGORY DISCOUNT
-    authFetch("http://localhost:8080/api/seller/category-discounts")
+    authFetch(`${API_BASE}/api/seller/category-discounts`)
     
       .then((res) => res.json())
       .then((list) => {
@@ -97,7 +98,7 @@ function EditCategory() {
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    await authFetch(`http://localhost:8080/api/categories/${id}`, {
+    await authFetch(`${API_BASE}/api/categories/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -112,8 +113,8 @@ function EditCategory() {
       const method = form.categoryDiscountId ? "PUT" : "POST";
 
       const url = form.categoryDiscountId
-        ? `http://localhost:8080/api/seller/category-discounts/${form.categoryDiscountId}`
-        : "http://localhost:8080/api/seller/category-discounts";
+        ? `${API_BASE}/api/seller/category-discounts/${form.categoryDiscountId}`
+        : `${API_BASE}/api/seller/category-discounts`;
 
       await authFetch(url, {
         method,
@@ -132,7 +133,7 @@ function EditCategory() {
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen flex font-sans overflow-y-auto ">
+    <div className="bg-gray-100 min-h-screen flex font-sans overflow-y-auto">
       <aside
         className={`bg-gray-900 w-70 h-screen fixed shadow-lg z-20 ${
           sidebaropen ? "translate-x-0" : "-translate-x-64"

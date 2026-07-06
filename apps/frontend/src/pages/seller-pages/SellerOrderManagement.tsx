@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { authFetch } from "../../utils/api";
+import { authFetch, API_BASE } from "../../utils/api";
 import { formatLkr } from "../../utils/currency";
 /* ================= TYPES ================= */
 
@@ -78,7 +78,7 @@ function SellerOrderManagement() {
 
   const loadOrders = async () => {
     try {
-      const res = await authFetch("http://localhost:8080/api/orders/all");
+      const res = await authFetch(`${API_BASE}/api/orders/all`);
       const data = await res.json();
       console.log("ORDER DATA:", data);
       setOrders(data);
@@ -97,7 +97,7 @@ function SellerOrderManagement() {
 
     try {
       const res = await authFetch(
-        `http://localhost:8080/api/orders/search?query=${query}`,
+        `${API_BASE}/api/orders/search?query=${query}`,
       );
 
       const data = await res.json();
@@ -110,7 +110,7 @@ function SellerOrderManagement() {
   const loadRepairHistory = async (orderId: number) => {
     try {
       const res = await authFetch(
-        `http://localhost:8080/api/repairs/order-user/${orderId}`,
+        `${API_BASE}/api/repairs/order-user/${orderId}`,
       );
 
       const data = await res.json();
@@ -121,7 +121,7 @@ function SellerOrderManagement() {
   };
   const filterByStatus = async (status: string) => {
     const res = await authFetch(
-      `http://localhost:8080/api/orders/status?status=${status}`,
+      `${API_BASE}/api/orders/status?status=${status}`,
     );
 
     const data = await res.json();
@@ -130,7 +130,7 @@ function SellerOrderManagement() {
 
   const filterByDate = async (type: string) => {
     const res = await authFetch(
-      `http://localhost:8080/api/orders/filter?type=${type}`,
+      `${API_BASE}/api/orders/filter?type=${type}`,
     );
 
     const data = await res.json();
@@ -171,7 +171,7 @@ function SellerOrderManagement() {
   const updateStatus = async (id: number, status: string) => {
     try {
       const res = await authFetch(
-        `http://localhost:8080/api/orders/${id}/status`,
+        `${API_BASE}/api/orders/${id}/status`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -190,7 +190,7 @@ function SellerOrderManagement() {
     }
   };
   const updatePaymentStatus = async (id: number, status: string) => {
-    await authFetch(`http://localhost:8080/api/orders/${id}/payment-status`, {
+    await authFetch(`${API_BASE}/api/orders/${id}/payment-status`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ paymentStatus: status }),
@@ -204,7 +204,7 @@ function SellerOrderManagement() {
       console.log("PRODUCT ID:", selectedProductId);
       console.log("ISSUE:", issue);
       console.log("EST COST:", estimatedCost);
-      await authFetch("http://localhost:8080/api/repairs", {
+      await authFetch(`${API_BASE}/api/repairs`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
