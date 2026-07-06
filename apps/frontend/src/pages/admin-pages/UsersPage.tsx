@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { authFetch, API_BASE } from "../../utils/api";
+import { authFetch, API_BASE, productImageUrl } from "../../utils/api";
 
 // ─────────────────────────────────────────────────────────────
 // TYPES
@@ -14,6 +14,10 @@ export interface AdminUser {
   email: string;
   phoneNumber?: string;
   profilePicture?: string;
+  // Seller verification fields
+  nicNumber?: string;
+  sellerAddress?: string;
+  nicImage?: string;
   role: UserRole;
   status: UserStatus;
   createdAt: string;
@@ -115,6 +119,9 @@ const api = {
   updateUserRole: (id: number, role: UserRole) =>
     apiFetch<AdminUser>(`${BASE}/${id}/role?role=${role}`, { method: "PATCH" }),
 
+  updateSellerDetails: (id: number, nicNumber: string, sellerAddress: string, nicImage: string) =>
+    apiFetch<AdminUser>(`${BASE}/${id}/seller-details?nicNumber=${encodeURIComponent(nicNumber)}&sellerAddress=${encodeURIComponent(sellerAddress)}&nicImage=${encodeURIComponent(nicImage)}`, { method: "PATCH" }),
+
   deleteUser: async (id: number) => {
     const res = await authFetch(`${BASE}/${id}`, { method: "DELETE" });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -142,9 +149,11 @@ const ROLE_STYLES: Record<UserRole, string> = {
 // HELPERS
 // ─────────────────────────────────────────────────────────────
 
-const Avatar: React.FC<{ name: string }> = ({ name }) => {
+const Avatar: React.FC<{ name: string; src?: string }> = ({ name, src }) => {
   const initials = name.split(" ").slice(0, 2).map((n) => n[0]).join("").toUpperCase();
-  return (
+  return src ? (
+    <img src={productImageUrl(src)} className="w-9 h-9 rounded-full object-cover shrink-0" alt={name} />
+  ) : (
     <div className="w-9 h-9 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-xs font-bold shrink-0">
       {initials}
     </div>
@@ -157,7 +166,7 @@ const Badge: React.FC<{ children: React.ReactNode; className: string }> = ({ chi
 
 const Spinner = () => (
   <tr>
-    <td colSpan={6} className="text-center p-8 text-gray-500">Loading...</td>
+    <td colSpan={7} className="text-center p-8 text-gray-500">Loading...</td>
   </tr>
 );
 
@@ -184,6 +193,11 @@ const UsersPage: React.FC = () => {
 
   const [editStatus, setEditStatus] = useState<UserStatus>("active");
   const [editRole, setEditRole] = useState<UserRole>("user");
+  // Seller details for edit modal
+  const [editNicNumber, setEditNicNumber] = useState("");
+  const [editSellerAddress, setEditSellerAddress] = useState("");
+  const [editNicImage, setEditNicImage] = useState<File | null>(null);
+  const [editNicImagePreview, setEditNicImagePreview] = useState<string | null>(null);
   const [editLoading, setEditLoading] = useState(false);
 
   const [createForm, setCreateForm] = useState({
@@ -207,7 +221,9 @@ const UsersPage: React.FC = () => {
     setError("");
     try {
       const result = await api.getUsers({ search, role: roleFilter, status: statusFilter, page, size: pageSize });
-      setUsers(result.content);
+      // Filter out ADMIN users from the list
+      const filteredUsers = result.content.filter(user => user.role !== "admin");
+      setUsers(filteredUsers);
       setTotalPages(result.totalPages);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Failed to load users");
@@ -254,6 +270,9 @@ const UsersPage: React.FC = () => {
     setSelectedUser(user);
     setEditStatus(user.status);
     setEditRole(user.role);
+    setEditNicNumber(user.nicNumber || "");
+    setEditSellerAddress(user.sellerAddress || "");
+    setEditNicImagePreview(user.nicImage ? productImageUrl(user.nicImage) : null);
     setEditOpen(true);
   };
 
@@ -266,8 +285,30 @@ const UsersPage: React.FC = () => {
         promises.push(api.updateUserStatus(selectedUser.id, { status: editStatus }));
       if (selectedUser.role !== editRole)
         promises.push(api.updateUserRole(selectedUser.id, editRole));
+      
+      // If role is being changed to seller, update seller details
+      if (editRole === "seller") {
+        let nicImageUrl = selectedUser.nicImage || "";
+        if (editNicImage) {
+          // Upload the NIC image first
+          const formData = new FormData();
+          formData.append("file", editNicImage);
+          const uploadRes = await authFetch(`${API_BASE}/api/upload/seller-nic`, {
+            method: "POST",
+            body: formData,
+          });
+          if (uploadRes.ok) {
+            const uploadData = await uploadRes.json();
+            nicImageUrl = uploadData.url || uploadData.filename || "";
+          }
+        }
+        promises.push(api.updateSellerDetails(selectedUser.id, editNicNumber, editSellerAddress, nicImageUrl));
+      }
+      
       if (promises.length > 0) await Promise.all(promises);
       setEditOpen(false);
+      setEditNicImage(null);
+      setEditNicImagePreview(null);
       fetchUsers();
     } catch (e: unknown) {
       alert(e instanceof Error ? e.message : "Failed to update user");
@@ -313,7 +354,6 @@ const UsersPage: React.FC = () => {
             className="border px-3 py-2 rounded bg-white text-gray-700 outline-none"
           >
             <option value="">All roles</option>
-            <option value="admin">Admin</option>
             <option value="seller">Seller</option>
             <option value="user">User</option>
           </select>
@@ -363,9 +403,12 @@ const UsersPage: React.FC = () => {
                   <td className="p-3 font-medium text-gray-500">{user.id}</td>
                   <td className="p-3">
                     <div className="flex items-center gap-2">
-                      <Avatar name={user.name} />
+                      <Avatar name={user.name} src={user.profilePicture} />
                       <div>
-                        <p className="font-medium">{user.name}</p>
+                        <p className="font-medium cursor-pointer text-blue-600 hover:underline" 
+                           onClick={() => { setSelectedUser(user); setViewOpen(true); }}>
+                          {user.name}
+                        </p>
                         <p className="text-xs text-gray-400">{user.email}</p>
                       </div>
                     </div>
@@ -433,104 +476,13 @@ const UsersPage: React.FC = () => {
         )}
       </div>
 
-      {/* ── CREATE MODAL ── */}
-      {createOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-            <h3 className="text-lg font-bold text-gray-700 mb-4">Add New User</h3>
-            <div className="space-y-3">
-              <div>
-                <label className="text-xs text-gray-500 mb-1 block">Full Name</label>
-                <input
-                  type="text"
-                  placeholder="Jane Smith"
-                  value={createForm.name}
-                  onChange={(e) => setCreateForm((f) => ({ ...f, name: e.target.value }))}
-                  className={inputCls}
-                />
-              </div>
-              <div>
-                <label className="text-xs text-gray-500 mb-1 block">Email</label>
-                <input
-                  type="email"
-                  placeholder="jane@example.com"
-                  value={createForm.email}
-                  onChange={(e) => setCreateForm((f) => ({ ...f, email: e.target.value }))}
-                  className={inputCls}
-                />
-              </div>
-              <div>
-                <label className="text-xs text-gray-500 mb-1 block">Password</label>
-                <input
-                  type="password"
-                  placeholder="Minimum 8 characters"
-                  value={createForm.password}
-                  onChange={(e) => setCreateForm((f) => ({ ...f, password: e.target.value }))}
-                  className={inputCls}
-                />
-              </div>
-              <div>
-                <label className="text-xs text-gray-500 mb-1 block">Phone (optional)</label>
-                <input
-                  type="text"
-                  placeholder="+94 77 000 0000"
-                  value={createForm.phoneNumber}
-                  onChange={(e) => setCreateForm((f) => ({ ...f, phoneNumber: e.target.value }))}
-                  className={inputCls}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs text-gray-500 mb-1 block">Role</label>
-                  <select
-                    value={createForm.role}
-                    onChange={(e) => setCreateForm((f) => ({ ...f, role: e.target.value as UserRole }))}
-                    className="border px-3 py-2 rounded bg-white text-gray-700 outline-none w-full"
-                  >
-                    <option value="user">User</option>
-                    <option value="seller">Seller</option>
-                    <option value="admin">Admin</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-xs text-gray-500 mb-1 block">Status</label>
-                  <select
-                    value={createForm.status}
-                    onChange={(e) => setCreateForm((f) => ({ ...f, status: e.target.value as UserStatus }))}
-                    className="border px-3 py-2 rounded bg-white text-gray-700 outline-none w-full"
-                  >
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-            <div className="flex justify-end gap-2 mt-5">
-              <button
-                onClick={() => setCreateOpen(false)}
-                className="px-4 py-2 bg-gray-200 rounded text-sm"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleCreate}
-                disabled={createLoading}
-                className="px-4 py-2 bg-orange-500 text-white rounded text-sm hover:bg-orange-600 disabled:opacity-50"
-              >
-                {createLoading ? "Creating..." : "Create User"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* ── VIEW MODAL ── */}
       {viewOpen && selectedUser && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
             <h3 className="text-lg font-bold text-gray-700 mb-4">User Details</h3>
             <div className="flex items-center gap-3 mb-4">
-              <Avatar name={selectedUser.name} />
+              <Avatar name={selectedUser.name} src={selectedUser.profilePicture} />
               <div>
                 <p className="font-semibold text-gray-800">{selectedUser.name}</p>
                 <p className="text-xs text-gray-400">{selectedUser.email}</p>
@@ -564,6 +516,32 @@ const UsersPage: React.FC = () => {
                     <td className="py-2 text-right text-gray-700 text-xs">{new Date(selectedUser.updatedAt).toLocaleString()}</td>
                   </tr>
                 )}
+                {/* Seller Details - Only show for sellers */}
+                {selectedUser.role === "seller" && (
+                  <>
+                    <tr className="border-t">
+                      <td className="py-2 text-gray-400">NIC Number</td>
+                      <td className="py-2 text-right text-gray-700">{selectedUser.nicNumber || "—"}</td>
+                    </tr>
+                    <tr className="border-t">
+                      <td className="py-2 text-gray-400">Seller Address</td>
+                      <td className="py-2 text-right text-gray-700">{selectedUser.sellerAddress || "—"}</td>
+                    </tr>
+                    {selectedUser.nicImage && (
+                      <tr className="border-t">
+                        <td className="py-2 text-gray-400">NIC Image</td>
+                        <td className="py-2 text-right">
+                          <img 
+                            src={productImageUrl(selectedUser.nicImage)} 
+                            alt="NIC" 
+                            className="w-24 h-16 object-cover rounded border cursor-pointer"
+                            onClick={() => window.open(productImageUrl(selectedUser.nicImage), "_blank")}
+                          />
+                        </td>
+                      </tr>
+                    )}
+                  </>
+                )}
               </tbody>
             </table>
             <div className="flex justify-end mt-4">
@@ -578,7 +556,7 @@ const UsersPage: React.FC = () => {
       {/* ── EDIT MODAL ── */}
       {editOpen && selectedUser && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
             <h3 className="text-lg font-bold text-gray-700 mb-1">Edit User</h3>
             <p className="text-sm text-gray-400 mb-4">{selectedUser.name}</p>
             <div className="space-y-3">
@@ -602,11 +580,58 @@ const UsersPage: React.FC = () => {
                   onChange={(e) => setEditRole(e.target.value as UserRole)}
                   className="border px-3 py-2 rounded bg-white text-gray-700 outline-none w-full"
                 >
-                  <option value="admin">Admin</option>
                   <option value="seller">Seller</option>
                   <option value="user">User</option>
                 </select>
               </div>
+              
+              {/* Seller Details - Only show when role is seller */}
+              {editRole === "seller" && (
+                <>
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1 block">NIC Number</label>
+                    <input
+                      type="text"
+                      placeholder="Enter NIC number"
+                      value={editNicNumber}
+                      onChange={(e) => setEditNicNumber(e.target.value)}
+                      className={inputCls}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1 block">Seller Address</label>
+                    <textarea
+                      placeholder="Enter seller address"
+                      value={editSellerAddress}
+                      onChange={(e) => setEditSellerAddress(e.target.value)}
+                      className={inputCls}
+                      rows={3}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1 block">NIC Image</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0] || null;
+                        setEditNicImage(file);
+                        if (file) {
+                          setEditNicImagePreview(URL.createObjectURL(file));
+                        }
+                      }}
+                      className="border px-3 py-2 rounded bg-white text-gray-700 outline-none w-full"
+                    />
+                    {editNicImagePreview && (
+                      <img 
+                        src={editNicImagePreview} 
+                        alt="NIC Preview" 
+                        className="w-32 h-20 object-cover rounded border mt-2"
+                      />
+                    )}
+                  </div>
+                </>
+              )}
             </div>
             <div className="flex justify-end gap-2 mt-5">
               <button onClick={() => setEditOpen(false)} className="px-4 py-2 bg-gray-200 rounded text-sm">

@@ -12,7 +12,10 @@ CREATE TABLE users (
   name VARCHAR(255) NOT NULL,
   phone_number VARCHAR(20),
   profile_picture VARCHAR(500),
-  role ENUM('admin', 'user', 'guest') DEFAULT 'user',
+  nic_number VARCHAR(20),
+  seller_address TEXT,
+  nic_image VARCHAR(500),
+  role ENUM('admin', 'seller', 'user') DEFAULT 'user',
   status ENUM('active', 'inactive', 'suspended', 'deleted') DEFAULT 'active',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -21,6 +24,7 @@ CREATE TABLE users (
   INDEX idx_role (role),
   INDEX idx_status (status)
 );
+```
 
 CREATE TABLE sessions (
   id INT PRIMARY KEY AUTO_INCREMENT,
