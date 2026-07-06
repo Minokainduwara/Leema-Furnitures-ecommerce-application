@@ -516,31 +516,31 @@ const UsersPage: React.FC = () => {
                     <td className="py-2 text-right text-gray-700 text-xs">{new Date(selectedUser.updatedAt).toLocaleString()}</td>
                   </tr>
                 )}
-                {/* Seller Details - Only show for sellers */}
-                {selectedUser.role === "seller" && (
-                  <>
-                    <tr className="border-t">
-                      <td className="py-2 text-gray-400">NIC Number</td>
-                      <td className="py-2 text-right text-gray-700">{selectedUser.nicNumber || "—"}</td>
-                    </tr>
-                    <tr className="border-t">
-                      <td className="py-2 text-gray-400">Seller Address</td>
-                      <td className="py-2 text-right text-gray-700">{selectedUser.sellerAddress || "—"}</td>
-                    </tr>
-                    {selectedUser.nicImage && (
-                      <tr className="border-t">
-                        <td className="py-2 text-gray-400">NIC Image</td>
-                        <td className="py-2 text-right">
-                          <img 
-                            src={productImageUrl(selectedUser.nicImage)} 
-                            alt="NIC" 
-                            className="w-24 h-16 object-cover rounded border cursor-pointer"
-                            onClick={() => window.open(productImageUrl(selectedUser.nicImage), "_blank")}
-                          />
-                        </td>
-                      </tr>
-                    )}
-                  </>
+                {/* NIC Details - Show for any user with NIC data */}
+                {selectedUser.nicNumber && (
+                  <tr className="border-t">
+                    <td className="py-2 text-gray-400">NIC Number</td>
+                    <td className="py-2 text-right text-gray-700">{selectedUser.nicNumber}</td>
+                  </tr>
+                )}
+                {selectedUser.sellerAddress && (
+                  <tr className="border-t">
+                    <td className="py-2 text-gray-400">Seller Address</td>
+                    <td className="py-2 text-right text-gray-700">{selectedUser.sellerAddress}</td>
+                  </tr>
+                )}
+                {selectedUser.nicImage && (
+                  <tr className="border-t">
+                    <td className="py-2 text-gray-400">NIC Image</td>
+                    <td className="py-2 text-right">
+                      <img 
+                        src={productImageUrl(selectedUser.nicImage)} 
+                        alt="NIC" 
+                        className="w-24 h-16 object-cover rounded border cursor-pointer"
+                        onClick={() => window.open(productImageUrl(selectedUser.nicImage), "_blank")}
+                      />
+                    </td>
+                  </tr>
                 )}
               </tbody>
             </table>
