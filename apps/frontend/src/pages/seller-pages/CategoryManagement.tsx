@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { authFetch } from "../../utils/api";
+import { authFetch, API_BASE } from "../../utils/api";
 function CategoryManagement() {
   const navigate = useNavigate();
 
@@ -38,10 +38,10 @@ function CategoryManagement() {
   // LOAD CATEGORIES
   useEffect(() => {
     Promise.all([
-      authFetch("http://localhost:8080/api/categories").then((res) =>
+      authFetch(`${API_BASE}/api/categories`).then((res) =>
         res.json(),
       ),
-      authFetch("http://localhost:8080/api/seller/category-discounts").then(
+      authFetch(`${API_BASE}/api/seller/category-discounts`).then(
         (res) => res.json(),
       ),
     ])
@@ -71,7 +71,7 @@ function CategoryManagement() {
 
   // DELETE
   const handleDelete = async () => {
-    await authFetch(`http://localhost:8080/api/categories/${deleteState.id}`, {
+    await authFetch(`${API_BASE}/api/categories/${deleteState.id}`, {
       method: "DELETE",
     });
 
@@ -93,7 +93,7 @@ function CategoryManagement() {
     try {
       // 🔥 find discount for this category
       const res = await authFetch(
-        "http://localhost:8080/api/seller/category-discounts",
+        `${API_BASE}/api/seller/category-discounts`,
       );
       const discounts = await res.json();
 
@@ -105,7 +105,7 @@ function CategoryManagement() {
 
       // 🔥 delete discount
       await authFetch(
-        `http://localhost:8080/api/seller/category-discounts/${discount.id}`,
+        `${API_BASE}/api/seller/category-discounts/${discount.id}`,
         { method: "DELETE" },
       );
 
@@ -175,13 +175,13 @@ function CategoryManagement() {
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search category..."
               className="w-full md:w-72 px-4 py-2.5 rounded-xl border border-gray-200 bg-white shadow-sm 
-        focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+          focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
             />
 
             <button
               onClick={() => navigate("/category/add")}
               className="bg-gradient-to-r from-emerald-500 to-green-600 text-white px-5 py-2.5 rounded-xl 
-        shadow-md hover:scale-[1.02] transition font-medium"
+          shadow-md hover:scale-[1.02] transition font-medium"
             >
               + Add Category
             </button>
@@ -289,7 +289,7 @@ function CategoryManagement() {
                         <button
                           onClick={() => navigate(`/category/edit/${c.id}`)}
                           className="px-3 py-1.5 rounded-lg text-sm bg-blue-100 text-blue-700 
-                    hover:bg-blue-200 transition"
+                      hover:bg-blue-200 transition"
                         >
                           Edit
                         </button>
@@ -297,7 +297,7 @@ function CategoryManagement() {
                           <button
                             onClick={() => handleRemoveDiscount(c.id)}
                             className="px-3 py-1.5 rounded-lg text-sm bg-yellow-100 text-yellow-700 
-      hover:bg-yellow-200 transition"
+                hover:bg-yellow-200 transition"
                           >
                             Remove Discount
                           </button>
@@ -308,7 +308,7 @@ function CategoryManagement() {
                             setDeleteState({ show: true, id: c.id })
                           }
                           className="px-3 py-1.5 rounded-lg text-sm bg-red-100 text-red-700 
-                    hover:bg-red-200 transition"
+                      hover:bg-red-200 transition"
                         >
                           Delete
                         </button>

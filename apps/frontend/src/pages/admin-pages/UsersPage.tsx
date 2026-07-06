@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { authFetch, API_BASE } from "../../utils/api";
 
 // ─────────────────────────────────────────────────────────────
 // TYPES
@@ -74,17 +75,10 @@ const ViewIcon = () => (
 // API
 // ─────────────────────────────────────────────────────────────
 
-const BASE = `${import.meta.env.VITE_API_URL}/api/admin/users`;
-
-function authHeaders(): Record<string, string> {
-  const token = localStorage.getItem("token");
-  const h: Record<string, string> = { "Content-Type": "application/json" };
-  if (token) h.Authorization = `Bearer ${token}`;
-  return h;
-}
+const BASE = `${API_BASE}/api/admin/users`;
 
 async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(url, { ...options, headers: authHeaders() });
+  const res = await authFetch(url, options);
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
     throw new Error(body?.message || `HTTP ${res.status}`);
@@ -122,7 +116,7 @@ const api = {
     apiFetch<AdminUser>(`${BASE}/${id}/role?role=${role}`, { method: "PATCH" }),
 
   deleteUser: async (id: number) => {
-    const res = await fetch(`${BASE}/${id}`, { method: "DELETE", headers: authHeaders() });
+    const res = await authFetch(`${BASE}/${id}`, { method: "DELETE" });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
   },
 };

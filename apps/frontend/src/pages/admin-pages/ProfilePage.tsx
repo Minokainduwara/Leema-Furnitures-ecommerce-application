@@ -8,6 +8,7 @@ import {
   Avatar,
   PageHeader,
 } from "../../components/ui/admin-ui/index";
+import { authFetch, API_BASE } from "../../utils/api";
 import type { ProfileTab } from "../../types";
 
 // ─────────────────────────────────────────────────────────────
@@ -28,30 +29,7 @@ interface ProfileData {
 // API CONFIG
 // ─────────────────────────────────────────────────────────────
 
-const BASE = `${import.meta.env.VITE_API_URL}/api/users`;
-
-function authHeaders(): Record<string, string> {
-  const token = localStorage.getItem("token");
-
-  return {
-    "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
-}
-
-async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(url, {
-    ...options,
-    headers: authHeaders(),
-  });
-
-  if (!res.ok) {
-    const msg = await res.text();
-    throw new Error(msg || "Request failed");
-  }
-
-  return res.json();
-}
+const BASE = `${API_BASE}/api/users`;
 
 // ─────────────────────────────────────────────────────────────
 // PROFILE TAB
@@ -70,9 +48,8 @@ const ProfileInfoTab: React.FC<ProfileInfoTabProps> = ({
 
   const handleSave = async () => {
     try {
-      await fetch(`${BASE}/me`, {
+      await authFetch(`${BASE}/me`, {
         method: "PUT",
-        headers: authHeaders(),
         body: JSON.stringify({
           name: profile.name,
           email: profile.email,
@@ -183,9 +160,8 @@ const SecurityTab: React.FC = () => {
 
   const handleChangePassword = async () => {
     try {
-      await fetch(`${BASE}/change-password`, {
+      await authFetch(`${BASE}/change-password`, {
         method: "PUT",
-        headers: authHeaders(),
         body: JSON.stringify({
           currentPassword: passwords.current,
           newPassword: passwords.newPass,
@@ -278,7 +254,7 @@ const ProfilePage: React.FC = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const data = await apiFetch<any>(`${BASE}/me`);
+        const data = await (await authFetch(`${BASE}/me`)).json();
 
         setProfile({
           name: data.name,
