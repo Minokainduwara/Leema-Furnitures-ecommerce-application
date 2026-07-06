@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useRef, type ChangeEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { authFetch } from "../../utils/api";
+import { authFetch, API_BASE } from "../../utils/api";
 import { formatLkr } from "../../utils/currency";
+
 const EditIcon = () => (
   <svg
     className="w-5 h-5 text-blue-500"
@@ -33,8 +34,6 @@ const DeleteIcon = () => (
     />
   </svg>
 );
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
 function SellerProductManagement() {
   const [sidebaropen, setsidebar] = useState(false);
@@ -78,7 +77,7 @@ function SellerProductManagement() {
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        const res = await authFetch(`${API_URL}/api/products`);
+        const res = await authFetch(`${API_BASE}/api/products`);
 
         if (!res.ok) throw new Error("Failed to fetch");
 
@@ -98,7 +97,7 @@ function SellerProductManagement() {
   const handleDelete = async () => {
     try {
       const res = await authFetch(
-        `${API_URL}/api/products/${showDelete.id}`,
+        `${API_BASE}/api/products/${showDelete.id}`,
         { method: "DELETE" },
       );
 
@@ -221,7 +220,6 @@ const displayedProducts = showAll
               ) : (
                 displayedProducts.map(
                   (p) => (
-                    console.log(p),
                     (
                       <tr key={p.id} className="border-t hover:bg-gray-50">
                         <td className="p-3  font-medium text-gray-700">
@@ -247,7 +245,7 @@ const displayedProducts = showAll
                         <td className="p-3">
                           {p.image ? (
                             <img
-                              src={`${API_URL}${p.image}`}
+                              src={`${API_BASE}${p.image}`}
                               className="w-10 h-10 rounded object-cover"
                             />
                           ) : (

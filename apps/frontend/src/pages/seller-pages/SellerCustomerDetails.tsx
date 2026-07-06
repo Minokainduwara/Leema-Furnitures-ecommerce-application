@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { authFetch } from "../../utils/api";
+import { authFetch, API_BASE } from "../../utils/api";
 
 function SellerCustomerDetails() {
   type Order = {
@@ -24,12 +24,7 @@ function SellerCustomerDetails() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    authFetch("http://localhost:8080/api/users?role=CUSTOMER", {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    })
+    authFetch(`${API_BASE}/api/users?role=CUSTOMER`)
       .then((res) => {
         if (!res.ok) {
           throw new Error("Failed to fetch users");
@@ -44,15 +39,14 @@ function SellerCustomerDetails() {
       });
   }, []);
 
-  
+    
   const handleLogout = () => {
     if (window.confirm("Are you sure you want to logout?")) {
       localStorage.removeItem("token");
       navigate("/login");
     }
   };
-
- 
+  
   const sideBarItems = [
     {
       name: "Dashboard",
@@ -110,7 +104,7 @@ function SellerCustomerDetails() {
         </div>
       </aside>
 
-      <main className="w-full p-6 ml-0 bg-gray-50 h-screen overflow-y-auto">
+      <main className="w-full p-8 h-screen overflow-y-auto">
         <div className="px-6 py-4 bg-white flex justify-between items-center rounded-lg shadow-md mb-6">
           <div className="mb-8">
             <h2 className="text-3xl font-bold text-gray-800">

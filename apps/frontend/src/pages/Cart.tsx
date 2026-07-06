@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { formatLkr } from "../utils/currency";
-import { authFetch } from "../utils/api";
+import { authFetch, API_BASE } from "../utils/api";
 import { useAuth } from "../hooks/Authcontext";
-const API_URL = import.meta.env.VITE_API_URL;
 
 interface CartItem {
   productId: number;
@@ -17,31 +16,31 @@ function Cart() {
   const [items, setItems] = useState<CartItem[]>([]);
   const [total, setTotal] = useState(0);
   const { user } = useAuth();
-  const token = localStorage.getItem("token");
 
   // Fetch cart
   const fetchCart = async () => {
-  try {
-    const res = await authFetch(`${import.meta.env.VITE_API_URL}/api/cart`);
-    const data = await res.json();
-    setItems(data.items || []);
-    setTotal(data.total || 0);
-  } catch {
-    toast.error("Failed to load cart");
-  }
-};
+    try {
+      const res = await authFetch(`${API_BASE}/api/cart`);
+      const data = await res.json();
+      setItems(data.items || []);
+      setTotal(data.total || 0);
+    } catch {
+      toast.error("Failed to load cart");
+    }
+  };
 
   useEffect(() => {
-  if (user) {
-    fetchCart();
-  }
-}, [user]);
+    if (user) {
+      fetchCart();
+    }
+  }, [user]);
+
   // Update quantity
   const updateQuantity = async (productId: number, quantity: number) => {
     if (quantity < 1) return; // Prevent negative quantity
 
     try {
-      await authFetch(`${API_URL}/api/cart/update`, {
+      await authFetch(`${API_BASE}/api/cart/update`, {
         method: "PUT",
         body: JSON.stringify({ productId, quantity }),
       });
@@ -54,24 +53,20 @@ function Cart() {
 
   // Remove item
   const removeItem = async (productId: number) => {
-  try {
-    const res = await authFetch(`${import.meta.env.VITE_API_URL}/api/cart/remove`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ productId }),
-    });
+    try {
+      const res = await authFetch(`${API_BASE}/api/cart/remove`, {
+        method: "POST",
+        body: JSON.stringify({ productId }),
+      });
 
-    if (!res.ok) throw new Error();
+      if (!res.ok) throw new Error();
 
-    toast.success("Item removed");
-    fetchCart();
-  } catch {
-    toast.error("Failed to remove item");
-  }
-};
+      toast.success("Item removed");
+      fetchCart();
+    } catch {
+      toast.error("Failed to remove item");
+    }
+  };
 
   return (
     <div className="min-h-screen flex justify-center items-start pt-16 pb-24 bg-stone-50 px-4">

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { authFetch } from "../../utils/api";
+import { authFetch, API_BASE } from "../../utils/api";
+
 function InventoryDashboard() {
   const [products, setProducts] = useState<any[]>([]);
   const [logs, setLogs] = useState<any[]>([]);
@@ -42,8 +43,8 @@ function InventoryDashboard() {
   // LOAD DATA
   useEffect(() => {
     Promise.all([
-      authFetch("http://localhost:8080/api/products").then((res) => res.json()),
-      authFetch("http://localhost:8080/api/inventory-logs").then((res) =>
+      authFetch(`${API_BASE}/api/products`).then((res) => res.json()),
+      authFetch(`${API_BASE}/api/inventory-logs`).then((res) =>
         res.json(),
       ),
     ])
@@ -173,8 +174,8 @@ function InventoryDashboard() {
     value={stockFilter}
     onChange={(e) => setStockFilter(e.target.value)}
     className="px-4 py-2 rounded-xl border border-gray-200 bg-white text-sm shadow-sm 
-               focus:ring-2 focus:ring-blue-300 focus:border-blue-500 outline-none
-               hover:border-blue-300 transition"
+           focus:ring-2 focus:ring-blue-300 focus:border-blue-500 outline-none
+           hover:border-blue-300 transition"
   >
     <option value="ALL">📦 All Stock</option>
     <option value="IN">🟢 In Stock</option>
@@ -187,8 +188,8 @@ function InventoryDashboard() {
     value={sortBy}
     onChange={(e) => setSortBy(e.target.value)}
     className="px-4 py-2 rounded-xl border border-gray-200 bg-white text-sm shadow-sm 
-               focus:ring-2 focus:ring-purple-300 focus:border-purple-500 outline-none
-               hover:border-purple-300 transition"
+           focus:ring-2 focus:ring-purple-300 focus:border-purple-500 outline-none
+           hover:border-purple-300 transition"
   >
     <option value="NONE">↕ Sort By</option>
     <option value="HIGH">⬆ Stock High → Low</option>
@@ -204,9 +205,9 @@ function InventoryDashboard() {
       setFilteredProducts(products);
     }}
     className="ml-auto px-5 py-2.5 rounded-xl text-sm font-medium
-               bg-gradient-to-r from-red-500 to-pink-500 text-white
-               hover:from-red-600 hover:to-pink-600
-               shadow-md hover:shadow-lg transition transform hover:scale-105"
+           bg-gradient-to-r from-red-500 to-pink-500 text-white
+           hover:from-red-600 hover:to-pink-600
+           shadow-md hover:shadow-lg transition transform hover:scale-105"
   >
     🔄 Reset Filters
   </button>
@@ -226,7 +227,7 @@ function InventoryDashboard() {
             <h3 className="text-2xl font-bold text-orange-500 mt-2">
               {
                 filteredProducts.filter((p) => p.stock < 5 && p.stock > 0)
-                  .length
+                    .length
               }
             </h3>
           </div>
@@ -323,8 +324,8 @@ function InventoryDashboard() {
     value={logFilter}
     onChange={(e) => setLogFilter(e.target.value)}
     className="px-4 py-2 rounded-xl border border-gray-200 bg-white text-sm shadow-sm
-               focus:ring-2 focus:ring-green-300 focus:border-green-500
-               hover:border-green-300 transition outline-none"
+           focus:ring-2 focus:ring-green-300 focus:border-green-500
+           hover:border-green-300 transition outline-none"
   >
     <option value="ALL">📋 All Activity</option>
     <option value="IN">📈 Stock Added</option>

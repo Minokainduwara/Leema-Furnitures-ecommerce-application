@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { authFetch } from "../../utils/api";
+import { authFetch, API_BASE } from "../../utils/api";
 
 function SellerProfile() {
   const [sidebaropen, setsidebar] = useState<boolean>(false);
@@ -54,7 +54,7 @@ function SellerProfile() {
 
   const loadProfile = async () => {
     try {
-      const res = await authFetch("http://localhost:8080/api/users/me");
+      const res = await authFetch(`${API_BASE}/api/users/me`);
 
       if (!res.ok) {
         console.error("API failed:", res.status);
@@ -73,7 +73,7 @@ function SellerProfile() {
 
   const updateProfile = async () => {
     try {
-      await authFetch("http://localhost:8080/api/users/me", {
+      await authFetch(`${API_BASE}/api/users/me`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -97,7 +97,7 @@ function SellerProfile() {
     }
 
     try {
-      await authFetch("http://localhost:8080/api/users/change-password", {
+      await authFetch(`${API_BASE}/api/users/change-password`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

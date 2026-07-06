@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { authFetch } from "../../utils/api";
+import { authFetch, API_BASE } from "../../utils/api";
 
 type Notification = {
   id: number;
@@ -65,10 +65,8 @@ function SellerMessage() {
 
   const fetchMessages = async () => {
     try {
-      const token = localStorage.getItem("token");
-      console.log("🔍 Token from storage:", token);
       const res = await authFetch(
-        "http://localhost:8080/api/notifications/seller",
+        `${API_BASE}/api/notifications/seller`,
       );
       const data = await res.json();
       setMessages(data);
@@ -83,7 +81,7 @@ function SellerMessage() {
     if (!msg.read) {
       try {
         await authFetch(
-          `http://localhost:8080/api/notifications/${msg.id}/read`,
+          `${API_BASE}/api/notifications/${msg.id}/read`,
           {
             method: "PATCH",
           },
