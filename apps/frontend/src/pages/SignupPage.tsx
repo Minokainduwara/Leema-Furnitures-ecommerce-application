@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Mail, Lock, User, Eye, EyeOff, UserPlus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../hooks/Authcontext";
+import { useAuth, PASSWORD_PATTERN, PASSWORD_REQUIREMENTS } from "../hooks/Authcontext";
 
 interface SignupForm {
   name: string;
@@ -51,6 +51,11 @@ const SignupPage: React.FC = () => {
 
     if (form.password.length < 6) {
       setError("Password must be at least 6 characters");
+      return;
+    }
+
+    if (!PASSWORD_PATTERN.test(form.password)) {
+      setError(PASSWORD_REQUIREMENTS);
       return;
     }
 
@@ -167,6 +172,7 @@ const SignupPage: React.FC = () => {
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
+              <p className="mt-1 text-xs text-stone-500">{PASSWORD_REQUIREMENTS}</p>
             </div>
 
             {/* Confirm Password */}

@@ -39,6 +39,26 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 
 const STORAGE_KEY = "leema_user";
 
+/** Must match backend RegisterRequest password pattern */
+export const PASSWORD_PATTERN =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&+=!]).{6,128}$/;
+
+export const PASSWORD_REQUIREMENTS =
+  "Password must be at least 6 characters and include uppercase, lowercase, a number, and a special character (@#$%^&+=!).";
+
+const parseApiError = async (res: Response, fallback: string): Promise<string> => {
+  const text = await res.text();
+  if (!text) {
+    return fallback;
+  }
+  try {
+    const data = JSON.parse(text) as { error?: string; message?: string };
+    return data.error || data.message || fallback;
+  } catch {
+    return text;
+  }
+};
+
 const readUser = (): AuthUser | null => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -110,8 +130,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         body: JSON.stringify({ email, password, name,phone }),
       });
       if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || "Signup failed");
+        throw new Error(await parseApiError(res, "Signup failed"));
       }
       const data: AuthResponse = await res.json();
       const u = persist(data);
@@ -135,8 +154,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         body: JSON.stringify({ email, password }),
       });
       if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || "Login failed");
+        throw new Error(await parseApiError(res, "Login failed"));
       }
       const data: AuthResponse = await res.json();
       const u = persist(data);
